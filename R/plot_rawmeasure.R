@@ -17,18 +17,12 @@ plot_rawmeasure <- function(atsea.ages = NULL, years = 2017) {
   mydir <- hakedatawd()
   if (is.null(atsea.ages)) {
     base::load(file.path(mydir, "extractedData", "atsea.ageWt.Rdat"))
-    base::load(file.path(mydir, "extractedData", "atsea.lenAge.Rdat"))
     base::load(file.path(mydir, "extractedData", "atsea.ages.Rdat"))
     base::load(file.path(mydir, "extractedData", "pacfin_bds_fish.Rdat"))
   }
-  if (!"Year" %in% colnames(atsea.lenAge)) {
-    atsea.lenAge$Year <- format(atsea.lenAge$RETRV_DATE_TIME, "%Y")
-    atsea.ages$Year <- format(atsea.ages$RETRV_DATE_TIME, "%Y")
-    atsea.ages$Year <- atsea.ages$YEAR
-  }
-  g1 <- ggplot(atsea.lenAge[atsea.lenAge$Year %in% years,],
-    aes(LENGTH_SIZE, group = factor(Year), na.rm = TRUE)) +
-    geom_line(stat = "density", aes(y = ..density.., col = factor(Year))) + 
+  g1 <- ggplot(atsea.ages[atsea.ages$YEAR %in% years,],
+    aes(LENGTH, group = factor(YEAR), na.rm = TRUE)) +
+    geom_line(stat = "density", aes(y = ..density.., col = factor(YEAR))) + 
     xlim(x_length) + 
     xlab("Length (cm)") +
     ylab("At-Sea")+

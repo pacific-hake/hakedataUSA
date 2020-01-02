@@ -99,23 +99,6 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
       db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw, 
       start = startyear$NORPAC[1], end = endyear)
     localsave(ncatch, "NORPACdomesticCatch")
-    # Bio data (script developed in 2016)
-    # Age only data
-    atsea.lenAge <- queryDB(
-      queryFilename = file.path(mydir, "sql", "atseaLengthAge.sql"),
-      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw, 
-      sp = "206", start = startyear$NORPAC[2], end = endyear)
-    # remove duplicate entries
-    # (Vanessa has an idea of why they exist but for now it seems to work)
-    dupes <- duplicated(paste(atsea.lenAge$SPECIMEN_NUMBER,
-      atsea.lenAge$BARCODE))
-    atsea.lenAge <- atsea.lenAge[!dupes,]
-    sink(summaryfile, append = TRUE)
-    cat("Removed duplicated hake age data from NORPAC\n")
-    print(table(dupes))
-    cat("The resulting data frame has", nrow(atsea.lenAge), " rows\n\n")
-    sink()
-    localsave(atsea.lenAge, "atsea.lenAge")
     # Age and weight data
     atsea.ageWt <- queryDB(
       queryFilename = file.path(mydir, "sql", "atseaAgeWeight.sql"),
