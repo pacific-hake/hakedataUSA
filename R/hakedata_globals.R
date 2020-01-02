@@ -42,8 +42,8 @@ hakedatawd <- function() {
 #' The path must be of a text file with two lines, where the first line
 #' is the NORPAC password and the second line is the PacFIN password. 
 #' These passwords should not be surrounded with quotes.
-#' If the argument is \code{NULL}, then the user will be prompted for
-#' input. 
+#' User will be prompted for passwords if a file is not specified, i.e.,
+#' \code{file = NULL} or if the file that is specified cannot be found.
 #' 
 #' @return A list with two entries, usernames and passwords, for the 
 #' databases you specified in the argument \code{database}.
@@ -68,6 +68,8 @@ hakedatasqlpw <- function(database = c("NORPAC", "PacFIN"), file = NULL) {
   keep <- c("norpac", "pacfin") %in% tolower(database)
   if (length(keep) == 0) stop("The databases are not NORPAC or PacFIN")
 
+  if (!file.exists(file)) file <- NULL
+
   if (is.null(file)) {
     passwords <- c(NA, NA)
     if ("norpac" %in% tolower(database)) {
@@ -77,7 +79,6 @@ hakedatasqlpw <- function(database = c("NORPAC", "PacFIN"), file = NULL) {
       passwords[2] <- readline(prompt = "Enter PacFIN password without quotes\n")
     }
   } else {
-    if (!file.exists(file)) stop("\nThe file,\n", file, "\ndoesn't exist.")
     passwords <- readLines(file, warn = FALSE)
   }
   invisible(list("username" = name[keep], "password" = passwords[keep]))
