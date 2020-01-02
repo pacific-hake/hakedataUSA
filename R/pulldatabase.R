@@ -39,6 +39,7 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
   passwordfile = "password.txt") {
   
   mydir <- hakedatawd()
+  sqldir <- system.file("extdata", "sql", package = "hakedataUSA")
   if (!is.list(startyear)) {
     stop("startyear must be a list.")
   }
@@ -95,19 +96,19 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
   if ("norpac" %in% tolower(database)) {
     # Catches
     ncatch <- queryDB(
-      queryFilename = file.path(mydir, "sql", "NORPAC.domestic.catch.detailed.sql"),
+      queryFilename = dir(sqldir, "NORPACdomesticCatch", full.names = TRUE),
       db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw, 
       start = startyear$NORPAC[1], end = endyear)
     localsave(ncatch, "NORPACdomesticCatch")
     # Age and weight data
     atsea.ageWt <- queryDB(
-      queryFilename = file.path(mydir, "sql", "atseaAgeWeight.sql"),
+      queryFilename = dir(sqldir, "atseaAgeWeight", full.names = TRUE),
       db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw, 
       sp = "206", start = startyear$NORPAC[2], end = endyear)
     localsave(atsea.ageWt, "atsea.ageWt")
     # Age and weight data from squash table
     atsea.ages <- queryDB(
-      queryFilename = file.path(mydir, "sql", "atSeaSquashTableAges.sql"),
+      queryFilename = dir(sqldir, "atSeaSquashTableAges", full.names = TRUE),
       db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw, 
       sp = "206", start = startyear$NORPAC[2], end = endyear)
     localsave(atsea.ages, "atsea.ages")
@@ -118,35 +119,35 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     # new method in 2017, which includes research catch and breaks out tribal catch
     # Remove XXX fleet (foreign catch?)
     pcatch <- queryDB(
-      queryFilename = file.path(mydir, "sql", "comp_ft_taylor_aliased.sql"),
+      queryFilename = dir(sqldir, "comp_ft_taylor_aliased", full.names = TRUE),
       db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw, 
       sp = "PWHT", start = startyear$PacFIN[1], end = endyear)
     localsave(pcatch, "Pacfincomp_ft_taylorCatch")
     # bds data
     # used to be bds.age.sql
     bds.age <- queryDB(
-      queryFilename = file.path(mydir, "sql", "pacfin_bds_age.sql"),
+      queryFilename = dir(sqldir, "pacfin_bds_age", full.names = TRUE),
       db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw, 
       sp = "PWHT", start = startyear$PacFIN[2], end = endyear)
     localsave(bds.age, "pacfin_bds_age")
     bds.allsp.cluster <- queryDB(
-      queryFilename=file.path(mydir, "sql", "pacfin_bds_allsp_cluster.sql"),
+      queryFilename=dir(sqldir, "pacfin_bds_allsp_cluster", full.names = TRUE),
       db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
       sp = "PWHT", start = startyear$PacFIN[2], end = endyear)
     localsave(bds.allsp.cluster, "pacfin_bds_allsp_cluster")
     bds.fish <- queryDB(
-      queryFilename = file.path(mydir, "sql", "pacfin_bds_fish.sql"),
+      queryFilename = dir(sqldir, "pacfin_bds_fish", full.names = TRUE),
       db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw, 
       sp = "PWHT", start = startyear$PacFIN[2], end = endyear, 
       asis = c(rep(FALSE, 11), TRUE, rep(FALSE, 32)))
     localsave(bds.fish, "pacfin_bds_fish")
     bds.sp.cluster <- queryDB(
-      queryFilename = file.path(mydir, "sql", "pacfin_bds_sp_cluster.sql"),
+      queryFilename = dir(sqldir, "pacfin_bds_sp_cluster", full.names = TRUE),
       db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
       sp = "PWHT", start = startyear$PacFIN[2], end = endyear)
     localsave(bds.sp.cluster, "pacfin_bds_sp_cluster")
     pcatchatsea <- queryDB(
-      queryFilename = file.path(mydir, "sql", "pacfin.atseabysector.sql"),
+      queryFilename = dir(sqldir, "pacfin.atseabysector", full.names = TRUE),
       db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
       sp = 206, start = startyear$PacFIN[2], end = endyear)
     localsave(pcatchatsea, "pcatchatsea")
