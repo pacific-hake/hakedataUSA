@@ -41,12 +41,38 @@ saved to the disk, i.e., one for each object and a summary
 file.
 }
 \description{
-Extract catch and age data from NORPAC and PacFIN databases
+Extract catch, weight and age data from NORPAC and PacFIN databases
 for the hake stock assessment.
 }
+\details{
+There are many detailed parts to \code{pulldatabase} that lead to many files
+being saved to the disk. The steps are outlined below:
+\enumerate{
+  \item The folder where the data should be saved is found.
+  \item A summary file is saved to the disk.
+  \item Extract data from NORPAC
+    \enumerate{
+      \item Catch data
+      \item Weight and age data
+      \item Squash table of ages (that also includes lengths)
+    }
+  \item Extract data from PacFIN
+    \enumerate{
+      \item Catch data
+      \item Age data from bds table
+      \item Species cluster
+      \item Bds fish table
+      \item Bds species cluster
+      \item At sea sector data
+    }
+  \item Save each item to the disk in the "extractedData" folder.
+}
+}
 \examples{
+\dontrun{
 dataenv <- pulldatabase()
 head(get("ncatch", envir = dataenv))
+}
 
 }
 \author{

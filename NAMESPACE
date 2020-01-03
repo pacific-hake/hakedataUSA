@@ -2,7 +2,6 @@
 
 export(UScatchPlots)
 export(atseacomps)
-export(catchpullcompare)
 export(create_fleetnames)
 export(datatoassessment)
 export(get_wtatagecsv)
