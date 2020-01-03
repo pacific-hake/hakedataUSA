@@ -1,8 +1,31 @@
 #' Pull Information From NORPAC and PacFIN Databases
 #' 
-#' Extract catch and age data from NORPAC and PacFIN databases
-#' for the hake stock assessment. 
+#' Extract catch, weight and age data from NORPAC and PacFIN databases
+#' for the hake stock assessment.
 #' 
+#' @details
+#' There are many detailed parts to \code{pulldatabase} that lead to many files
+#' being saved to the disk. The steps are outlined below:
+#' \enumerate{
+#'   \item The folder where the data should be saved is found.
+#'   \item A summary file is saved to the disk.
+#'   \item Extract data from NORPAC
+#'     \enumerate{
+#'       \item Catch data
+#'       \item Weight and age data
+#'       \item Squash table of ages (that also includes lengths)
+#'     }
+#'   \item Extract data from PacFIN
+#'     \enumerate{
+#'       \item Catch data
+#'       \item Age data from bds table
+#'       \item Species cluster
+#'       \item Bds fish table
+#'       \item Bds species cluster
+#'       \item At sea sector data
+#'     }
+#'   \item Save each item to the disk in the "extractedData" folder.
+#' }
 #' @param database A vector of character values indicating 
 #' which databases you want to pull information from.
 #' Options include \code{c("NORPAC", "PacFIN")}, one or both
@@ -30,8 +53,10 @@
 #' file.
 #' 
 #' @examples
+#' \dontrun{
 #' dataenv <- pulldatabase()
 #' head(get("ncatch", envir = dataenv))
+#' }
 #' 
 pulldatabase <- function(database = c("NORPAC", "PacFIN"), 
   startyear = list("NORPAC" = 2008, "PacFIN" = c(1980, 2008)),
@@ -59,13 +84,6 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     }
   }
 
-  summaryfile <- file.path(mydir, "extractedData", 
-    paste0("summary_", format(Sys.time(), "%Y.%m.%d"), ".txt"))
-  on.exit(sink(file = NULL))
-  sink(summaryfile)
-  cat("Summary of hake-data pull from", 
-    format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n")
-  sink()
   info <- hakedatasqlpw(file = passwordfile)
   NORPAC.uid <- info[[1]][1]
   PacFIN.uid <- info[[1]][2]
@@ -116,7 +134,6 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
 
   if ("pacfin" %in% tolower(database)) {
     # Catches
-    # new method in 2017, which includes research catch and breaks out tribal catch
     # Remove XXX fleet (foreign catch?)
     pcatch <- queryDB(
       queryFilename = dir(sqldir, "comp_ft_taylor_aliased", full.names = TRUE),
@@ -124,7 +141,6 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
       sp = "PWHT", start = startyear$PacFIN[1], end = endyear)
     localsave(pcatch, "Pacfincomp_ft_taylorCatch")
     # bds data
-    # used to be bds.age.sql
     bds.age <- queryDB(
       queryFilename = dir(sqldir, "pacfin_bds_age", full.names = TRUE),
       db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw, 
@@ -153,153 +169,6 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     localsave(pcatchatsea, "pcatchatsea")
   }
 
-  # Summaries
-  # todo: Make summaries available if only one database is requested.
-  # todo: Make csv or table for summary to easily compare across years
-  #       instead of having to do manual comparisons.
-  sink(summaryfile, append = TRUE)
-  cat("look at file sizes\n")
-  print(file.info(dir(file.path(mydir, "extractedData"), 
-    full.names = TRUE, pattern = ".Rdat"))[, 1:2])
-  cat("\n")
-  sink()
-  if (all(c("norpac", "pacfin") %in% tolower(database))) {
-    sink(summaryfile, append = TRUE)
-    cat("\nAges, otoliths, and samples (PacFIN only) by year\n",
-      "where NA values are included for age\n")
-    maxyears <- unique(unique(bds.age$SAMPLE_YEAR),
-      unique(bds.fish$SAMPLE_YEAR),
-      unique(atsea.ages$YEAR))
-    maxyears <- maxyears[order(maxyears)]
-    temp <- data.frame(
-      "database" = c(rep("PacFIN", 3), rep("NORPAC", 2)),
-      "data" = c("bds ages", "bds otoliths", "fish samples", 
-        "ages", "otoliths"),
-      rbind(
-      table(factor(bds.age$SAMPLE_YEAR[!is.na(bds.age$AGE_YEARS)],
-        levels = maxyears)),
-      table(factor(bds.age$SAMPLE_YEAR, levels = maxyears)),
-      table(factor(bds.fish$SAMPLE_YEAR, levels = maxyears)),
-      table(factor(atsea.ages$YEAR[!is.na(atsea.ages$AGE)], 
-        levels = maxyears)),
-      table(factor(atsea.ages$YEAR, levels = maxyears))))
-    colnames(temp) <- gsub("^X", "", colnames(temp))
-    print(temp, row.names = FALSE)
-    rm(temp)
-    cat("\nAges by month and year.\n",
-      "Information is separated by state for PacFIN.\n",
-      "The number of NAs is summarized for NORPAC.\n")
-    temp <- list()
-    temp[[1]] <-   table(bds.age$SAMPLE_YEAR,
-      factor(bds.age$SAMPLE_MONTH, levels = 1:12),
-          bds.age$SAMPLE_AGID)
-    temp[[2]] <- table(atsea.ages$YEAR,
-      factor(as.numeric(format(as.Date(atsea.ages$HAUL_OFFLOAD_DATE),"%m")),levels = 1:12),
-      is.na(atsea.ages$AGE))
-    temp <- do.call("rbind", 
-      lapply(temp, function(y) do.call("rbind", apply(y, 3, function(x) data.frame(x)))))
-    temp <- data.frame(do.call("rbind", strsplit(rownames(temp), "\\.")), temp)
-    colnames(temp)[1:2] <- c("state", "YEAR")
-    colnames(temp) <- gsub("^X|X2\\.|", "", colnames(temp))
-    temp$database <- ifelse(temp[, 1] %in% c("TRUE", "FALSE"), "NORPAC", "PacFIN")
-    temp$NAinfo <- ifelse(temp$state == TRUE, TRUE, FALSE)
-    temp$state <- ifelse(temp$state %in% c(TRUE, FALSE), "all", as.character(temp$state))
-    rownames(temp) <- NULL
-    print(temp, row.names = FALSE)
-    rm(temp)
-    sink()
-  }
-  if ("norpac" %in% tolower(database)) {
-    sink(summaryfile, append = TRUE)
-    cat("\nInvestigate unique trips from NORPAC data\n")
-    cat("The following cruise numbers should be investigated:\n")
-    badNORPAC <- names(which(apply(
-      table(atsea.lenAge$CRUISE,atsea.lenAge$CRUISE_VESSEL_SEQ)>0, 1, sum) > 1))
-    cat(paste(badNORPAC, collapse = "\n"), "\n")
-    for (cruise in badNORPAC) {
-      dat <- atsea.lenAge[atsea.lenAge$CRUISE == cruise, ]
-      y1 <- paste(dat$CRUISE, dat$CRUISE_VESSEL_SEQ, dat$TRIP_SEQ, sep=".")
-      y2 <- paste(dat$CRUISE, dat$TRIP_SEQ, sep=".")
-      cat("Cruise and trip sequence on top vs. cruise",
-       "cruise vessel sequence, and trip sequence on left\n")
-      print(table(y1,y2))
-      cat("\n\n")
-    }
-    yy <- atsea.ages[!is.na(atsea.ages$AGE),]
-    xx <- atsea.lenAge[!is.na(atsea.lenAge$AGE),]
-    xx$year <- substring(xx$RETRV_DATE_TIME,1,4)
-    cat("In the NORPAC data,",
-      "there are a different number of age and length NA values",
-      "in the following years:\n")
-    yyy <- table(yy$YEAR)
-    xxx <- table(xx$year)
-    if (!all(c(
-      names(yyy) %in% names(xxx), 
-      names(xxx) %in% names(yyy)))) {
-      cat("Ages\n")
-      print(table(yy$YEAR))
-      cat("Lengths\n")
-      print(table(xx$year))
-    }
-    print(merge(yyy, xxx, all = TRUE))
-    sink()
-  }
-  if ("norpac" %in% tolower(database)) {
-    sink(summaryfile, append = TRUE)
-    cat("\nSummary of PacFIN catches by fleet across all years")
-    cat("\nShould include 1, 2, and 3, with the latter being the smallest")
-    colSums(table(
-      substr(ncatch$RETRIEVAL_DATE, 1, 4),
-      ncatch$VESSEL_TYPE))
-    cat("\n\n")
-    sink()
-  }
-  if ("pacfin" %in% tolower(database)) {
-    sink(summaryfile, append = TRUE)
-    cat("\nSummary of PacFIN catches by fleet across all years")
-    cat("\nShould include LE, OA, R, TI, XX")
-    colSums(table(pcatch$YEAR, pcatch$FLEET))
-    cat("\n\n")
-    sink()
-  }
-  sink(summaryfile, append = TRUE)
-  cat("\n\nEND OF SUMMARY\n\n")
-  sink()
-
-  # todo: get IT to explain legacy code
-  # Legacy summary code that I don't understand
-  # y1 <- paste(atsea.lenAge$CRUISE, atsea.lenAge$TRIP_SEQ, sep=".")
-  # y2 <- paste(atsea.lenAge$CRUISE, atsea.lenAge$CRUISE_VESSEL_SEQ, atsea.lenAge$TRIP_SEQ, sep=".")
-  # x <- table(y1,y2)>0
-  # table(apply(x,1,sum))
-  # y1 <- paste(atsea.lenAge$CRUISE, sep=".")
-  # y2 <- paste(atsea.lenAge$CRUISE, atsea.lenAge$TRIP_SEQ, sep=".")
-  # x <- table(y1,y2)>0
-  # table(apply(x,1,sum))
-  # y1 <- paste(atsea.lenAge$TRIP_SEQ, sep=".")
-  # y2 <- paste(atsea.lenAge$CRUISE, atsea.lenAge$TRIP_SEQ, sep=".")
-  # x <- table(y1,y2)>0
-  # table(apply(x,1,sum))
-  # zz <- merge(xx,yy,by=c("SPECIMEN_NUMBER","BARCODE"),all=T)
-  # sum(duplicated(xx$SPECIMEN_NUMBER))
-  # sum(duplicated(yy$SPECIMEN_NUMBER))
-  # sum(duplicated(zz$SPECIMEN_NUMBER))
-
-  # sum(duplicated(paste(xx$year,xx$SPECIMEN_NUMBER)))
-  # head(xx[duplicated(xx$SPECIMEN_NUMBER),])
-  # xx[xx$SPECIMEN_NUMBER==632706,]
-  # xx[xx$SPECIMEN_NUMBER==281,]
-  # yy[yy$SPECIMEN_NUMBER==281,]
-
-  # zz14 <- zz[zz$YEAR==2014,]
-  # sum(duplicated(paste(zz14$SPECIMEN_NUMBER,zz14$BARCODE)))
-
-  # zzz <- zz[!duplicated(paste(zz$SPECIMEN_NUMBER,zz$BARCODE)),]
-  # table(zzz$YEAR)
-  # table(xx$year)
-  # table(yy$YEAR)
-
-  # xxx <- xx[!duplicated(paste(xx$SPECIMEN_NUMBER,xx$BARCODE)),]
   e1 <- new.env()
   if ("norpac" %in% tolower(database)) {
     assign("atsea.ages", atsea.ages, envir = e1)

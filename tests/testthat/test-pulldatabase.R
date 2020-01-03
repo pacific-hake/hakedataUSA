@@ -1,0 +1,98 @@
+context("Pull from databases")
+
+test_that("Files have positive size", {
+  expect_true(all(file.size(dir(test_dir_data,
+    full.names = TRUE, pattern = "[a-z].Rdat")) > 1000),
+    label = "All extracted Rdat files have large file size")
+})
+
+test_that("Age structures without an age", {
+  expect_equal(sum(is.na(bds.age$AGE_YEARS)), 0,
+    label = "Number of PacFIN age structures without an age is")
+  # todo(eachyear): add historic info to compare to
+  history_badages <- c("2008" = 10, "2009" = 11, "2010" = 76,
+    "2011" = 5, "2012" = 84, "2013" = 5, "2014" = 17, "2015" = 175,
+    "2016" = 52, "2017" = 8)
+  new_badages <- table(atsea.ages$YEAR[is.na(atsea.ages$AGE)])
+  expect_true(all(new_badages[names(history_badages)] - history_badages == 0),
+    label = "Number of NORPAC age structures w/o an age remained the same")
+})
+
+test_that("Data is available for every year.", {
+  maxyears <- unique(c(bds.age$SAMPLE_YEAR,
+    bds.fish$SAMPLE_YEAR, atsea.ages$YEAR))
+  maxyears <- maxyears[order(maxyears)]
+  temp <- data.frame(
+      "database" = c(rep("PacFIN", 2), rep("NORPAC", 1)),
+      "data" = c("fish samples", "otoliths", "otoliths"),
+      rbind(
+      table(factor(bds.fish$SAMPLE_YEAR, levels = maxyears)),
+      table(factor(bds.age$SAMPLE_YEAR, levels = maxyears)),
+      table(factor(atsea.ages$YEAR[!is.na(atsea.ages$AGE)], levels = maxyears))),
+      check.names = FALSE)
+  expect_true(all(temp[1, -c(1:2)] > 4000),
+    label = "At least 4000 fish samples per year in PacFIN")
+  expect_true(all(temp[-1, -c(1:2)] > 1200),
+    label = "At least 1200 age samples per year per database")
+  write.csv(temp, file = file.path(test_dir_data, "summary_nsamples_year.csv"),
+    append = FALSE)
+})
+
+test_that("NORPAC cruises include a single vessel", {
+  badNORPAC <- as.numeric(names(which(apply(
+    table(atsea.ages$CRUISE, atsea.ages$VESSEL_SEQ)>0, 1, sum) > 1)))
+  expect_true(all(badNORPAC %in% c(13788, 13836, 14254, 19661)),
+    label = "Bad NORPAC cruises were kept to 4 historical ones")
+  cat(paste(badNORPAC, collapse = "\n"), "\n")
+})
+
+test_that("", {
+  atsea.ages$Month <- factor(as.numeric(format(as.Date(
+    atsea.ages$HAUL_OFFLOAD_DATE), "%m")), levels = 1:12)
+  temp <- merge(all = TRUE,
+    aggregate(list("Ages" = bds.age$AGE_YEARS),
+      by = list(
+        "Month" = factor(bds.age$SAMPLE_MONTH, levels = 1:12),
+        "Year" = bds.age$SAMPLE_YEAR,
+        "State" = bds.age$SAMPLE_AGID), FUN = length),
+    data.frame(
+      aggregate(AGE ~ YEAR + Month, data = atsea.ages[!is.na(atsea.ages$AGE),],
+      FUN = length), "State" = "atsea"),
+    by.x = c("Year", "Month", "State", "Ages"),
+    by.y = c("YEAR", "Month", "State", "AGE"))
+  temp <- reshape(temp, direction = "wide", idvar = c("Year", "Month"),
+    timevar = "State")
+  expect_equal(sum(temp$Ages.C > 0, na.rm = TRUE), 2,
+    label = "N years that California provided age data")
+})
+
+test_that("Fleet XXX in PacFIN has no recent data", {
+  temp <- table(pcatch[pcatch$FLEET == "XX", "YEAR"])
+  expect_lt(max(as.numeric(names(temp))), 1994,
+    label = "Maximum year of catch from FLEET XX")
+})
+
+test_that("Research catch is small", {
+  expect_lt(max(aggregate(MT ~ YEAR, FUN = sum,
+    data = pcatch[pcatch$FLEET == "R", c("YEAR", "MT")])$MT),
+    1050, label = "Yearly research catch")
+})
+
+test_that("No tribal catch before 2003", {
+  temp <- aggregate(MT ~ YEAR, FUN = sum,
+    data = pcatch[pcatch$FLEET == "TI", c("YEAR", "MT")])
+  expect_true(all(temp$MT > 0), label = "Recent tribal catch every year")
+  expect_gt(min(temp$YEAR), 2002, label = "First year of tribal catch")
+})
+
+test_that("Positive catches in Limited Entry", {
+  temp <- aggregate(MT ~ YEAR, FUN = sum,
+    data = pcatch[pcatch$FLEET == "LE", c("YEAR", "MT")])
+  expect_true(all(temp$MT > 0), label = "Recent LE catch every year")
+  expect_gt(min(temp$YEAR), 1993, label = "First year of LE catch")
+})
+
+test_that("NORPAC VESSEL_TYPE == 3 only in 2009 and 2010", {
+  temp <- substr(ncatch[ncatch$VESSEL_TYPE == 3, "RETRIEVAL_DATE"], 1, 4)
+  expect_true(all(temp %in% 2009:2010), label = "VESSEL_TYPE 3 in 2009:2010")
+})
