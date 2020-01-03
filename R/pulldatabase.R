@@ -37,8 +37,8 @@
 #' the first entry is the start year for catches and the second is the 
 #' start year for age compositions. 
 #' @param endyear An integer value specifying the final year of data
-#' to include in the extraction. The default will be to
-#' end the data based on the current calendar year.
+#' to include in the extraction. The default uses
+#' \code{\link{hakedata_year}} to determine the terminal year.
 #' @param passwordfile A file path directing R to a file that contains
 #' two lines, with the first being your NORPAC password and the
 #' second being your PacFIN password without quotes.
@@ -60,7 +60,7 @@
 #' 
 pulldatabase <- function(database = c("NORPAC", "PacFIN"), 
   startyear = list("NORPAC" = 2008, "PacFIN" = c(1980, 2008)),
-  endyear = as.numeric(format(Sys.time(), "%Y")),
+  endyear = hakedata_year(),
   passwordfile = "password.txt") {
   
   mydir <- hakedatawd()
