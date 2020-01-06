@@ -130,6 +130,12 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
       db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw, 
       sp = "206", start = startyear$NORPAC[2], end = endyear)
     localsave(atsea.ages, "atsea.ages")
+    # Get species list
+    nspecies <- queryDB(
+      queryFilename = file.path(hakedatawd(), "sql", "NORPACspecies.query"),
+      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw,
+      start = startyear$NORPAC[2], end = endyear)
+    localsave(nspecies, "NORPACspecies")
   }
 
   if ("pacfin" %in% tolower(database)) {
@@ -173,8 +179,8 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
   if ("norpac" %in% tolower(database)) {
     assign("atsea.ages", atsea.ages, envir = e1)
     assign("atsea.ageWt", atsea.ageWt, envir = e1)
-    assign("atsea.lenAge", atsea.lenAge, envir = e1)
     assign("ncatch", ncatch, envir = e1)
+    assign("nspecies", nspecies, envir = e1)
   }
   if ("pacfin" %in% tolower(database)) {
     assign("bds.age", bds.age, envir = e1)

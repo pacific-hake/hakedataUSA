@@ -4,6 +4,7 @@
 #' Data is summarized from the NORPAC database only.
 #' 
 #' @template ncatch 
+#' @param nspecies A data frame of species names from NORPAC.
 #' @param fileout A file path to a \code{.pdf} extension to specify where
 #' the plots should be saved. A single \code{.pdf} can be created or multiple
 #' \code{.png} files will be created.
@@ -15,7 +16,7 @@
 #' @export
 #' @author Kelli Faye Johnson
 #'
-workupNorpacCatchSpecies <- function(ncatch = NULL,   
+workupNorpacCatchSpecies <- function(ncatch = NULL, nspecies = NULL,
   fileout = "bycatchsummary.pdf") {
   
   oldoptions <- options()
@@ -31,14 +32,14 @@ workupNorpacCatchSpecies <- function(ncatch = NULL,
     	filepath, " does not exist.")
     base::load(filepath)
   }
-
-  # Get species list
-  temp <- hakedatasqlpw(database = "NORPAC", file = "password.txt")
-  nspecies <- queryDB(
-    queryFilename = file.path(hakedatawd(), "sql", "NORPACspecies.query"),
-    db = "NORPAC", uid = temp$username, pw = temp$password, 
-    start = 1966, end = as.numeric(substr(Sys.Date(), 1, 4)))
-  rm(temp)
+  if (is.null(nspecies)) {
+    file <- "NORPACspecies.Rdata"
+    filepath <- ifelse(file.exists(file), file,
+      file.path(hakedatawd(), "extractedData", file))
+    if (!file.exists(filepath)) stop("The file ",
+      filepath, " does not exist.")
+    base::load(filepath)
+  }
 
   spp <- setNames(nspecies$SPECIES_NO, nspecies$SPECIES_NAME)
   spp <- spp[spp %in% ncatch$SPECIES]
