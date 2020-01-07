@@ -96,19 +96,19 @@ shorecomps <- function(bds.age = NULL, bds.fish = NULL,
   utils::write.csv(afs,
     file = file.path(mydir, "Catches", "Comps", "Shoreside.Age.Only",
       "shoresideAgeComps.csv"), row.names = FALSE)
-  utils::write.csv(sep = ",", row.names = FALSE, col.names = TRUE,
+  utils::write.csv(row.names = FALSE,
     file = file.path(mydir, "Catches", "Comps", "shoreside_AGID_Age.csv"),
     reshape(aggregate(FREQ ~ SOURCE_AGID + FISH_AGE_YEARS_FINAL+ SAMPLE_YEAR ,
       data = bds.fish.worked, length),
       direction = "wide", timevar = "SOURCE_AGID",
       idvar = c("FISH_AGE_YEARS_FINAL", "SAMPLE_YEAR")))
-  utils::write.csv(sep = ",", row.names = FALSE, col.names = TRUE,
+  utils::write.csv(row.names = FALSE,
     file = file.path(mydir, "Catches", "Comps", "shoreside_AGID_Grid.csv"),
     reshape(aggregate(FREQ ~ GRID + FISH_AGE_YEARS_FINAL+ SAMPLE_YEAR ,
       data = bds.fish.worked, length),
       direction = "wide", timevar = "GRID",
       idvar = c("FISH_AGE_YEARS_FINAL", "SAMPLE_YEAR")))
-  utils::write.csv(sep = ",", row.names = FALSE, col.names = TRUE,
+  utils::write.csv(row.names = FALSE,
     file = file.path(mydir, "Catches", "Comps", "shoreside_PCID"),
     aggregate(totalWt ~ PCID + SAMPLE_YEAR, data = dat, FUN = sum))
 
