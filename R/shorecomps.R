@@ -97,7 +97,7 @@ shorecomps <- function(
       direction = "wide", timevar = "GRID",
       idvar = c("FISH_AGE_YEARS_FINAL", "SAMPLE_YEAR")))
   utils::write.csv(row.names = FALSE,
-    file = file.path(mydir, "Catches", "Comps", "shoreside_PCID"),
+    file = file.path(mydir, "Catches", "Comps", "shoreside_PCID.csv"),
     aggregate(totalWt ~ PCID + SAMPLE_YEAR, data = dat, FUN = sum))
 
   return(afs)
