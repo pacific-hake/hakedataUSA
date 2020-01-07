@@ -7,6 +7,7 @@ datatocomps <- function(dirdata, dirmod) {
   if (!grepl("\\d{4}", substring(can[2], 1, 2))) can <- can[-2]
 
   cansplit <- strsplit(can, ",")
+  cansplit <- lapply(cansplit, function(x){c(x[1],x[!x == ""][-1])})
   canlabel <- cansplit[which(sapply(cansplit, length) == 1)]
   canlabel <- gsub(".+Trawler.+", "CAN FreezerTrawl", canlabel)
   canlabel <- gsub(".+side.+", "CAN Shoreside", canlabel)
