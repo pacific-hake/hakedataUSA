@@ -13,9 +13,6 @@
 #' @author Kelli Faye Johnson
 #' @return todo: document the return
 #' 
-#' @examples
-#' shorecomps(verbose = TRUE)
-#' 
 shorecomps <- function(bds.age = NULL, bds.fish = NULL,
   bds.sp.cluster = NULL, bds.allsp.cluster = NULL, 
   ages = 1:15, verbose = FALSE) {
