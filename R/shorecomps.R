@@ -30,13 +30,6 @@ shorecomps <- function(bds.age = NULL, bds.fish = NULL,
   if (is.null(bds.sp.cluster)) base::load(file.path(mydir, "extractedData", 
     "pacfin_bds_sp_cluster.Rdat"))
   mydir <- hakedatawd()
-  summaryfile <- file.path(mydir, "Catches", "Comps", "shoreagesSummary.txt")
-  sink(file = summaryfile)
-  on.exit(suppressWarnings(sink()), add = TRUE)
-  cat("Summary of hake-data shoreside", 
-    format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
-  sink()
-
   bds.fish.worked <- workupPacFinTablesBDS(bds_fish=bds.fish,
     age_temp = bds.age, sp_cluster = bds.sp.cluster, 
     all_cluster = bds.allsp.cluster)
@@ -50,23 +43,6 @@ shorecomps <- function(bds.age = NULL, bds.fish = NULL,
       !is.na(bds.fish.worked$FISH_AGE_YEARS_FINAL), ]
   }
 
-  sink(summaryfile, append = TRUE)
-  cat("\nThere were ", bad, "NA ages.\n")
-  cat("\nSummary of Year.\n")
-  print(table(bds.fish.worked$SAMPLE_YEAR))
-  cat("\nSummary of Ages by Agency by Year:\n")
-  print(table(
-    bds.fish.worked$FISH_AGE_YEARS_FINAL, 
-    bds.fish.worked$SAMPLE_AGENCY,
-    bds.fish.worked$SAMPLE_YEAR
-    ))
-  cat("\nSummary of Grid by Month by Year:\n")
-  print(table(
-    bds.fish.worked$GRID, 
-    bds.fish.worked$SAMPLE_MONTH,
-    bds.fish.worked$SAMPLE_YEAR
-    ))
-  sink()
 
   bds.fish.worked$SEX <- factor(bds.fish.worked$SEX)
   dat <- SetUpHakeBDS.fn(bds.fish.worked, verbose = verbose,
@@ -120,16 +96,25 @@ shorecomps <- function(bds.age = NULL, bds.fish = NULL,
   afs[, "nTrips"] <- nSamp[as.character(afs[, "Year"])]
   dir.create(file.path(mydir, "Catches",
     "Comps", "Shoreside.Age.Only"), recursive = TRUE, showWarnings = FALSE)
-  write.csv(afs,
+  utils::write.csv(afs,
     file = file.path(mydir, "Catches", "Comps", "Shoreside.Age.Only",
       "shoresideAgeComps.csv"), row.names = FALSE)
+  utils::write.csv(sep = ",", row.names = FALSE, col.names = TRUE,
+    file = file.path(mydir, "Catches", "Comps", "shoreside_AGID_Age.csv"),
+    reshape(aggregate(FREQ ~ SOURCE_AGID + FISH_AGE_YEARS_FINAL+ SAMPLE_YEAR ,
+      data = bds.fish.worked, length),
+      direction = "wide", timevar = "SOURCE_AGID",
+      idvar = c("FISH_AGE_YEARS_FINAL", "SAMPLE_YEAR")))
+  utils::write.csv(sep = ",", row.names = FALSE, col.names = TRUE,
+    file = file.path(mydir, "Catches", "Comps", "shoreside_AGID_Grid.csv"),
+    reshape(aggregate(FREQ ~ GRID + FISH_AGE_YEARS_FINAL+ SAMPLE_YEAR ,
+      data = bds.fish.worked, length),
+      direction = "wide", timevar = "GRID",
+      idvar = c("FISH_AGE_YEARS_FINAL", "SAMPLE_YEAR")))
+  utils::write.csv(sep = ",", row.names = FALSE, col.names = TRUE,
+    file = file.path(mydir, "Catches", "Comps", "shoreside_PCID"),
+    aggregate(totalWt ~ PCID + SAMPLE_YEAR, data = dat, FUN = sum))
 
-  sink(summaryfile, append = TRUE)
-  cat("\n\nPort Code IDs (PCID) by year:\n")
-  pcidsum <- aggregate(totalWt ~ PCID + SAMPLE_YEAR, 
-    data = dat, FUN = sum)
-  print(pcidsum)
-  sink()
   if (verbose) {
     testthat::expect_equal(
       pcidsum[pcidsum$SAMPLE_YEAR == 2017, "totalWt"],
