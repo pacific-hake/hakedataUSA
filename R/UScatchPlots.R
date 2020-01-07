@@ -17,16 +17,16 @@ UScatchPlots <- function(doPNG = TRUE, nyears = 5) {
     mgp=c(2.1, 0.75, 0), las = 1)
   args3 <- list(outer=TRUE,side=3,line=-0.3,cex=1.3)
 
-  quotas <- read.csv(file.path(mydir, "Catches", "quotas.csv"), header = TRUE)
-  colnames(quotas) <- gsub("^X", "", colnames(quotas))
+  quotas <- read.csv(file.path(mydir, "Catches", "quotas.csv"), 
+    sep = ",", header = TRUE, check.names = FALSE)
   shore <- read.csv(
     file.path(mydir, "Catches", "USshoreCatchByPeriodComp_ft.csv"))
-  cp <- read.csv(file.path(mydir, "Catches", "CP_CatchesByMonth.csv"))
-  ms <- read.csv(file.path(mydir, "Catches", "MS_CatchesByMonth.csv"))
-  colnames(shore) <- colnames(cp) <- colnames(ms) <- 
-    c("Fleet", "Month", "Year", "Catch.MT")
-  Yrs <- as.character((max(shore$Year) - nyears + 1):max(shore$Year))
-  Yrs <- as.character((max(cp$Year) - nyears + 1):max(cp$Year))
+  cp <- data.frame("sector" = "CP", 
+    read.csv(file.path(mydir, "Catches", "us-cp-catch-by-month.csv")))
+  ms <- data.frame("sector" = "MS", 
+    read.csv(file.path(mydir, "Catches", "us-ms-catch-by-month.csv")))
+  Yrs <- as.character((max(shore$year) - nyears + 1):max(shore$year))
+  Yrs <- as.character((max(cp$year) - nyears + 1):max(cp$year))
   cols <- plotcolour(length(Yrs))
   lineTypes <- rep(1,length(Yrs))
   lineWds <- rep(2,length(Yrs))
@@ -34,10 +34,10 @@ UScatchPlots <- function(doPNG = TRUE, nyears = 5) {
 
   if (doPNG) {
     do.call("png", c(args, 
-      file = file.path("Figures", "shoresideCatchMonthYear.png")))
+      file = file.path(mydir, "Figures", "shoresideCatchMonthYear.png")))
   } else {windows(height = args$height, width = args$width)}
   do.call("par", args2)
-  plotHakeCatchMonthYear.fn(shore[shore$Fleet=="USshore",],
+  plotHakeCatchMonthYear.fn(shore[shore$sector=="USshore",],
     Yrs=Yrs,quotas=quotas[3,],lineWds=lineWds,lineTypes=lineTypes,
     cols=cols,leg.cex=0.7)
   do.call("mtext", c(args3, text = "U.S. Shoreside Catches (preliminary)"))
@@ -45,43 +45,41 @@ UScatchPlots <- function(doPNG = TRUE, nyears = 5) {
 
   if (doPNG) {
     do.call("png", c(args, 
-      file = file.path("Figures", "CpCatchMonthYear.png")))
+      file = file.path(mydir, "Figures", "CpCatchMonthYear.png")))
   } else {windows(height = args$height, width = args$width)}
-  tmp <- quotas[1,-1]
   do.call("par", args2)
   plotHakeCatchMonthYear.fn(cp,
-    Yrs=Yrs,quotas=tmp,lineWds=lineWds,lineTypes=lineTypes,
+    Yrs=Yrs,quotas=quotas[1,-1],lineWds=lineWds,lineTypes=lineTypes,
     cols=cols,leg.cex=0.7)
   do.call("mtext", c(args3, text = "U.S. CP Catches (preliminary)"))
   if(doPNG) dev.off()  
 
   if (doPNG) {
     do.call("png", c(args, 
-      file = file.path("Figures", "MsCatchMonthYear.png")))
+      file = file.path(mydir, "Figures", "MsCatchMonthYear.png")))
   } else {windows(height = args$height, width = args$width)}
-  tmp <- quotas[2,-1]
   do.call("par", args2)
   plotHakeCatchMonthYear.fn(ms,
-    Yrs=Yrs,quotas=tmp,lineWds=lineWds,lineTypes=lineTypes,
+    Yrs=Yrs,quotas=quotas[2,-1],lineWds=lineWds,lineTypes=lineTypes,
     cols=cols,leg.cex=0.7)
   do.call("mtext", c(args3, text = "U.S. MS Catches (preliminary)"))
   if(doPNG) dev.off()  
 
-  tmp <- tapply(cp$Catch.MT,cp$Year,sum)["2017"]
+  tmp <- tapply(cp$catch,cp$year,sum)["2017"]
   testthat::expect_equal(as.numeric(tmp), 136960, tolerance = 1e-04,
     info = "2017 US catcher-processor catch in mt.")
   testthat::expect_equal(as.numeric(tmp/quotas[quotas$Fleet=="CP","2017"]),
     0.9978726, tolerance = 1e-06,
     info = "Ratio of 2017 catch to catcher-processor quota.")  
 
-  tmp <- tapply(ms$Catch.MT,ms$Year,sum)["2017"]
+  tmp <- tapply(ms$catch,ms$year,sum)["2017"]
   testthat::expect_equal(as.numeric(tmp), 66427.88, tolerance = 1e-04,
     info = "2017 US mothership catch in mt.")
   testthat::expect_equal(as.numeric(tmp/quotas[quotas$Fleet=="MS","2017"]),
     0.6856435, tolerance = 1e-06,
     info = "Ratio of 2017 catch to mothership quota.")
       
-  tmp <- tapply(shore$Catch.MT,shore$Year,sum)["2017"]
+  tmp <- tapply(shore$catch,shore$year,sum)["2017"]
   testthat::expect_equal(as.numeric(tmp), 150841.18, tolerance = 1e-04,
     info = "2017 US shoreside catch in mt.")
   testthat::expect_equal(

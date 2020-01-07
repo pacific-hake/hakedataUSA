@@ -1,4 +1,4 @@
-SetUpHakeBDS.fn <- function(BDS,verbose=T,max.mmLength=1000,dataTypes=c("C"),
+SetUpHakeBDS.fn <- function(BDS,verbose=TRUE,max.mmLength=1000,dataTypes=c("C"),
                                 sampleMethods=c("R"),sampleTypes=c("","C","M"),
                                 states=c("CA","OR","WA")) {
 ###############################################################################
@@ -11,16 +11,6 @@ SetUpHakeBDS.fn <- function(BDS,verbose=T,max.mmLength=1000,dataTypes=c("C"),
 
 
     BDS$length.cm <- BDS$FISH_LENGTH/10                                                 #lengths in cm
-
-    BDS$inpfc <- rep(NA,nrow(BDS))                                  #assign single ipnfc codes to areas
-    BDS$inpfc[BDS$INPFC_AREA %in% c("CP")] <- "CP"
-    BDS$inpfc[BDS$INPFC_AREA %in% c("MT")] <- "MT"
-    BDS$inpfc[BDS$INPFC_AREA %in% c("EK","EU","EUR")] <- "EK"
-    BDS$inpfc[BDS$INPFC_AREA %in% c("CL","COL","NC","SC")] <- "CL"
-    BDS$inpfc[BDS$INPFC_AREA %in% c("VN","VUS")] <- "VN"
-    BDS$inpfc[is.na(BDS$INPFC_AREA)] <- "NA"
-
-    BDS$area <- BDS$inpfc  #can use this to define specific areas
 
     BDS$gear <- NA
     BDS$gear[BDS$GRID%in%c("SST","SHT","PWT","DST","DSG")] <- NA #"ShrimpTrawl"
@@ -37,10 +27,10 @@ SetUpHakeBDS.fn <- function(BDS,verbose=T,max.mmLength=1000,dataTypes=c("C"),
         flush.console()
     }
 
-    BDS$state <- rep(NA,nrow(BDS))
-    BDS$state[BDS$SAMPLE_AGENCY == "CA"] <- "CA"
-    BDS$state[BDS$SAMPLE_AGENCY == "OR"] <- "OR"
-    BDS$state[BDS$SAMPLE_AGENCY == "W"] <- "WA"
+    BDS$state <- NA
+    BDS$state[BDS$SOURCE_AGID == "C"] <- "CA"
+    BDS$state[BDS$SOURCE_AGID == "O"] <- "OR"
+    BDS$state[BDS$SOURCE_AGID == "W"] <- "WA"
     BDS$state[BDS$SAMPLE_AGENCY == "PW"] <- "PW"
 
 
@@ -54,18 +44,9 @@ SetUpHakeBDS.fn <- function(BDS,verbose=T,max.mmLength=1000,dataTypes=c("C"),
     }
     BDS <- BDS[,!ind]
 
-    if(verbose) {
-        cat("\nThe dimensions of the unfiltered dataframe are:\n")
-        print(dim(BDS))
-        cat("\n")
-        flush.console()
-    }
-
     #filter out the rows that will not be used
     keep <- rep(T,nrow(BDS))                                             #TRUE means to omit that row
     totKeep <- sum(keep)
-    keep <- keep & !is.na(BDS$area)
-     if(verbose){cat(totKeep-sum(keep),"rows omitted becasue of NA in area (Canadian catch)\n")}; totKeep <- sum(keep)
     keep <- keep & (BDS$state %in% states)
      if(verbose){cat(totKeep-sum(keep),"rows omitted becasue not a specified state:",states,"\n")}; totKeep <- sum(keep)
     keep <- keep & (!is.na(BDS$gear))
@@ -93,7 +74,6 @@ SetUpHakeBDS.fn <- function(BDS,verbose=T,max.mmLength=1000,dataTypes=c("C"),
     #BDS$length.cm <- round(BDS$length.cm,0)                         #round all lengths to nearest cm
     #if(verbose) cat("Lengths were rounded to the nearest cm in length.cm\n")
     BDS$length.cm <- floor(BDS$length.cm)                         #floor all lengths to nearest cm
-    if(verbose) cat("Lengths were floored to the lower cm in length.cm\n")
 
     #set up total weights for expansion
     #use EXP_WT if provided (for OR only)
@@ -103,7 +83,6 @@ SetUpHakeBDS.fn <- function(BDS,verbose=T,max.mmLength=1000,dataTypes=c("C"),
     BDS$totalWt[ind] <- BDS$TOTAL_WGT[ind]
     ind <- !is.na(BDS$EXP_WT) & BDS$EXP_WT>0                                           #OR samples with an expanded total weight
     BDS$totalWt[ind] <- BDS$EXP_WT[ind]                                          # replace any total weights with these expanded (IAN used exp_wts for Ebglish Sole, but did not use TOTAL_WGT from OR)
-    if(verbose) cat("A column call totalWt created using TOTAL_WGT and EXP_WT\n")
 
     ############
     # Some agencies do not have a total weight or cluster weight (WA)
@@ -269,7 +248,7 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
         print(table(is.na(samps$usetot_wgt),samps$SOURCE_AGID,useNA="ifany"))
         print(table(is.na(samps$usetot_wgt),samps$SAMPLE_YEAR,samps$SOURCE_AGID,useNA="ifany"))
         cat("If there are missing weights, you may want to decide how to fill them in.\n\n")
-        print(samps[is.na(samps$usetot_wgt),])
+        print(NROW(samps[is.na(samps$usetot_wgt),]))
     }
 
     if(verbose) {
@@ -277,7 +256,7 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
         cat("There are",sum(bds$expand > maxExpansion),"expansion factors greater than",maxExpansion,"\n")
         par(mfrow=c(2,1))
         #####expansion factors by state
-        boxplot(split(bds$expand,bds$state),xlab="State",ylab="expansion to landing factor")
+        boxplot(split(bds$expand,bds$state),xlab="State",ylab="expansion to landing factor",outline = FALSE)
         boxplot(split(bds$expand,bds$state),xlab="State",ylab="expansion to landing factor",ylim=c(0,maxExpansion))
         windows(height=5,width=6.5)
         plot(cumsum(table(round(samps$expand,0),useNA='ifany'))/nrow(samps))

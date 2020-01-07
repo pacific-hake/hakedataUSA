@@ -95,4 +95,34 @@ test_that("Positive catches in Limited Entry", {
 test_that("NORPAC VESSEL_TYPE == 3 only in 2009 and 2010", {
   temp <- substr(ncatch[ncatch$VESSEL_TYPE == 3, "RETRIEVAL_DATE"], 1, 4)
   expect_true(all(temp %in% 2009:2010), label = "VESSEL_TYPE 3 in 2009:2010")
+  expect_true(all(ncatch[ncatch$VESSEL_TYPE == 3, "PERMITT"] == 353),
+    label = "VESSEL_TYPE 3 PERMITT")
+  expect_true(all(ncatch[ncatch$VESSEL_TYPE == 3, "VESSEL"] == "A709"),
+    label = "VESSEL_TYPE 3 VESSEL")
+})
+
+test_that("Tribal catch is mothership catch", {
+  expect_true(all(ncatch[ncatch$CDQ_CODE %in% "M01", "VESSEL_TYPE", drop = TRUE] == 2),
+    label = "Makah catch is from mothership in NORPAC")
+})
+
+test_that("Tribal catch is same as before", {
+  expect_equal(unique(na.omit(as.character(ncatch$CDQ_CODE))), "M01",
+    label = "Unique CDQ_CODE")
+  cdqcodedate <- table(ncatch$CDQ_CODE, format(ncatch$RETRIEVAL_DATE, "%Y"))
+  expect_equal(nrow(cdqcodedate), 1,
+    label = "cdq codes in the data indicate Makah catch and it")
+  expect_equal(cdqcodedate[, "2008"], 1938, label = "2008 Makah catch")
+  expect_equal(cdqcodedate[, "2009"], 2065, label = "2009 Makah catch")
+  expect_equal(cdqcodedate[, "2010"], 2496, label = "2010 Makah catch")
+  expect_equal(cdqcodedate[, "2011"], 1636, label = "2011 Makah catch")
+  expect_equal(cdqcodedate[, "2012"],   19, label = "2012 Makah catch")
+  expect_equal(cdqcodedate[, "2013"],    0, label = "2013 Makah catch")
+  expect_equal(cdqcodedate[, "2014"],    0, label = "2014 Makah catch")
+  expect_equal(cdqcodedate[, "2015"],    0, label = "2015 Makah catch")
+  expect_equal(cdqcodedate[, "2016"],    0, label = "2016 Makah catch")
+  expect_equal(cdqcodedate[, "2017"],    0, label = "2017 Makah catch")
+  expect_equal(cdqcodedate[, "2018"],    0, label = "2018 Makah catch")
+  expect_equal(cdqcodedate[, "2019"],    0, label = "2019 Makah catch")
+  #todo(eachyear): add new year equal to zero
 })

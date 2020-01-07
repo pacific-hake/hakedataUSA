@@ -13,34 +13,22 @@
 #' @author Kelli Faye Johnson
 #' @return todo: document the return
 #' 
-shorecomps <- function(bds.age = NULL, bds.fish = NULL,
-  bds.sp.cluster = NULL, bds.allsp.cluster = NULL, 
-  ages = 1:15, verbose = FALSE) {
+shorecomps <- function(
+  page = NULL,
+  ages = 1:15,
+  verbose = FALSE) {
   
   mydir <- hakedatawd()
-  if (is.null(bds.age)) base::load(file.path(mydir, "extractedData", 
-    "pacfin_bds_age.Rdat"))
-  if (is.null(bds.allsp.cluster)) base::load(file.path(mydir, "extractedData", 
-    "pacfin_bds_allsp_cluster.Rdat"))
-  if (is.null(bds.fish)) base::load(file.path(mydir, "extractedData", 
-    "pacfin_bds_fish.Rdat"))
-  if (is.null(bds.sp.cluster)) base::load(file.path(mydir, "extractedData", 
-    "pacfin_bds_sp_cluster.Rdat"))
-  mydir <- hakedatawd()
-  bds.fish.worked <- workupPacFinTablesBDS(bds_fish=bds.fish,
-    age_temp = bds.age, sp_cluster = bds.sp.cluster, 
-    all_cluster = bds.allsp.cluster)
+  dir.create(file.path(mydir, "Catches", "Comps", "Shoreside.Age.Only"),
+    recursive = TRUE, showWarnings = FALSE)
+  if (is.null(page)) base::load(file.path(mydir, "extractedData", "page.Rdat"))
 
-  bad <- sum(is.na(bds.fish.worked$FISH_AGE_YEARS_FINAL))
-  if (bad > 0) {
-    if (verbose) warning("There are ", bad, 
-      " NA ages in bds.fish.worked",
-      "that were removed.")
-    bds.fish.worked <- bds.fish.worked[
-      !is.na(bds.fish.worked$FISH_AGE_YEARS_FINAL), ]
-  }
-
-
+  page$uniquecluster_wgt <- ifelse(
+      duplicated(paste(page$SAMPLE_NO, page$CLUSTER_NO)),
+      0, page$CLUSTER_WGT)
+  page$all_cluster_sum <- stats::ave(page$uniquecluster_wgt, page$SAMPLE_NO,
+    FUN = sum)
+  bds.fish.worked <- page[!is.na(page$AGE_YEARS), ]
   bds.fish.worked$SEX <- factor(bds.fish.worked$SEX)
   dat <- SetUpHakeBDS.fn(bds.fish.worked, verbose = verbose,
     max.mmLength = 1000, dataTypes = c("C"),
@@ -112,10 +100,5 @@ shorecomps <- function(bds.age = NULL, bds.fish = NULL,
     file = file.path(mydir, "Catches", "Comps", "shoreside_PCID"),
     aggregate(totalWt ~ PCID + SAMPLE_YEAR, data = dat, FUN = sum))
 
-  if (verbose) {
-    testthat::expect_equal(
-      pcidsum[pcidsum$SAMPLE_YEAR == 2017, "totalWt"],
-      c(241587234, 25904000, 104190250, 123699900))
-  }
   return(afs)
 }

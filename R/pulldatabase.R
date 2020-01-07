@@ -173,6 +173,11 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
       db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
       sp = 206, start = startyear$PacFIN[2], end = endyear)
     localsave(pcatchatsea, "pcatchatsea")
+    page <- queryDB(
+      queryFilename = dir(sqldir, "pacfin_comprehensive_bds", full.names = TRUE),
+      db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
+      sp = "PWHT", start = startyear$PacFIN[2], end = endyear)
+    localsave(page, "page")
   }
 
   e1 <- new.env()
@@ -188,6 +193,7 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     assign("bds.fish", bds.fish, envir = e1)
     assign("bds.sp.cluster", bds.sp.cluster, envir = e1)
     assign("pcatch", pcatch, envir = e1)
+    assign("page", page, envir = e1)
   }
   invisible(e1)
 }

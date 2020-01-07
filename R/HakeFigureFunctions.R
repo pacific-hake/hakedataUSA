@@ -29,28 +29,28 @@ catchPlot.fn <- function(x,y,plotType=c("default","proportion","cumulative"),...
 }
 
 
-plotHakeCatchMonthYear.fn <- function(dat,Yrs=range(dat$Year),quotas=NULL,lineWds,lineTypes,cols,leg.cex=1,divisor=1000,plotNum=1:4) {
+plotHakeCatchMonthYear.fn <- function(dat,Yrs=range(dat$year),quotas=NULL,lineWds,lineTypes,cols,leg.cex=1,divisor=1000,plotNum=1:4) {
 #Take hake dataframe of Fleet, Month, Year, MT and plots year specific catches by month
 #Does not discriminate by fleet
 #Assumes that there is one observation of Month in each year
 
-    dat.yr <- split(dat,dat$Year)
-    maxYlim <- max(unlist(lapply(dat.yr,function(x){max(x$Catch.MT)}))[Yrs],
+    dat.yr <- split(dat,dat$year)
+    maxYlim <- max(unlist(lapply(dat.yr,function(x){max(x$catch)}))[Yrs],
         na.rm = TRUE)/divisor
     if(1 %in% plotNum) {
         plot(1,1,xlab="Month",ylab=paste("Catch\n(",divisor," MT)",sep=""),xlim=c(1,12),ylim=c(0,maxYlim),type="n")
         for(i in 1:length(Yrs)) {
-            catchPlot.fn(dat.yr[[Yrs[i]]]$Month,dat.yr[[Yrs[i]]]$Catch.MT/divisor,col=cols[i],lwd=lineWds[i],lty=lineTypes[i],type="b",pch=20)
-        }
+            catchPlot.fn(dat.yr[[Yrs[i]]]$month,dat.yr[[Yrs[i]]]$catch/divisor,col=cols[i],lwd=lineWds[i],lty=lineTypes[i],type="b",pch=20)
+        }   
         legend("topleft",legend=Yrs,col=cols,lty=lineTypes,lwd=lineWds,cex=leg.cex)
     }
 
     if(2 %in% plotNum) {
-        maxYlim <- max(unlist(lapply(dat.yr,function(x){sum(x$Catch.MT)}))[Yrs],
+        maxYlim <- max(unlist(lapply(dat.yr,function(x){sum(x$catch)}))[Yrs],
             na.rm = TRUE)/divisor
         plot(1,1,xlab="Month",ylab=paste("Cumulative Catch\n(",divisor," MT)",sep=""),xlim=c(1,12),ylim=c(0,maxYlim),type="n")
         for(i in 1:length(Yrs)) {
-            catchPlot.fn(dat.yr[[Yrs[i]]]$Month,dat.yr[[Yrs[i]]]$Catch.MT/divisor,plotType="cumulative",col=cols[i],lwd=lineWds[i],lty=lineTypes[i],type="b",pch=20)
+            catchPlot.fn(dat.yr[[Yrs[i]]]$month,dat.yr[[Yrs[i]]]$catch/divisor,plotType="cumulative",col=cols[i],lwd=lineWds[i],lty=lineTypes[i],type="b",pch=20)
         }
         legend("topleft",legend=Yrs,col=cols,lty=lineTypes,lwd=lineWds,cex=leg.cex)
     }
@@ -58,7 +58,7 @@ plotHakeCatchMonthYear.fn <- function(dat,Yrs=range(dat$Year),quotas=NULL,lineWd
     if(1 %in% plotNum) {
         plot(1,1,xlab="Month",ylab=paste("Proportion of Total Catch"),xlim=c(1,12),ylim=c(0,1),type="n",yaxs="i")
         for(i in 1:length(Yrs)) {
-            catchPlot.fn(dat.yr[[Yrs[i]]]$Month,dat.yr[[Yrs[i]]]$Catch.MT/divisor,plotType="proportion",col=cols[i],lwd=lineWds[i],lty=lineTypes[i],type="b",pch=20)
+            catchPlot.fn(dat.yr[[Yrs[i]]]$month,dat.yr[[Yrs[i]]]$catch/divisor,plotType="proportion",col=cols[i],lwd=lineWds[i],lty=lineTypes[i],type="b",pch=20)
         }
         legend("topleft",legend=Yrs,col=cols,lty=lineTypes,lwd=lineWds,cex=leg.cex)
     }
@@ -68,8 +68,8 @@ plotHakeCatchMonthYear.fn <- function(dat,Yrs=range(dat$Year),quotas=NULL,lineWd
         abline(h=1,col=gray(0.5))
         for(i in 1:length(Yrs)) {
             if (is.null(dim(dat.yr[[Yrs[i]]])[1])) next
-            dat.yr[[Yrs[i]]] <- rbind(dat.yr[[Yrs[i]]],c(NA,13,as.numeric(Yrs[i]),quotas[[Yrs[i]]]-sum(dat.yr[[Yrs[i]]][,"Catch.MT"])))
-            catchPlot.fn(dat.yr[[Yrs[i]]]$Month,dat.yr[[Yrs[i]]]$Catch.MT/divisor,plotType="proportion",col=cols[i],lwd=lineWds[i],lty=lineTypes[i],type="b",pch=20)
+            dat.yr[[Yrs[i]]] <- rbind(dat.yr[[Yrs[i]]],c(NA,13,as.numeric(Yrs[i]),quotas[[Yrs[i]]]-sum(dat.yr[[Yrs[i]]][,"catch"])))
+            catchPlot.fn(dat.yr[[Yrs[i]]]$month,dat.yr[[Yrs[i]]]$catch/divisor,plotType="proportion",col=cols[i],lwd=lineWds[i],lty=lineTypes[i],type="b",pch=20)
         }
         legend("bottomright",legend=Yrs,col=cols,lty=lineTypes,lwd=lineWds,cex=leg.cex)
     

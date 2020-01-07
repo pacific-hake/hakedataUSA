@@ -16,7 +16,7 @@
 #' @author Kelli Faye Johnson
 #' 
 atseacomps <- function(atsea.ages = NULL, ncatch = NULL,
-  endyear = 2017, ages = 1:15) {
+  endyear = hakedata_year(), ages = 1:15) {
   mydir <- hakedatawd()
   Yearlist <- 2008:endyear
   if (is.null(atsea.ages)) {
@@ -85,16 +85,9 @@ atseacomps <- function(atsea.ages = NULL, ncatch = NULL,
     "NAages" = sum(is.na(atsea.ages$AGE)),
     "atseaagesbyYrAge" = dat,
     "atseaagesbyYr" = rowSums(dat))
-  sink(file = file.path(mydir, "Catches", "Comps", "atseaagesSummary.txt"))
-  on.exit(suppressWarnings(sink()), add = TRUE)
-  cat("Summary of hake-data atsea.ages", 
-    format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
-  cat("\nThere were ", summary$NAages, "NA ages.\n")
-  cat("\nSummary of Year.\n")
-  print(summary$atseaagesbyYr)
-  cat("\nSummary of Ages by Year:\n")
-  print(summary$atseaagesbyYrAge)
-  sink()
+  utils::write.table(summary$atseaagesbyYrAge,
+    file = file.path(mydir, "Catches", "Comps", "PacFIN_ages_n.csv"),
+    sep = ",", col.names = NA, row.names = TRUE)
 
   return(summary)
 }

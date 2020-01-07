@@ -16,62 +16,22 @@
 #' @author Kelli Faye Johnson
 #' @export
 #' @import r4ss utils
+#' @importFrom stats aggregate
 
 datatoassessment <- function(dirout, year, filedat = NULL) {
   mydir <- hakedatawd()
   catchdir <- file.path(mydir, "Catches")
 
-  out <- utils::read.csv(file.path(catchdir, "depth_USbottom_atsea.csv"))
-  utils::write.table(x = out, 
-    file = file.path(dirout, "depth-us-atsea-bottom.csv"),
-    sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-  out <- utils::read.csv(file.path(catchdir, "depth_USfishing_atsea.csv"))
-  utils::write.table(x = out, 
-    file = file.path(dirout, "depth-us-atsea-fishing.csv"),
-    sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-
-  cp <- utils::read.csv(file.path(catchdir, "CP_CatchesByMonth.csv"))
-  out <- cp[, -which(colnames(cp) == "Sector")]
-  colnames(out) <- c("month", "year", "catch")
-  out$catch <- round(out$catch, digits = 5)
-  utils::write.table(x = out, 
-    file = file.path(dirout, "us-cp-catch-by-month.csv"),
-    sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-  
-  ms <- utils::read.csv(file.path(catchdir, "MS_CatchesByMonth.csv"))
-  out <- ms[, -which(colnames(ms) == "Sector")]
-  colnames(out) <- c("month", "year", "catch")
-  out$catch <- round(out$catch, digits = 5)
-  utils::write.table(x = out, 
-    file = file.path(dirout, "us-ms-catch-by-month.csv"),
-    sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-
-  sh <- utils::read.csv(file.path(catchdir, "USshoreCatchByPeriodComp_ft.csv"))
-  out <- sh[sh$Sector == "USshore", -which(colnames(ms) == "Sector")]
-  colnames(out) <- c("month", "year", "catch")
-  out$catch <- round(out$catch, digits = 5)
-  utils::write.table(x = out, 
-    file = file.path(dirout, "us-shore-catch-by-month.csv"),
-    sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-  out <- sh[sh$Sector == "USresearch", -which(colnames(ms) == "Sector")]
-  colnames(out) <- c("month", "year", "catch")
-  out$catch <- sprintf("%.9f", out$catch)
-  utils::write.table(x = out, 
-    file = file.path(dirout, "us-research-catch-by-month.csv"),
-    sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
-
   inc <- utils::read.csv(file.path(dirout, "landings-tac-history.csv"))
-  all <- merge(merge(cp, ms, all = TRUE), setNames(sh, colnames(ms)), all = TRUE)
-  all$Sector <- as.character(all$Sector)
-  all[all$Sector == "USshore", "Sector"] <- "US_shore"
-  inc <- merge(
-    data.frame("Year" = unique(all[!all$Year %in% inc$Year, c("Year")])),
-    inc, all = TRUE)
-  ags <- aggregate(Catch.MT ~ Year + Sector, data = all, sum)
-  for (ii in unique(ags$Sector)) {
-    inc[match(ags$Year[ags$Sector == ii], inc$Year), match(ii, colnames(inc))] <-
-    ags$Catch.MT[ags$Sector == ii]
-  }
+  sh <- utils::read.csv(file.path(catchdir, "PacFIN_Sector.csv"))
+  inc$US_shore[match(sh$X, inc$Year)] <- sh$USshore
+  inc$USresearch[match(sh$X[!is.na(sh$USresearch)], inc$Year)] <- sh$USresearch[!is.na(sh$USresearch)]
+  cp <- stats::aggregate(catch ~ year, 
+    data = utils::read.csv(file.path(catchdir, "us-cp-catch-by-month.csv")), sum)
+  inc$atSea_US_CP[match(cp$year, inc$Year)] <- cp$catch
+  ms <- aggregate(catch ~ year, 
+    data = utils::read.csv(file.path(catchdir, "us-ms-catch-by-month.csv")), sum)
+  inc$atSea_US_MS[match(ms$year, inc$Year)] <- ms$catch
   inc[, "Ustotal"] <- apply(inc[, grepl("^US|_US", colnames(inc), ignore.case = FALSE)], 
     1, sum, na.rm = TRUE)
   inc[, "TOTAL"] <- apply(inc[, grepl(".total", colnames(inc), ignore.case = TRUE)], 
@@ -99,20 +59,9 @@ datatoassessment <- function(dirout, year, filedat = NULL) {
 
   # Dat file
   if (!is.null(filedat)) {
-    # dat <- r4ss::SS_readdat(filedat, version = 3.3, verbose = FALSE)
-    # dat$catch$Fishery <- round(inc[match(dat$catch$year, inc$Year), "TOTAL"], 0)
-    # r4ss::SS_writedat(dat, filedat, overwrite = TRUE)
-    alt <- readLines(filedat)
-    top <- grep("#Year Seas Fleet Catch   Catch_SE", alt)
-    while (substr(alt[top], 1, 4) != 1966) top <- top + 1
-    bottom <- grep("CPUE_and_surveyabundance_observations", alt)
-    while (!grepl("[[:digit:]]{4}", substr(alt[bottom], 1, 4))) bottom <- bottom - 1
-    newcatch <- apply(data.frame(inc$Year, 1, 1, 
-      round(inc$TOTAL, 0), 
-      as.numeric(tail(strsplit(alt[top], "\\s")[[1]], 1))), 1, paste, collapse = " ")
-    alt <- alt[-(top:bottom)]
-    alt <- append(alt, after = top - 1, newcatch)
-    writeLines(alt, filedat)
+    dat <- r4ss::SS_readdat(filedat, version = 3.3, verbose = FALSE)
+    dat$catch[match(inc$Year, dat$catch[dat$catch$fleet == 1, "year"]), "catch"] <- inc$TOTAL
+    r4ss::SS_writedat(dat, filedat, overwrite = TRUE, verbose = FALSE)
   }
 
   # Write files back to the disk

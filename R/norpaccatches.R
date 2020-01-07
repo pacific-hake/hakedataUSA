@@ -107,113 +107,33 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
   on.exit(options(warn = oldop), add = TRUE)
 
   mydir <- hakedatawd()
-  summaryfile <- file.path(mydir, "extractedData", 
-    paste0("summary_catchNORPAC_", format(Sys.time(), "%Y.%m.%d"), ".txt"))
-  on.exit(suppressWarnings(sink(file = NULL)), add = TRUE)
-  sink(summaryfile)
-  cat("Summary of NORPAC catches created on", 
-    format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n")
-  sink()
 
   if (is.null(ncatch)) {
     load(file.path(mydir, "extractedData", "NORPACdomesticCatch.Rdat"))
   }
+  outncatch <- processNorpacCatch(ncatch, 
+    outfname = file.path(mydir, "Catches"))
 
-  #MS and CP combined
-  #VESSEL_TYPE:  A one-digit numeric code that indicates whether the vessel
-  # processes fish or delivers it to a processing plant where:
-  # 1 = a catcher processor vessel,
-  # 2 = a mothership or a ship that receives unsorted codends from other vessels,
-  # 3 = a catcher only vessel that delivers unprocessed fish to a shoreside
-  #     or floating plant or vessel,
-  # 4 = a mothership that receives sorted codends,
-  # 5 = a vessel that sells the majority of their catch over the side to other
-  #     fishing vessels who will utilize the fish for bait,
-  # 6 = vessels that discard all catch from a haul.
-
-  # Calculate bycatch rate to determine hake weight in unsampled hauls
-  out <- processNorpacCatch(ncatch,
-    outfname = switch(writecsv + 1,
-    NULL, file.path(mydir, "Catches", "NorpacDomesticCatchesByMonth.csv")))
-  out.yr <- aggregate(Catch.MT ~ Sector + Year, data = out, sum)
-  if(writecsv) write.csv(out.yr,
-    file = file.path(mydir, "Catches", "NorpacDomesticCatchesByYear.csv"),
-    row.names = FALSE)
-
-  # Vessel type
-  typedate <- addmargins(margin = 2,
-    table(ncatch$VESSEL_TYPE, format(ncatch$RETRIEVAL_DATE, "%Y")))
-  sink(summaryfile, append = TRUE)
-  cat("\nSummary of vessel type by year \n")
-  print(typedate)
-  for (ii in c("VESSEL", "PERMIT", "CDQ_CODE")) {
-    temp <- table(ncatch[, ii], ncatch$VESSEL_TYPE)
-    cat("\nSummary of vessel type by", tolower(ii), "\n")
-    print(temp)
-  }
-  sink()
-  #MS and CP only
-  for (vtype in 1:2) {
-    temp <- processNorpacCatch(ncatch[ncatch$VESSEL_TYPE == vtype, ])
-    if (vtype == 1) temp$Sector <- "atSea_US_CP"
-    if (vtype == 2) temp$Sector <- "atSea_US_MS"
-    if (writecsv) {
-      write.csv(temp,
-        file.path(mydir, "Catches", 
-          paste0(strsplit(temp$Sector[1], "_")[[1]][3], "_CatchesByMonth.csv")),
-        row.names = FALSE)
-      yearly <- aggregate(Catch.MT ~ Sector + Year, data = temp, sum)
-      write.csv(yearly,
-        file.path(mydir, "Catches", 
-          paste0(strsplit(temp$Sector[1], "_")[[1]][3], "_CatchesByYear.csv")),
-        row.names = FALSE)
-    }
-  }
- # Working here
-  cdqcodedate <- table(ncatch$CDQ_CODE,format(ncatch$RETRIEVAL_DATE, "%Y"))
-  if (nrow(cdqcodedate) != 1) stop("There are ", nrow(cdqcodedate), 
-    " cdq codes in the data and there should be one.")
-  if (!all(cdqcodedate[names(cdqcodedate) %in% 2008:2017] == 
-    c(1938, 2065, 2496, 1636, 19, 0, 0, 0, 0))) stop("The tribal catches",
-    " do not match what was pulled in 2017\n")
-  #TRIBAL
-  TRout <- processNorpacCatch(ncatch[ncatch$CDQ_CODE=="M01",])
-  TRout$Sector <- "atSea_tribal"
-  TRout.yr <- aggregate(TRout$Catch,list(TRout$Sector,TRout$Year),sum)
-  sink(summaryfile, append = TRUE)
-  cat("\nSummary of CDQ_CODE by year \n")
-  print(cdqcodedate)
-  cat("\nSummary of Makah catches by year \n")
-  print(TRout.yr)
-  sink()
-
-  sink(summaryfile, append = TRUE)
-  cat("\n\nSummary of hake-only catches")
-  sink()
-
-  hcatch <- ncatch[ncatch$SPECIES == 206, ]
-  hcatch$Year <- as.numeric(format(hcatch$RETRIEVAL_DATE, "%Y"))
-  hcatch$Month <- as.numeric(format(hcatch$RETRIEVAL_DATE, "%m"))
+  hcatch <- outncatch[outncatch$SPECIES == 206, ]
   hcatch$hrs <- hcatch$DURATION_IN_MIN/60
   hcatch$crate <- hcatch$EXTRAPOLATED_WEIGHT / 1000 / hcatch$hrs
   hcatch$FISHING_DEPTH_M <- hcatch$FISHING_DEPTH_FATHOMS * 1.8288
   hcatch$BOTTOM_DEPTH_M <- hcatch$BOTTOM_DEPTH_FATHOMS * 1.8288
-  splits <- lapply(split(hcatch, hcatch$Year), 
-    function(x) split(x[, "crate"], x[, "Month"]))
-  catch.yr <- split(hcatch,hcatch$Year)
+  splits <- lapply(split(hcatch, hcatch$year), 
+    function(x) split(x[, "crate"], x[, "month"]))
+  catch.yr <- split(hcatch, hcatch$year)
 
-  # todo: Find a way to ensure that these deep depths are not confidential
   # todo: fix las to match between US and Canada
-  keeptheseyears <- tail(1: max(hcatch$Year, na.rm = TRUE), nyears)
-  exportdepth(split(hcatch$FISHING_DEPTH_M, hcatch$Year),
+  keeptheseyears <- tail(1: max(hcatch$year, na.rm = TRUE), nyears)
+  exportdepth(split(hcatch$FISHING_DEPTH_M, hcatch$year),
     country = "US", type = "fishing_atsea", 
     dir = file.path(mydir, "Catches"))
-  exportdepth(split(hcatch$BOTTOM_DEPTH_M, hcatch$Year),
+  exportdepth(split(hcatch$BOTTOM_DEPTH_M, hcatch$year),
     country = "US", type = "bottom_atsea", 
     dir = file.path(mydir, "Catches"))
   if (colour) {
-    colors <- plotcolour(length(sort(unique(hcatch$Year))))
-  } else {colors <- rep("grey", length(sort(unique(hcatch$Year))))}
+    colors <- plotcolour(length(sort(unique(hcatch$year))))
+  } else {colors <- rep("grey", length(sort(unique(hcatch$year))))}
   for (idev in c("eps", "png")) {
     filei <- file.path(mydir, "Figures", paste0("fishDepthsUS.", idev))
     if (idev == "eps") {
@@ -238,7 +158,9 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
 
   pdf(file = file.path(mydir, "Figures", "fishCatchRatesUSByYear.pdf"))
   for (iyear in as.numeric(names(splits))) {
-    box95(splits[[which(names(splits) == iyear)]],
+    temp <- splits[[which(names(splits) == iyear)]]
+    temp <- temp[lapply(temp, length) > 3]
+    box95(temp,
       ylab="Unstandardized catch-per-hour (mt/hour)",
       xlab="Month",
       main=paste("U.S. At-sea unstandardized", iyear, "catch-rate (preliminary)"),
@@ -258,88 +180,81 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
   }
 
   # Summarize catches by depth
-  sink(summaryfile, append = TRUE)
-  cat("\nSummary of depth ranges (min and max fathoms) of catch per year.\n")
-  print(sapply(lapply(catch.yr, "[[", "BOTTOM_DEPTH_FATHOMS"), 
-    range, na.rm = TRUE))
-  sink()
+  bdepthfathoms <- sapply(lapply(catch.yr, "[[", "BOTTOM_DEPTH_FATHOMS"), 
+    range, na.rm = TRUE)
+  row.names <- c("min", "max")
+  utils::write.table(bdepthfathoms, 
+    file = file.path(mydir, "Catches", "NORPAC_DomesticAtSea_bdepthfathom_range.csv"),
+    sep = ",", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
-# check these tables to make sure at least 3 vessels were fishing in each month
-# todo: find a way to print year / month combos that are true
-  hcatch$groups <- factor(hcatch$Month, levels = 1:12, 
+  hcatch$groups <- factor(hcatch$month, levels = 1:12, 
     labels = rep(c("12", "34", "56", "78", "910", "1112"), each = 2))
   confid <- apply(table(
-    hcatch$CATCHER_BOAT_ADFG, hcatch$groups, hcatch$Year, useNA = "ifany"), 
+    hcatch$CATCHER_BOAT_ADFG, hcatch$groups, hcatch$year, useNA = "ifany"), 
     3, function(x) apply(x, 2, function(y) any(y %in% 1:2)))
   confid <- apply(table(
-    hcatch$CATCHER_BOAT_ADFG, hcatch$Month, hcatch$Year, useNA = "ifany"), 
+    hcatch$CATCHER_BOAT_ADFG, hcatch$month, hcatch$year, useNA = "ifany"), 
     3, function(x) apply(x, 2, function(y) any(y %in% 1:2)))
   confid <- apply(table(
-    hcatch$VESSEL, hcatch$Month, hcatch$Year, useNA = "ifany"), 
+    hcatch$VESSEL, hcatch$month, hcatch$year, useNA = "ifany"), 
     3, function(x) apply(x, 2, function(y) any(y %in% 1:2)))
-  with(hcatch[hcatch$Year == 2017, ], 
-    table(CATCHER_BOAT_ADFG, Month, useNA="ifany"))
 
-  sink(summaryfile, append = TRUE)
-  cat("\nSummary of bottom depth by vessel by month by year\n",
-    "for depths greater than 1500.\n")
-  temp <- sapply(catch.yr, function(x) {
-      x <- x[x$BOTTOM_DEPTH_FATHOMS > 1500, ]
-      table(x$VESSEL, x$Month)
-    })
-  print(temp[which(sapply(temp, dim)[2, ] != 0)])
-  cat("\nSummary of bottom depth by vessel by year\n",
-    "for depths greater than 1999.\n")
-  print(sapply(catch.yr, 
-    function(x) table(x[x$BOTTOM_DEPTH_FATHOMS > 1999, "VESSEL"])))
-  sink()
+  temp <- aggregate(BOTTOM_DEPTH_FATHOMS ~ VESSEL + year + month, 
+    drop = TRUE, data = hcatch[hcatch$BOTTOM_DEPTH_FATHOMS > 1500, ],
+    FUN = length)
+  colnames(temp) <- c("vessel", "year", "month", "ntowsdeeper1500f")
+  temp <- temp[temp$ntowsdeeper1500f > 3, ]
+  utils::write.table(temp,
+    file = file.path(mydir, "Catches", "NORPAC_DomesticAtSea_bdepthfathom_deeper1500f.csv"))
 
-  hcatch$Monthf <- droplevels(factor(hcatch$Month, levels = 1:12, 
+ hcatch$monthf <- droplevels(factor(hcatch$month, levels = 1:12, 
     labels = rep(paste(seq(1, 11, by = 2), seq(2, 12, by = 2), sep = "-"),
     each = 2)))
   temp <- merge(hcatch, setNames(
-    aggregate(VESSEL ~ Monthf + Year, 
-      data = hcatch[!is.na(hcatch$Month) & 
-      hcatch$Year %in% tail(1:max(hcatch$Year, na.rm = TRUE), nyears), ], 
-    function(x) ifelse(length(unique(x)) %in% 1:2, 0, 1)),
+    aggregate(VESSEL ~ monthf + year, 
+      data = hcatch[!is.na(hcatch$month) & 
+      hcatch$year %in% tail(1:max(hcatch$year, na.rm = TRUE), nyears), ], 
+    function(x) ifelse(length(unique(x)) %in% 1:3, 0, 1)),
     c("Monthf", "Year", "sumn")))
   for (iname in c("FISHING_DEPTH_FATHOMS", "BOTTOM_DEPTH_FATHOMS")){
     temp$y <- temp[, iname]
     g <- ggplot2::ggplot(temp[temp$sumn == 1, ], 
       ggplot2::aes(x = Monthf, y = y)) + hake.theme + 
       ggplot2::geom_boxplot(outlier.shape = NA) + 
-      ggplot2::facet_wrap(Year ~ ., nrow = 2) + 
+      ggplot2::facet_wrap(year ~ ., nrow = 2) + 
       ggplot2::xlab("month") + 
       ggplot2::ylab(tolower(gsub("_DEPTH_FATHOMS", " depth (fathoms)", iname))) 
-    ggplot2::ggsave(g, file = file.path("FIGURES", paste0("fish", iname, "_US.png")),
+    ggplot2::ggsave(g, 
+      file = file.path(mydir, "FIGURES", paste0("fish", iname, "_US.png")),
       width = 7, height = 7)
   }
 
   g <- ggplot2::ggplot(hcatch[!is.na(hcatch$VESSEL) & 
-      hcatch$Year %in% tail(1:max(hcatch$Year, na.rm = TRUE), nyears), ], 
+      hcatch$year %in% tail(1:max(hcatch$year, na.rm = TRUE), nyears), ], 
     ggplot2::aes(x = VESSEL, y = BOTTOM_DEPTH_FATHOMS)) + hake.theme + 
   ggplot2::geom_boxplot() + 
-  ggplot2::facet_wrap(Year ~ ., nrow = 2) +
+  ggplot2::facet_wrap(year ~ ., nrow = 2) +
   ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
   ggplot2::xlab("vessel") + 
   ggplot2::ylab("bottom depth (fathoms)") 
-  ggplot2::ggsave(g, file = file.path("FIGURES", "CONFIDENTIAL", "fishBottomDepthByVesselUS.png"),
+  ggplot2::ggsave(g, 
+    file = file.path(mydir, "FIGURES", "CONFIDENTIAL", "fishBottomDepthByVesselUS.png"),
     width = 7, height = 7)
-  # todo: label the vessel types as CP and MS but I don't know what 3 is.
-  if (!any(table(hcatch$Year, hcatch$VESSEL_TYPE) %in% 1:2)) {
-    g <- ggplot2::ggplot(reshape(hcatch[!is.na(hcatch$Year) & 
-      hcatch$Year %in% tail(1:max(hcatch$Year, na.rm = TRUE), nyears), ],
+  if (!any(table(hcatch$year, hcatch$VESSEL_TYPE) %in% 1:2)) {
+    g <- ggplot2::ggplot(reshape(hcatch[!is.na(hcatch$year) & 
+      hcatch$year %in% tail(1:max(hcatch$year, na.rm = TRUE), nyears), ],
       varying = c("BOTTOM_DEPTH_FATHOMS", "FISHING_DEPTH_FATHOMS"),
       v.names = "depth",
       timevar = "dtype",
       times = c("bottom", "fishing"),
       direction = "long"), 
-      ggplot2::aes(x = factor(VESSEL_TYPE), y = depth)) + hake.theme + 
+      ggplot2::aes(x = vesseltype, y = depth)) + hake.theme + 
       ggplot2::geom_boxplot(outlier.shape = NA) + 
-      ggplot2::facet_grid(dtype ~ Year, scales = "free_y") + 
+      ggplot2::facet_grid(dtype ~ year, scales = "free_y") + 
       ggplot2::xlab("sector") + 
       ggplot2::ylab("depth (fathoms)")
-    ggplot2::ggsave(g, file = file.path("FIGURES", "fishDepthByYearUS.png"),
+    ggplot2::ggsave(g, 
+      file = file.path(mydir, "FIGURES", "fishDepthByYearUS.png"),
       width = 7, height = 7)
   }
   while (dev.cur() > 1) dev.off()
