@@ -2,7 +2,7 @@ datatocomps <- function(dirdata, dirmod) {
 
   options(default.stringsAsFactors = FALSE)
   options(stringsAsFactors = FALSE)
-  
+
   can <- readLines(file.path(dirdata, "can-age-data.csv"))
   if (!grepl("\\d{4}", substring(can[2], 1, 2))) can <- can[-2]
 
@@ -59,16 +59,6 @@ datatocomps <- function(dirdata, dirmod) {
     as.numeric(all$Nsamples)
   colnames(sw) <- gsub("^a", "sw", colnames(sw))
 
-  # todo: change from hardcoding
-  mnwtage <- c(0.0885, 0.2562, 0.3799, 0.4913, 0.5434, 0.5906, 0.6620,
-    0.7215, 0.7910, 0.8629, 0.9315, 0.9681, 1.0751, 1.0016, 1.0202)
-  nw <- apply(all[, grepl("^a", colnames(all))], 2, as.numeric) * 
-    as.numeric(all$Catch) / 
-    apply(apply(all[, grepl("^a", colnames(all))], 2, as.numeric), 1, 
-    function(x) sum(x * mnwtage))
-  colnames(nw) <- gsub("^a", "nw", colnames(nw))
-
-  # todo: need wtatage per year so I can do nwy
   wtatage <- r4ss::SS_readwtatage(file.path(dirmod, "wtatage.ss"))
   colnames(wtatage)[colnames(wtatage) == "Yr"] <- "Year"
   colnames(wtatage)[colnames(wtatage) %in% 0:ncol(wtatage)] <- paste0("wtAtAge", 
@@ -101,8 +91,6 @@ datatocomps <- function(dirdata, dirmod) {
   return(final)
 }
 
-# datatocomps("c:/stockAssessment/hake-assessment/data",
-#   dirmod = "c:/stockAssessment/hake-assessment/models/2019.03.00_base_model")
 
 datatoassessmentcomp <- function(dircomp, dirassessment) {
   dirsave <- file.path(dirassessment, "data")
