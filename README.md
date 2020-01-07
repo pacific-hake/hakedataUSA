@@ -17,10 +17,10 @@ age_norpac <- atseacomps(hakedata$atsea.ages, hakedata$ncatch)
 age_shore <- shorecomps(verbose = TRUE)
 age_yearlyweights <- mappingagesamples(hakedata$atsea.ages, hakedata$ncatch, savepng = TRUE)
 jtcdecotoliths <- agedotoliths(hakedata$atsea.ages)
-datatocomps(dirdata = file.path(local.assess, "data"),
-  dirmod = file.path(local.assess, "models", local.model))
 datatoassessment(dirout = file.path(local.assess, "data"), year = hakedata_year(), 
   filedat = file.path(local.assess, "models", local.model, "hake_data.ss"))
+datatocomps(dirdata = file.path(local.assess, "data"),
+  dirmod = file.path(local.assess, "models", local.model))
 ```
 
 # Issues
