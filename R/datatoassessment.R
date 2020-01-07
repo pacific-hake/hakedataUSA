@@ -1,17 +1,17 @@
 #' Move US Catch Information to Assessment Files
-#' 
+#'
 #' Integrate the latest catch information from the US hake fishery
 #' into the hake-assessment files used in the building of the
 #' stock assessment.
-#' 
+#'
 #' @param dirout A directory that houses the \code{.csv} data files
 #' for the stock assessment.
 #' @param year The year of data that you are particularly interested
 #' in updating, although most years get updated since 2008.
-#' @param filedat The Stock Synthesis dat file that you want to 
+#' @param filedat The Stock Synthesis dat file that you want to
 #' integrate catches into. The default is \code{NULL}, which allows
 #' you to run the function without writing a new dat file.
-#' 
+#'
 #' @return todo: document what this function returns.
 #' @author Kelli Faye Johnson
 #' @export
@@ -26,21 +26,29 @@ datatoassessment <- function(dirout, year, filedat = NULL) {
   sh <- utils::read.csv(file.path(catchdir, "PacFIN_Sector.csv"))
   inc$US_shore[match(sh$X, inc$Year)] <- sh$USshore
   inc$USresearch[match(sh$X[!is.na(sh$USresearch)], inc$Year)] <- sh$USresearch[!is.na(sh$USresearch)]
-  cp <- stats::aggregate(catch ~ year, 
+  cp <- stats::aggregate(catch ~ year,
     data = utils::read.csv(file.path(catchdir, "us-cp-catch-by-month.csv")), sum)
   inc$atSea_US_CP[match(cp$year, inc$Year)] <- cp$catch
-  ms <- aggregate(catch ~ year, 
+  ms <- aggregate(catch ~ year,
     data = utils::read.csv(file.path(catchdir, "us-ms-catch-by-month.csv")), sum)
   inc$atSea_US_MS[match(ms$year, inc$Year)] <- ms$catch
-  inc[, "Ustotal"] <- apply(inc[, grepl("^US|_US", colnames(inc), ignore.case = FALSE)], 
+  inc[, "Ustotal"] <- apply(inc[, grepl("^US|_US", colnames(inc), ignore.case = FALSE)],
     1, sum, na.rm = TRUE)
-  inc[, "TOTAL"] <- apply(inc[, grepl(".total", colnames(inc), ignore.case = TRUE)], 
+
+  # update CAN catch
+  can <- utils::read.csv(file.path(dirout, "Landings_by_year_Canada.csv"),
+    header = TRUE)
+  inc[match(can$Year, inc$Year), c("CAN_Shoreside", "CAN_FreezeTrawl", "CAN_JV")] <-
+    can[, c("ss_weight", "ft_weight", "jv_weight")]
+  inc[, "CANtotal"] <- apply(inc[, grepl("^CAN_", colnames(inc), ignore.case = FALSE)],
+    1, sum, na.rm = TRUE)
+  inc[, "TOTAL"] <- apply(inc[, grepl(".total", colnames(inc), ignore.case = TRUE)],
     1, sum, na.rm = TRUE)
   inc[is.na(inc)] <- ""
 
   tar <- utils::read.csv(file.path(dirout, "catch-targets-biomass.csv"))
   tar[tar$Year == year, "Realized"] <- inc[inc$Year == year, "TOTAL"]
-  tar[tar$Year == year, "X.Realized"] <- tar[tar$Year == year, "Realized"] / 
+  tar[tar$Year == year, "X.Realized"] <- tar[tar$Year == year, "Realized"] /
     tar[tar$Year == year, "TAC"]
   colnames(tar)[which(colnames(tar) == "X.Realized")] <- "%Realized"
   tar[is.na(tar)] <- ""
@@ -65,10 +73,10 @@ datatoassessment <- function(dirout, year, filedat = NULL) {
   }
 
   # Write files back to the disk
-  utils::write.table(x = inc, 
+  utils::write.table(x = inc,
     file = file.path(dirout, "landings-tac-history.csv"),
     row.names = FALSE, sep = ",", quote = FALSE)
-  utils::write.table(x = tar, 
+  utils::write.table(x = tar,
     file = file.path(dirout, "catch-targets-biomass.csv"),
     row.names = FALSE, sep = ",", quote = FALSE)
 
