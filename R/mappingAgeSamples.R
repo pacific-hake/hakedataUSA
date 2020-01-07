@@ -62,7 +62,7 @@ mappingagesamples <- function(atsea.ages = NULL, ncatch = NULL,
 #' 
 #' @return Plots or saved png files.
 #' 
-mapfun <- function(data, doPNG=FALSE, dir = getwd()){
+mapfun <- function(data, doPNG=FALSE, dir = hakedatawd()){
   width <- 9
   height <- 13
   if(doPNG){
