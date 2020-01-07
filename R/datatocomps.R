@@ -69,13 +69,10 @@ datatocomps <- function(dirdata, dirmod) {
   colnames(nw) <- gsub("^a", "nw", colnames(nw))
 
   # todo: need wtatage per year so I can do nwy
-  wtatage <- readLines(file.path(dirmod, "wtatage.ss"))
-  wtatage <- do.call("rbind", 
-    strsplit(wtatage[(grep("Weight at age for Fishery: Fleet = 1", wtatage) + 2):
-    (grep("Weight at age for Survey: Fleet = 2", wtatage) - 2)], "\\s+"))
-  if (wtatage[1, 1] == "") wtatage <- wtatage[, -1]
-  colnames(wtatage) <- c("Year", "seas", "gender", "GP", "bseas",
-   "fleet", paste0("wtAtAge", 0:(ncol(wtatage) - 7)))
+  wtatage <- r4ss::SS_readwtatage(file.path(dirmod, "wtatage.ss"))
+  colnames(wtatage)[colnames(wtatage) == "Yr"] <- "Year"
+  colnames(wtatage)[colnames(wtatage) %in% 0:ncol(wtatage)] <- paste0("wtAtAge", 
+  colnames(wtatage)[colnames(wtatage) %in% 0:ncol(wtatage)])
   all <- merge(all, wtatage[, c("Year", paste0("wtAtAge", 1:ncol(cw)))], 
     all.x = TRUE)
   all <- all[order(all$Sector, all$Year), ]
