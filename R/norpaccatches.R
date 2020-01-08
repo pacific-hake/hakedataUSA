@@ -56,7 +56,7 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
     legend("topright", bty="n", fill=colors, legend=years)
     axis(2, at=yvec, las=1)
     axis(1, at=months, month.abb[months], tick=FALSE)
-    axis(1, at=1:13 - 0.5, lab=rep("", length(1:13)))
+    axis(1, at=1:13 - 0.5, labels=rep("", length(1:13)))
     for(imonth in seq(4,10,2)){
       rect(imonth-.5, .01, imonth+.5, 300, col=rgb(0,0,0,0.05), border=FALSE)
     }

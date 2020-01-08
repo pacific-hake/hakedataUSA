@@ -30,8 +30,8 @@ test_that("Data is available for every year.", {
       table(factor(bds.age$SAMPLE_YEAR, levels = maxyears)),
       table(factor(atsea.ages$YEAR[!is.na(atsea.ages$AGE)], levels = maxyears))),
       check.names = FALSE)
-  expect_true(all(temp[1, -c(1:2)] > 4000),
-    label = "At least 4000 fish samples per year in PacFIN")
+  expect_true(all(temp[1, -c(1:2)] > 3900),
+    label = "At least 3900 fish samples per year in PacFIN")
   expect_true(all(temp[-1, -c(1:2)] > 1200),
     label = "At least 1200 age samples per year per database")
   write.csv(temp, file = file.path(test_dir_data, "summary_nsamples_year.csv"),

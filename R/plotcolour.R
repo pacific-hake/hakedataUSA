@@ -15,8 +15,8 @@
 #' @return A vector of colours
 #' 
 #' @examples
-#' n <-18
-#' plot(data.frame(1:n, 1), col=plotcolour(n),pch=19,cex=5)
+#' n <-15
+#' plotcolour(n)
 #' 
 plotcolour <- function(n = 10) {
   base <- RColorBrewer::brewer.pal(name = "Set1", n = 9)

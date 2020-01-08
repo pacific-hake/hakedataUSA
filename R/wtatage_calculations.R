@@ -372,7 +372,7 @@ makeimage <- function(agevec=0:15,yrvec=1975:2017,
   # finish plot
   axis(1,at=0:15,cex.axis=.7);
   axis(2,at=c(1973,yrvec),
-       lab=c("mean",yrvec),las=1,cex.axis=.7)
+       labels=c("mean",yrvec),las=1,cex.axis=.7)
 }
 
 dointerpSimple <- function(df,skipcols=1:6){

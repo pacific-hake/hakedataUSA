@@ -4,7 +4,12 @@
 \alias{atseacomps}
 \title{Workup At-Sea Composition Data for Pacific Hake}
 \usage{
-atseacomps(atsea.ages = NULL, ncatch = NULL, endyear = 2017, ages = 1:15)
+atseacomps(
+  atsea.ages = NULL,
+  ncatch = NULL,
+  endyear = hakedata_year(),
+  ages = 1:15
+)
 }
 \arguments{
 \item{atsea.ages}{An R object with NORPAC ages. The default value is

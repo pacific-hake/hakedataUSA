@@ -29,7 +29,7 @@ the vector starts with 2008 and ends with the most recent year
 of data.}
 
 \item{navgyears}{The number of early and late years to average since
-1975 and \code(max(yrs)) for the early and late analysis asked for
+1975 and \code{max(yrs)} for the early and late analysis asked for
 by the Scientific Review Group in 2017. The argument can be a single
 value or a vector of two values, where in the latter case the second
 value will be used for the most recent time period.}

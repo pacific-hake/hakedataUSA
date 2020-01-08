@@ -114,9 +114,9 @@ plotMaturity.fn <- function(x, theFactor, cols, factorLab=sort(as.character(uniq
     plot(1,1,xlim=range(x$Length,na.rm=T),ylim=c(-ht*numMats,1.05),type="n",xlab="Length (cm)",ylab="",yaxt="n",yaxs="i")
     axis(2,at=seq(0.1,1,0.1),las=1)
     mtext("Proportion Mature", side=2, at=0.5, adj=0.5, line=3, outer=F)
-    axis(2,at=seq(-1*ht,-numMats*ht,-1*ht)+0.5*ht,label=factorLab,las=1,cex.axis=0.7,tick=F,hadj=labHadj)
+    axis(2,at=seq(-1*ht,-numMats*ht,-1*ht)+0.5*ht,labels=factorLab,las=1,cex.axis=0.7,tick=F,hadj=labHadj)
     axis(3)
-    axis(4,at=c(-numMats*ht,-(numMats-1)*ht),label=c(0,theMax),cex.axis=0.7,las=1,hadj=0.5)
+    axis(4,at=c(-numMats*ht,-(numMats-1)*ht),labels=c(0,theMax),cex.axis=0.7,las=1,hadj=0.5)
     mtext("# of samples", side=4, line=1.3, at=mean(seq(-1*ht,-numMats*ht,-1*ht)+0.5*ht), adj=0.5, cex=0.7)
     #axis(4,at=mean(seq(-1*ht,-numMats*ht,-1*ht)+0.5*ht),label="# of samples",las=0,cex.axis=0.8,tick=F,hadj=0
     abline(h=0,lwd=3)

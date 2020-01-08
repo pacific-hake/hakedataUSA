@@ -4,12 +4,18 @@
 \alias{workupNorpacCatchSpecies}
 \title{Summarize Bycatch in the Pacific Hake Fishery With Barplots}
 \usage{
-workupNorpacCatchSpecies(ncatch = NULL, fileout = "bycatchsummary.pdf")
+workupNorpacCatchSpecies(
+  ncatch = NULL,
+  nspecies = NULL,
+  fileout = "bycatchsummary.pdf"
+)
 }
 \arguments{
 \item{ncatch}{An R object with NORPAC catches. The default value is
 \code{NULL}, where the object will be read from a saved object within
 a directory called extractedData.}
+
+\item{nspecies}{A data frame of species names from NORPAC.}
 
 \item{fileout}{A file path to a \code{.pdf} extension to specify where
 the plots should be saved. A single \code{.pdf} can be created or multiple

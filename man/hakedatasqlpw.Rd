@@ -29,7 +29,6 @@ Find the username specific to the computer for
 accessing the NORPAC or PacFIN data repository.
 }
 \examples{
-hakedatasqlpw()
 
 }
 \author{

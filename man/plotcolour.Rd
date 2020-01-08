@@ -20,8 +20,8 @@ For example, the most recent year of data will always be
 black and the second most recent year will always be red.
 }
 \examples{
-n <-18
-plot(data.frame(1:n, 1), col=plotcolour(n),pch=19,cex=5)
+n <-15
+plotcolour(n)
 
 }
 \author{

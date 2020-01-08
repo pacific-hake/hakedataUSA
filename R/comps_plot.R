@@ -14,7 +14,7 @@ comps_plot <- function() {
 
   for (minyear in c(min(yrs), max(yrs) - 15)) {
     png(
-      file = file.path(mydir, "Catches", "Comps", 
+      filename = file.path(mydir, "Catches", "Comps", 
         paste0("propnatage_fish_minyear", minyear, ".png")),
       height=6, width=15, units = "in", res = 600)
     par(mfrow = c(1, 1), mar = c(4, 4, 2, 1))

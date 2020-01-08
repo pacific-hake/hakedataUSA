@@ -4,16 +4,13 @@
 \alias{shorecomps}
 \title{Workup Shoreside Compsition Data}
 \usage{
-shorecomps(
-  bds.age = NULL,
-  bds.fish = NULL,
-  bds.sp.cluster = NULL,
-  bds.allsp.cluster = NULL,
-  ages = 1:15,
-  verbose = FALSE
-)
+shorecomps(page = NULL, ages = 1:15, verbose = FALSE)
 }
 \arguments{
+\item{atsea.ages}{An R object with NORPAC ages. The default value is
+\code{NULL}, where the object will be read from a saved object within
+a directory called extractedData.}
+
 \item{bds.fish}{An R object with PacFIN information
 #todo: document better}
 
@@ -26,10 +23,6 @@ a directory called extractedData.}
 all species. The default value is
 \code{NULL}, where the object will be read from a saved object within
 a directory called extractedData.}
-
-\item{atsea.ages}{An R object with NORPAC ages. The default value is
-\code{NULL}, where the object will be read from a saved object within
-a directory called extractedData.}
 }
 \value{
 todo: document the return
@@ -38,10 +31,6 @@ todo: document the return
 Provide composition data from the U.S. Shoreside
 hake fishery. Written by Allan Hicks in 2016 and
 revised in 2017 by Ian Taylor.
-}
-\examples{
-shorecomps(verbose = TRUE)
-
 }
 \author{
 Kelli Faye Johnson

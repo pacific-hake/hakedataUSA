@@ -50,7 +50,6 @@ hakedatawd <- function() {
 #' @export
 #' @author Kelli Faye Johnson
 #' @examples
-#' hakedatasqlpw()
 #' 
 hakedatasqlpw <- function(database = c("NORPAC", "PacFIN"), file = NULL) {
   user <- Sys.info()["user"]

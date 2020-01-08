@@ -76,9 +76,9 @@ workupNorpacCatchSpecies <- function(ncatch = NULL, nspecies = NULL,
 		"sardine" = "Pacific sardine")
 	ext <- tail(strsplit(basename(fileout), split="\\.")[[1]], 1)
 	if (ext == "pdf") pdf(fileout)
-  if (ext == "png") png(file = gsub("\\.png", "hake%03d.png", fileout))
+  if (ext == "png") png(filename = gsub("\\.png", "hake%03d.png", fileout))
 	ignore <- sapply(use, barplotbycatch, data = forbplot, withhake = FALSE)
-  if (ext == "png") png(file = gsub("\\.png", "%03d.png", fileout))
+  if (ext == "png") png(filename = gsub("\\.png", "%03d.png", fileout))
 	ignore <- sapply(use, barplotbycatch, data = forbplot)
 	graphics.off()
 

@@ -4,7 +4,7 @@
 \alias{mapfun}
 \title{Plot Map of Fishing Locations for Each Age Sample}
 \usage{
-mapfun(data, doPNG = FALSE, dir = getwd())
+mapfun(data, doPNG = FALSE, dir = hakedatawd())
 }
 \arguments{
 \item{data}{A data frame created in mappingagesamples.}

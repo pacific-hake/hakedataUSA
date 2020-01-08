@@ -13,7 +13,7 @@ for the stock assessment.}
 \item{year}{The year of data that you are particularly interested
 in updating, although most years get updated since 2008.}
 
-\item{filedat}{The Stock Synthesis dat file that you want to 
+\item{filedat}{The Stock Synthesis dat file that you want to
 integrate catches into. The default is \code{NULL}, which allows
 you to run the function without writing a new dat file.}
 }
