@@ -27,7 +27,7 @@ plot_rawmeasure <- function(atsea.ages = NULL, years = 2017) {
     xlab("Length (cm)") +
     ylab("At-Sea")+
     labs(col = "Year") + 
-    hakedata:::plottheme() + 
+    plottheme() + 
     scale_color_manual(values=plotcolour(n = length(years)))
   g2 <- ggplot(atsea.ages[atsea.ages$Year %in% years,],
     aes(WEIGHT, group = factor(Year), na.rm = TRUE)) +
@@ -36,7 +36,7 @@ plot_rawmeasure <- function(atsea.ages = NULL, years = 2017) {
     xlab("Weight (kg)") +
     ylab("At-Sea")+
     labs(col = "Year") + 
-    hakedata:::plottheme() + 
+    plottheme() + 
     scale_color_manual(values=plotcolour(n = length(years)))
   bds.fish <- bds.fish[-which(bds.fish$SAMPLE_NO == "OR1972474" & bds.fish$FISH_NO == 70), ]
   g3 <- ggplot(bds.fish[bds.fish$SAMPLE_YEAR %in% years,],
@@ -46,7 +46,7 @@ plot_rawmeasure <- function(atsea.ages = NULL, years = 2017) {
     xlab("Length (cm)") +
     ylab("Shoreside") +
     labs(col = "Year") + 
-    hakedata:::plottheme() + 
+    plottheme() + 
     scale_color_manual(values=plotcolour(n = length(years)))
   g4 <- ggplot(bds.fish[bds.fish$SAMPLE_YEAR %in% years &
     !bds.fish$SAMPLE_NO %in% c(20173204010038, 20173204010040),],
@@ -57,7 +57,7 @@ plot_rawmeasure <- function(atsea.ages = NULL, years = 2017) {
     xlab("Weight (kg)") +
     ylab("Shoreside") +
     labs(col = "Year") + 
-    hakedata:::plottheme() + 
+    plottheme() + 
     scale_color_manual(values=plotcolour(n = length(years)))
   ggplot2::ggsave(filename = file.path(mydir, "Figures", "raw_length_AtSea.png"), g1, width = 7, height = 3)
   ggplot2::ggsave(filename = file.path(mydir, "Figures", "raw_weight_AtSea.png"), g2, width = 7, height = 3)
