@@ -4,6 +4,7 @@
 #' changes these integer values to character strings that provide meaning.
 #' The following integers are the available options in NORPAC to indicate 
 #' whether the vessel processes fish or delivers it to a processing plant:
+#' \enumerate{
 #' \item a catcher processor (CP) vessel,
 #' \item a mothership (MS) or ship that receives unsorted codends from 
 #'   other vessels,

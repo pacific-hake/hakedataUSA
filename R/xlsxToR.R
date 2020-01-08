@@ -54,7 +54,7 @@ xlsxToR <- function(file, keep_sheets = NULL, skip = NULL, header = TRUE, simpli
   
   
   file.copy(file, temp_dir)
-  new_file <- list.files(temp_dir, full.name = TRUE, pattern = basename(file))
+  new_file <- list.files(temp_dir, full.names = TRUE, pattern = basename(file))
   unzip(new_file, exdir = temp_dir)
   
   # Get OS
@@ -64,7 +64,7 @@ xlsxToR <- function(file, keep_sheets = NULL, skip = NULL, header = TRUE, simpli
   # is handled the same across both platforms. I've kept the original code here
   # commented out in case it can be of use in the future.
   # mac <- xmlToList(xmlParse(list.files(
-  #   paste0(temp_dir, "/docProps"), full.name = TRUE, pattern = "app.xml")))
+  #   paste0(temp_dir, "/docProps"), full.names = TRUE, pattern = "app.xml")))
   # mac <- grepl("Macintosh", mac$Application)
   # if(mac) {
   #   os_origin <- "1899-12-30" # documentation says should be "1904-01-01"
@@ -74,7 +74,7 @@ xlsxToR <- function(file, keep_sheets = NULL, skip = NULL, header = TRUE, simpli
   
   # Get names of sheets
   sheet_names <- xmlToList(xmlParse(list.files(
-    paste0(temp_dir, "/xl"), full.name = TRUE, pattern = "workbook.xml")))
+    paste0(temp_dir, "/xl"), full.names = TRUE, pattern = "workbook.xml")))
   sheet_names <- rbind.fill(lapply(sheet_names$sheets, function(x) {
     as.data.frame(as.list(x), stringsAsFactors = FALSE) }))
   rownames(sheet_names) <- NULL
@@ -86,7 +86,7 @@ xlsxToR <- function(file, keep_sheets = NULL, skip = NULL, header = TRUE, simpli
   
   # Get column classes
   styles <- xmlParse(list.files(
-    paste0(temp_dir, "/xl"), full.name = TRUE, pattern = "styles.xml"))
+    paste0(temp_dir, "/xl"), full.names = TRUE, pattern = "styles.xml"))
   styles <- xpathApply(styles, "//x:xf[@applyNumberFormat and @numFmtId]", 
     namespaces = "x", xmlAttrs)
   styles <- lapply(styles, function(x) {
@@ -106,7 +106,7 @@ xlsxToR <- function(file, keep_sheets = NULL, skip = NULL, header = TRUE, simpli
 
   worksheet_paths <- list.files(
     paste0(temp_dir, "/xl/worksheets"), 
-    full.name = TRUE, 
+    full.names = TRUE, 
     pattern = paste0(
       "sheet(", 
       paste(sheet_names$id, collapse = "|"), 
@@ -158,7 +158,7 @@ xlsxToR <- function(file, keep_sheets = NULL, skip = NULL, header = TRUE, simpli
   worksheets <- do.call("rbind.fill", 
     worksheets[sapply(worksheets, class) == "data.frame"])
   
-  entries <- xmlParse(list.files(paste0(temp_dir, "/xl"), full.name = TRUE, 
+  entries <- xmlParse(list.files(paste0(temp_dir, "/xl"), full.names = TRUE, 
     pattern = "sharedStrings.xml$"))
   entries <- xpathSApply(entries, "//x:si", namespaces = "x", xmlValue)
   names(entries) <- seq_along(entries) - 1

@@ -16,7 +16,7 @@ queryDB(
 )
 }
 \arguments{
-\item{queryFilename}{The filename of the sql query to read in and convert with \code{\link{make.query}}}
+\item{queryFilename}{The filename of the sql query to read in.}
 
 \item{db}{The name of your database connection.}
 
@@ -33,18 +33,18 @@ If entered, it will be visible and unsecure.}
 \item{end}{The end year.}
 
 \item{ais}{A logical, specifying whether or not to convert columns,
-as in \code{\link{read.table}}.}
+as in \code{\link[utils]{read.table}}.}
 }
 \description{
 Wrapper to make a query from a sql file and get the data from a database using RODBC
 }
 \details{
-Calls \code{\link{make.query}} and the \code{RODBC} functions.
+Calls \code{RODBC} functions.
 The function first opens an ODBC connection and, using sql, extracts
 data from the \code{db}.
 }
 \seealso{
-\code{\link{RODBC::sqlQuery}}
+\code{\link[RODBC]{sqlQuery}}
 }
 \author{
 Andi Stephens
