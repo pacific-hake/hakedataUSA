@@ -27,9 +27,6 @@
 #' @author Ian Taylor
 #' @return todo: document return
 #' 
-#' @examples
-#' weightatage(dir = file.path(hakedatawd(), "LengthWeightAge"), yrs = 2008:2017)
-#' 
 wtatage_extra <- function(dir, outliers = TRUE, maxage = 15,
   yrs = 2008:format(Sys.Date(), "%Y"), 
   navgyears = c(5, 3)) {

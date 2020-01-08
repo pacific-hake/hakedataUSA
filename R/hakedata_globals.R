@@ -49,7 +49,6 @@ hakedatawd <- function() {
 #' databases you specified in the argument \code{database}.
 #' @export
 #' @author Kelli Faye Johnson
-#' @examples
 #' 
 hakedatasqlpw <- function(database = c("NORPAC", "PacFIN"), file = NULL) {
   user <- Sys.info()["user"]

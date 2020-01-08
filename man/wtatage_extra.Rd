@@ -40,10 +40,6 @@ todo: document return
 \description{
 todo: give a better description
 }
-\examples{
-weightatage(dir = file.path(hakedatawd(), "LengthWeightAge"), yrs = 2008:2017)
-
-}
 \author{
 Ian Taylor
 }

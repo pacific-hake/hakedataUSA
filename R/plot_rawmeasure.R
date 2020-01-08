@@ -6,7 +6,7 @@
 #' @template ncatch
 #' @param years
 #' 
-#' @return 
+#' @return #todo: document return
 #' @export 
 #' @import ggplot2
 #' @author Kelli Faye Johnson

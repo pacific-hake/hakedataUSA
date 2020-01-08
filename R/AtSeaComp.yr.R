@@ -41,7 +41,7 @@
 #    in.filename   Data file.
 #    out.filename  Results file.
 #    rpt.filename  Report file.
-
+#' @import stats
 atseaComp.yr = function(dat,ncatch,BY_AGE=TRUE, BY_MONTH=FALSE, BY_GENDER=FALSE,
                        lbin.sizes=NULL, minAge=1, maxAge=15,
                        vesselType=NULL,

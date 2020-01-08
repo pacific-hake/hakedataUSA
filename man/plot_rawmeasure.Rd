@@ -18,7 +18,7 @@ a directory called extractedData.}
 a directory called extractedData.}
 }
 \value{
-
+#todo: document return
 }
 \description{
 todo: add more information about this function here.

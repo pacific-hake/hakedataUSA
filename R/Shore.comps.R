@@ -317,7 +317,7 @@ print(table(shore.data$SEX))
     } else {
         # Try median values by PORT, then overall.  Calculate medians
         # BEFORE replacing NA's with zeros, to avoid skewing values.
-        Annual.Median.CL = median(shore.data$CLUSTER_WGT, na.rm=T)
+        Annual.Median.CL = stats::median(shore.data$CLUSTER_WGT, na.rm=T)
 
         # Early years of data had no PORT information
 
@@ -373,7 +373,7 @@ print(table(shore.data$SEX))
 
         Replaced.with.Annual.Total = 0
     } else {
-        Annual.Median.Total = median(shore.data$TOTAL_WGT, na.rm=T)
+        Annual.Median.Total = stats::median(shore.data$TOTAL_WGT, na.rm=T)
         Annual.Median.Total = rep(Annual.Median.Total, length(shore.data$TOTAL_WGT))
 
         Use_Annual_Total = shore.data$TOTAL_WGT
@@ -471,13 +471,13 @@ print("HERE1")
     pre_exp.factor.summary = summary(exp_factor)
 
     # Reduce the impact of very-very large catches with small samples by setting max to some percentile
-    pctl = quantile(exp_factor, in.pctl, na.rm=T)
+    pctl = stats::quantile(exp_factor, in.pctl, na.rm=T)
     exp_factor[shore.data$SUM_FREQ < 40 & exp_factor > pctl] = pctl    #WHERE IS THE 40 COMING FROM
     Maxed.exp.factor <- sum(shore.data$SUM_FREQ < 40 & exp_factor > pctl)
     
     # Deal with sparse samples
     if (!remove_sparse) {
-        median_exp_factor = median(exp_factor, na.rm=T)
+        median_exp_factor = stats::median(exp_factor, na.rm=T)
         exp_factor[shore.data$SAMPLE_NO %in% rownames(Too_few_fish)] = median_exp_factor
         Replaced.exp.median = nrow(Too_few_fish)
     } # End if
@@ -570,16 +570,16 @@ print("HERE5")
     if (TEMPORAL) { by.factors =  "SEASON + " }  
     by.factors = paste(by.factors, "SEX + Use_Length + FISH_AGE_YEARS_FINAL", sep="")
   
-    form = as.formula(paste("exp_factor ~ ", by.factors, sep=""))
-    fish.form = as.formula(paste("FREQ ~ ", by.factors, sep=""))
-    trips.form = as.formula(paste("FREQ ~ ", "SAMPLE_NO + ", by.factors, sep=""))
+    form = stats::as.formula(paste("exp_factor ~ ", by.factors, sep=""))
+    fish.form = stats::as.formula(paste("FREQ ~ ", by.factors, sep=""))
+    trips.form = stats::as.formula(paste("FREQ ~ ", "SAMPLE_NO + ", by.factors, sep=""))
     
     #try.detach(shore.data)
     #attach(shore.data)
 
-    shore.comps.num = round(xtabs(form,data=shore.data))
-    fish.num = round(xtabs(fish.form,data=shore.data))
-    trips.num = round(xtabs(trips.form,data=shore.data))
+    shore.comps.num = round(stats::xtabs(form,data=shore.data))
+    fish.num = round(stats::xtabs(fish.form,data=shore.data))
+    trips.num = round(stats::xtabs(trips.form,data=shore.data))
 print("HERE6")
 
     ##############################################################################
@@ -887,7 +887,7 @@ print("HERE9")
     cat("\nSummary of SAMPLE_TYPE\n")
     print(sum.SAMPLE_TYPE)
 
-  sample_sizes = xtabs(as.formula(FREQ ~ SAMPLE_NO + SAMPLE_AGENCY),data=shore.data)
+  sample_sizes = stats::xtabs(stats::as.formula(FREQ ~ SAMPLE_NO + SAMPLE_AGENCY),data=shore.data)
   
   cat("\nSample sizes\n")
   print(sample_sizes)

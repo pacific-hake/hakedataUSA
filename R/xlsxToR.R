@@ -33,12 +33,9 @@
 # - Fixed a bug of not deleting temp files, see below.
 # - Reset the row names to start at one.
 
+#' @import XML plyr pbapply
 
 xlsxToR <- function(file, keep_sheets = NULL, skip = NULL, header = TRUE, simplify_names = TRUE, verbose = FALSE) {
-  
-  require(XML)
-  require(plyr)
-  require(pbapply)
 
 # JRW 16 Jan 2015 There was a huge bug of not deleting temp files which caused e.g. changes in Excel files not to be read into R and deleted files appearing to be read into R.
   #                 The fix below is a hack caused by MS del command not having a recursive feature, a cleaner solution can be done with a Unix/Linx rm command clone.

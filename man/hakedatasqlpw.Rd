@@ -28,9 +28,6 @@ Find username for hake-data sql accounts
 Find the username specific to the computer for
 accessing the NORPAC or PacFIN data repository.
 }
-\examples{
-
-}
 \author{
 Kelli Faye Johnson
 }

@@ -1,7 +1,7 @@
 #' Theme For \code{\link[ggplot2]{theme}}
 #' 
 #' Create a special theme for hake plots when plotting using the 
-#' \code[\link[ggplot2]{ggplot}] functions.
+#' \code{\link[ggplot2]{ggplot}} functions.
 #'  
 #' @author Kelli Faye Johnson
 #' @return A \code{\link[ggplot2]{theme}} object with specific
