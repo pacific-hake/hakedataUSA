@@ -27,11 +27,13 @@ select
    AGENCY_CONDITION_CODE cond_agcode,
    FISH_LENGTH_TYPE_CODE fish_length_type,
    FISH_LENGTH,
+   FISH_LENGTH_UNITS,
    FORK_LENGTH,
    FORK_LENGTH_IS_ESTIMATED fork_length_estimated,
    FISH_MATURITY_CODE maturity,
    AGENCY_FISH_MATURITY_CODE maturity_agcode,
    FISH_WEIGHT,
+   FISH_WEIGHT_UNITS,
    SEX_CODE sex,
    WEIGHT_OF_MALES_LBS males_wgt,
    NUMBER_OF_MALES males_num,
@@ -52,6 +54,7 @@ select
 FROM pacfin_marts.COMPREHENSIVE_BDS_COMM
 WHERE
    PACFIN_SPECIES_CODE LIKE upper(&sp) AND
+   AGE_SEQUENCE_NUMBER = 1 AND
    sample_year between &beginyr and &endyr
 ORDER BY
    sample_year,

@@ -177,6 +177,11 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
       queryFilename = dir(sqldir, "pacfin_comprehensive_bds", full.names = TRUE),
       db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
       sp = "PWHT", start = startyear$PacFIN[2], end = endyear)
+    # Fix weights to be in grams and lengths to be in mm
+    ind <- page$FISH_WEIGHT_UNITS %in% c("LBS", "P")
+    page$FISH_WEIGHT[ind] <- page$FISH_WEIGHT[ind] * 453.592
+    ind <- page$FISH_LENGTH_UNITS %in% c("CM")
+    page$FISH_LENGTH[ind] <- page$FISH_LENGTH[ind] * 10
     localsave(page, "page")
   }
 
