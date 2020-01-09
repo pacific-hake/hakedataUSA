@@ -132,16 +132,14 @@ wtatage_collate <- function(year = hakedata_year()) {
 
   fileout <- file.path(mydir, "LengthWeightAge", 
     paste0("LWAdata_", year, ".csv"))
+  bad <- dat[dat$Weight_kg > 10, ]
+  info$outliers <- NULL
+  if (NROW(bad) > 0) {
+    info$outliers <- bad
+    dat[dat$Weight_kg < 10, ]
+  }
   utils::write.csv(dat, file = fileout, row.names = FALSE)
 
-  ### checking for source of outliers in 2017 data
-  info$outliers <- table(
-    bds.fish.worked$SAMPLE_AGENCY[
-      !is.na(bds.fish.worked$FISH_AGE_YEARS_FINAL) &
-      !is.na(bds.fish.worked$FISH_WEIGHT) &
-      bds.fish.worked$FISH_WEIGHT > 10])
-  ## CA OR PW  W 
-  ##  0  0  0 40 
   info$largefishtable <- aggregate(Weight_kg ~ Source + I(Weight_kg > 10),  
     data = dat, length)
   info$wtatage <- dat
