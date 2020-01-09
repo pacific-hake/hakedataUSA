@@ -107,6 +107,11 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
   on.exit(options(warn = oldop), add = TRUE)
 
   mydir <- hakedatawd()
+  dir.create(file.path(mydir, "Figures"),
+    showWarnings = FALSE, recursive = TRUE)
+  if (!file.exists(file.path(mydir, "Figures"))) {
+    stop("The folder 'Figures' doesn't exist in ", mydir)
+  }
 
   if (is.null(ncatch)) {
     load(file.path(mydir, "extractedData", "NORPACdomesticCatch.Rdat"))
@@ -225,7 +230,7 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
       ggplot2::xlab("month") + 
       ggplot2::ylab(tolower(gsub("_DEPTH_FATHOMS", " depth (fathoms)", iname))) 
     ggplot2::ggsave(g, 
-      file = file.path(mydir, "FIGURES", paste0("fish", iname, "_US.png")),
+      file = file.path(mydir, "Figures", paste0("fish", iname, "_US.png")),
       width = 7, height = 7)
   }
 
@@ -238,7 +243,7 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
   ggplot2::xlab("vessel") + 
   ggplot2::ylab("bottom depth (fathoms)") 
   ggplot2::ggsave(g, 
-    file = file.path(mydir, "FIGURES", "CONFIDENTIAL", "fishBottomDepthByVesselUS.png"),
+    file = file.path(mydir, "Figures", "CONFIDENTIAL", "fishBottomDepthByVesselUS.png"),
     width = 7, height = 7)
   if (!any(table(hcatch$year, hcatch$VESSEL_TYPE) %in% 1:2)) {
     g <- ggplot2::ggplot(reshape(hcatch[!is.na(hcatch$year) & 
@@ -254,7 +259,7 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
       ggplot2::xlab("sector") + 
       ggplot2::ylab("depth (fathoms)")
     ggplot2::ggsave(g, 
-      file = file.path(mydir, "FIGURES", "fishDepthByYearUS.png"),
+      file = file.path(mydir, "Figures", "fishDepthByYearUS.png"),
       width = 7, height = 7)
   }
   while (dev.cur() > 1) dev.off()
