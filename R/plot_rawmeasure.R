@@ -4,7 +4,7 @@
 #' 
 #' @template atsea.ages
 #' @template ncatch
-#' @param years
+#' @param years A vector of years that you want plotted.
 #' 
 #' @return #todo: document return
 #' @export 

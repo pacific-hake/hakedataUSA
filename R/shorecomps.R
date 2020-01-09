@@ -38,6 +38,7 @@ shorecomps <- function(
   nFish <- table(dat$SAMPLE_MONTH,dat$SAMPLE_YEAR)
 
   dat$state <- "PW"  #so that it doesn't need to expand up states and won't need a catch file
+  # Relationship assumes FISH_WEIGHT is in grams and FISH_LENGTH is cm
   out.lm <- lm(log(FISH_WEIGHT)~log(FISH_LENGTH/10), data = dat)
   # Must keep the next line as is, don't try to make it shorter!
   lw <- data.frame(OR=c(exp(out.lm$coefficients[1]),out.lm$coefficients[2]))

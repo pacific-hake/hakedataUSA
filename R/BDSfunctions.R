@@ -162,6 +162,11 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
     bds$predwt[bds$state %in% "PW"] <- lw$OR[1]*((bds$FISH_LENGTH[bds$state %in% "PW"]/10)^lw$OR[2])
     bds$predwt[bds$state %in% "CA"] <- lw$CA[1]*((bds$FISH_LENGTH[bds$state %in% "CA"]/10)^lw$CA[2])
 
+    plot(FISH_WEIGHT ~ FISH_LENGTH, data = bds, 
+      ylab = "Weight (g)", xlab = "Length (mm)")
+    points(predwt ~ FISH_LENGTH, data = bds, col = "red")
+    mtext(side = 3, line = -1, "Predicted weights in red")
+
     bds$predWtSum <- stats::ave(bds$predwt, bds$SAMPLE_NO, FUN = sum)
     if(any(is.na(bds$predWtSum))) {
         stop("There are some predicted weights that are NA. This means that there are NA's in lengths, the parameters, or somewhere else.")
@@ -193,6 +198,8 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
     ind <- bds$SOURCE_AGID=="O"
     bds$sampleWgt[ind] <- bds$all_cluster_sum[ind]
     ind <- ind & is.na(bds$sampleWgt)
+    # todo: fix this b/c cluster weight is filled in above, and filled in 
+    # values are not included in all_cluster_sum b/c I calculate that upon download
     bds$sampleWgt[ind] <- bds$CLUSTER_WGT[ind]
     ind <- ind & is.na(bds$sampleWgt)
     bds$sampleWgt[ind] <- bds$predWtSum[ind]
@@ -242,17 +249,18 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
 
     samps <- bds[!duplicated(bds$SAMPLE_NO),]
     row.names(samps) <- samps$SAMPLE_NO
-    if(verbose) {
-        cat("Table of number of samples with missing weights to expand with by source agency ID. (TRUE or NA means missing)\n")
-        print(table(is.na(samps$usetot_wgt),samps$SOURCE_AGID,useNA="ifany"))
-        print(table(is.na(samps$usetot_wgt),samps$SAMPLE_YEAR,samps$SOURCE_AGID,useNA="ifany"))
-        cat("If there are missing weights, you may want to decide how to fill them in.\n\n")
-        print(NROW(samps[is.na(samps$usetot_wgt),]))
+    if (NROW(samps[is.na(samps$usetot_wgt),]) > 0) {
+        stop("There are missing weights and you need to change the code to fill them in.")
     }
 
     if(verbose) {
+      if (sum(bds$expand < 0.999)) {
         cat("There are",sum(bds$expand < 0.999),"expansion factors less than 0.999.\n")
-        cat("There are",sum(bds$expand > maxExpansion),"expansion factors greater than",maxExpansion,"\n")
+      }
+      if (sum(bds$expand > maxExpansion) > 0) {
+        cat("There are",sum(bds$expand > maxExpansion),
+          "expansion factors greater than",maxExpansion,"\n")
+      }
         par(mfrow=c(2,1))
         #####expansion factors by state
         boxplot(split(bds$expand,bds$state),xlab="State",ylab="expansion to landing factor",outline = FALSE)
