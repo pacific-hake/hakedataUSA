@@ -54,7 +54,7 @@ select
 FROM pacfin_marts.COMPREHENSIVE_BDS_COMM
 WHERE
    PACFIN_SPECIES_CODE LIKE upper(&sp) AND
-   AGE_SEQUENCE_NUMBER = 1 AND
+   (AGE_SEQUENCE_NUMBER = 1 OR AGE_SEQUENCE_NUMBER is null) AND
    sample_year between &beginyr and &endyr
 ORDER BY
    sample_year,
