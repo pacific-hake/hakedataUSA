@@ -107,10 +107,10 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
   on.exit(options(warn = oldop), add = TRUE)
 
   mydir <- hakedatawd()
-  dir.create(file.path(mydir, "Figures"),
+  dir.create(file.path(mydir, "Figures", "CONFIDENTIAL"),
     showWarnings = FALSE, recursive = TRUE)
   if (!file.exists(file.path(mydir, "Figures"))) {
-    stop("The folder 'Figures' doesn't exist in ", mydir)
+    stop("The folder 'CONFIDENTIAL' doesn't exist in 'Figures' in ", mydir)
   }
 
   if (is.null(ncatch)) {
