@@ -106,26 +106,20 @@ wtatage_collate <- function(year = hakedata_year()) {
   rm(tmp)
 
   #US Shore-based fishery
-  base::load(file.path(mydir, "extractedData", "pacfin_bds_age.Rdat"))
-  base::load(file.path(mydir, "extractedData", "pacfin_bds_allsp_cluster.Rdat"))
-  base::load(file.path(mydir, "extractedData", "pacfin_bds_fish.Rdat"))
-  base::load(file.path(mydir, "extractedData", "pacfin_bds_sp_cluster.Rdat"))
-  bds.fish.worked <- workupPacFinTablesBDS(bds_fish = bds.fish,
-    age_temp = bds.age, sp_cluster = bds.sp.cluster,
-    all_cluster = bds.allsp.cluster)
+  base::load(file.path(mydir, "extractedData", "page.Rdat"))
+  bds.fish.worked <- page[
+    !is.na(page$FISH_AGE_YEARS_FINAL) &
+    !is.na(page$FISH_WEIGHT) &
+    page$SAMPLE_YEAR %in% year, ]
   bds.fish.worked$SEX <- factor(bds.fish.worked$SEX)
-  tmp <- bds.fish.worked[
-    !is.na(bds.fish.worked$FISH_AGE_YEARS_FINAL) &
-    !is.na(bds.fish.worked$FISH_WEIGHT) & 
-    bds.fish.worked$SAMPLE_YEAR %in% year, ]
-  info$usshorebasedmean <- tapply(
-    tmp$FISH_WEIGHT * lb2kg,
-    list(tmp$FISH_AGE_YEARS_FINAL), mean)
-  tmp <- data.frame(Source = "SHORE", Weight_kg = tmp$FISH_WEIGHT * lb2kg, 
-    Sex = tmp$SEX, Age_yrs = tmp$FISH_AGE_YEARS_FINAL, 
-    Length_cm = tmp$FISH_LENGTH / 10, 
-    Month = tmp$SAMPLE_MONTH, 
-    Year = tmp$SAMPLE_YEAR)
+  info$usshorebasedmean <- tapply(bds.fish.worked$FISH_WEIGHT / 1000, 
+    list("AGE" = bds.fish.worked$FISH_AGE_YEARS_FINAL), mean)
+  tmp <- data.frame(Source = "SHORE",
+    Weight_kg = bds.fish.worked$FISH_WEIGHT / 1000,
+    Sex = bds.fish.worked$SEX, Age_yrs = bds.fish.worked$FISH_AGE_YEARS_FINAL,
+    Length_cm = bds.fish.worked$FISH_LENGTH / 10, 
+    Month = bds.fish.worked$SAMPLE_MONTH, 
+    Year = bds.fish.worked$SAMPLE_YEAR)
 
   dat <- rbind(dat, tmp)
   rm(tmp)
