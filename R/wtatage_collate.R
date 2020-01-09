@@ -27,7 +27,7 @@
 #'   \item file: The file path used to save the \code{dat}.
 #' }
 #' 
-wtatage_collate <- function(year) {
+wtatage_collate <- function(year = hakedata_year()) {
   info <- list()
   mydir <- hakedatawd()
   acdir <- file.path(mydir, "AcousticSurvey", "BioData", "csvFiles")
@@ -39,12 +39,14 @@ wtatage_collate <- function(year) {
     Ac_survYear <- TRUE
     #Shimada
     datUS <- utils::read.csv(
-      file = file.path(acdir, paste0(year, "S_biodata_specimen_AGES.csv")))
+      file = dir(acdir, pattern = paste0(year, ".*S_biodata_specimen_AGES.csv"),
+        full.names = TRUE))
     datUS$Sex2 <- "U"
     datUS$Sex2[datUS$Sex == 1] <- "M"
     datUS$Sex2[datUS$Sex == 2] <- "F"
     haul <- utils::read.csv(
-      file = file.path(acdir, paste0(year, "S_biodata_haul.csv")),
+      file = dir(acdir, pattern = paste0(year, ".*S_biodata_haul.csv"),
+        full.names = TRUE),
       stringsAsFactors = FALSE)
     datUS <- merge(
       datUS,
