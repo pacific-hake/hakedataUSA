@@ -18,19 +18,17 @@
 #' @import r4ss utils
 #' @importFrom stats aggregate
 
-datatoassessment <- function(dirout, year, filedat = NULL) {
-  mydir <- hakedatawd()
-  catchdir <- file.path(mydir, "Catches")
+new_catch <- function(dirout, year, filedat = NULL) {
 
   inc <- utils::read.csv(file.path(dirout, "landings-tac-history.csv"))
-  sh <- utils::read.csv(file.path(catchdir, "PacFIN_Sector.csv"))
+  sh <- utils::read.csv(file.path(dirout, "PacFIN_Sector.csv"))
   inc$US_shore[match(sh$X, inc$Year)] <- sh$USshore
   inc$USresearch[match(sh$X[!is.na(sh$USresearch)], inc$Year)] <- sh$USresearch[!is.na(sh$USresearch)]
   cp <- stats::aggregate(catch ~ year,
-    data = utils::read.csv(file.path(catchdir, "us-cp-catch-by-month.csv")), sum)
+    data = utils::read.csv(file.path(dirout, "us-cp-catch-by-month.csv")), sum)
   inc$atSea_US_CP[match(cp$year, inc$Year)] <- cp$catch
   ms <- aggregate(catch ~ year,
-    data = utils::read.csv(file.path(catchdir, "us-ms-catch-by-month.csv")), sum)
+    data = utils::read.csv(file.path(dirout, "us-ms-catch-by-month.csv")), sum)
   inc$atSea_US_MS[match(ms$year, inc$Year)] <- ms$catch
   inc[, "Ustotal"] <- apply(inc[, grepl("^US|_US", colnames(inc), ignore.case = FALSE)],
     1, sum, na.rm = TRUE)
