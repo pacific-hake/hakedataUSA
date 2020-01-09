@@ -74,8 +74,6 @@ shorecomps <- function(
   }
 
   afs[, "nTrips"] <- nSamp[as.character(afs[, "Year"])]
-  dir.create(file.path(mydir, "Catches",
-    "Comps", "Shoreside.Age.Only"), recursive = TRUE, showWarnings = FALSE)
   utils::write.csv(afs,
     file = file.path(mydir, "Catches", "Comps", "Shoreside.Age.Only",
       "shoresideAgeComps.csv"), row.names = FALSE)
