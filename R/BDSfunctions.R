@@ -104,7 +104,8 @@ SetUpHakeBDS.fn <- function(BDS,verbose=TRUE,max.mmLength=1000,dataTypes=c("C"),
             BDS[BDS$SAMPLE_NO == iii,"FEMALES_NUM"] <- sum(tmp$SEX=="F")
         }
         if(is.na(sum(tmp$CLUSTER_WGT))) {
-            BDS[BDS$SAMPLE_NO == iii,"CLUSTER_WGT"] <- sum(tmp$FISH_WEIGHT)
+            # FISH_WEIGHT is in g and CLUSTER_WGT is in lb
+            BDS[BDS$SAMPLE_NO == iii,"CLUSTER_WGT"] <- sum(tmp$FISH_WEIGHT) * 0.00220462
         }
     }
  
@@ -156,10 +157,10 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
     # these will be summed to give the sample weight, however
     #don't need to use this because expand cluster weight to total weight because they are cluster sampling a mixture of species
     bds$predwt <- NA
-    bds$predwt[bds$state %in% "WA"] <- lw$WA[1]*((bds$FISH_LENGTH[bds$state %in% "WA"]/10)^lw$WA[2]) * 2.20462  #convert kg to pounds
-    bds$predwt[bds$state %in% "OR"] <- lw$OR[1]*((bds$FISH_LENGTH[bds$state %in% "OR"]/10)^lw$OR[2]) * 2.20462  #convert kg to pounds
-    bds$predwt[bds$state %in% "PW"] <- lw$OR[1]*((bds$FISH_LENGTH[bds$state %in% "PW"]/10)^lw$OR[2]) * 2.20462  #convert kg to pounds
-    bds$predwt[bds$state %in% "CA"] <- lw$CA[1]*((bds$FISH_LENGTH[bds$state %in% "CA"]/10)^lw$CA[2]) * 2.20462  #convert kg to pounds
+    bds$predwt[bds$state %in% "WA"] <- lw$WA[1]*((bds$FISH_LENGTH[bds$state %in% "WA"]/10)^lw$WA[2])
+    bds$predwt[bds$state %in% "OR"] <- lw$OR[1]*((bds$FISH_LENGTH[bds$state %in% "OR"]/10)^lw$OR[2])
+    bds$predwt[bds$state %in% "PW"] <- lw$OR[1]*((bds$FISH_LENGTH[bds$state %in% "PW"]/10)^lw$OR[2])
+    bds$predwt[bds$state %in% "CA"] <- lw$CA[1]*((bds$FISH_LENGTH[bds$state %in% "CA"]/10)^lw$CA[2])
 
     bds$predWtSum <- stats::ave(bds$predwt, bds$SAMPLE_NO, FUN = sum)
     if(any(is.na(bds$predWtSum))) {
@@ -179,7 +180,7 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
     ind <- ind & is.na(bds$sampleWgt)
     bds$sampleWgt[ind] <- bds$CLUSTER_WGT[ind]
     ind <- ind & is.na(bds$sampleWgt)
-    bds$sampleWgt[ind] <- bds$predWtSum[ind]
+    bds$sampleWgt[ind] <- bds$predWtSum[ind] * 0.00220462
 
     ind <- (bds$SOURCE_AGID %in% c("W")) & is.na(bds$usetot_wgt)
     bds$usetot_wgt[ind] <- bds$sampleWgt[ind]
