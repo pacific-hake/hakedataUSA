@@ -161,9 +161,7 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
     bds$predwt[bds$state %in% "PW"] <- lw$OR[1]*((bds$FISH_LENGTH[bds$state %in% "PW"]/10)^lw$OR[2]) * 2.20462  #convert kg to pounds
     bds$predwt[bds$state %in% "CA"] <- lw$CA[1]*((bds$FISH_LENGTH[bds$state %in% "CA"]/10)^lw$CA[2]) * 2.20462  #convert kg to pounds
 
-    tmp.split <- split(bds$predwt,bds$SAMPLE_NO)
-    predWtSum <- unlist(lapply(tmp.split,sum))
-    bds$predWtSum <- predWtSum[match(bds$SAMPLE_NO,names(predWtSum))]
+    bds$predWtSum <- stats::ave(bds$predwt, bds$SAMPLE_NO, FUN = sum)
     if(any(is.na(bds$predWtSum))) {
         stop("There are some predicted weights that are NA. This means that there are NA's in lengths, the parameters, or somewhere else.")
     }
