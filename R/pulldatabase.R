@@ -182,6 +182,9 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     page$FISH_WEIGHT[ind] <- page$FISH_WEIGHT[ind] * 453.592
     ind <- page$FISH_LENGTH_UNITS %in% c("CM")
     page$FISH_LENGTH[ind] <- page$FISH_LENGTH[ind] * 10
+    page$all_cluster_sum <- stats::ave(ifelse(
+      duplicated(paste(page$SAMPLE_NO, page$CLUSTER_NO)),
+      0, page$CLUSTER_WGT), page$SAMPLE_NO, FUN = sum)
     localsave(page, "page")
   }
 

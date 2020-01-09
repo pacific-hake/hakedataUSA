@@ -23,11 +23,6 @@ shorecomps <- function(
     recursive = TRUE, showWarnings = FALSE)
   if (is.null(page)) base::load(file.path(mydir, "extractedData", "page.Rdat"))
 
-  page$uniquecluster_wgt <- ifelse(
-      duplicated(paste(page$SAMPLE_NO, page$CLUSTER_NO)),
-      0, page$CLUSTER_WGT)
-  page$all_cluster_sum <- stats::ave(page$uniquecluster_wgt, page$SAMPLE_NO,
-    FUN = sum)
   bds.fish.worked <- page[!is.na(page$AGE_YEARS), ]
   bds.fish.worked$SEX <- factor(bds.fish.worked$SEX)
   dat <- SetUpHakeBDS.fn(bds.fish.worked, verbose = verbose,
