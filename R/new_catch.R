@@ -83,7 +83,11 @@ new_catch <- function(dirout, year, filedat = NULL) {
   # Dat file
   if (!is.null(filedat)) {
     dat <- r4ss::SS_readdat(filedat, version = 3.3, verbose = FALSE)
-    dat$catch[match(inc$Year, dat$catch[dat$catch$fleet == 1, "year"]), "catch"] <- inc$TOTAL
+    ind <- !(dat$catch$year > 0)
+    dat$catch <- rbind(dat$catch[ind, ],
+      data.frame("year" = inc$Year, "seas" = 1, "fleet" = 1,
+        catch = inc$TOTAL, catch_se = 0.01))
+    dat$endyr <- max(inc$Year)
     r4ss::SS_writedat(dat, filedat, overwrite = TRUE, verbose = FALSE)
   }
 
