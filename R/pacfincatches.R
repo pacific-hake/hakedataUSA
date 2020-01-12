@@ -3,6 +3,9 @@
 #' Remove foreign catches and fix column names of catches from PacFIN.
 #' 
 #' @template pcatch
+#' @param addtribal A numeric value in metric tons that will be added
+#' to the US shoreside catch to account for tribal fish tickets not
+#' being in PacFIN yet.
 #' 
 #' @importFrom stats aggregate
 #' @importFrom utils write.table
@@ -12,7 +15,7 @@
 #'   \item removed foreign catches, and
 #'   \item catches by year and sector.
 #' }
-pacfincatches <- function(pcatch = NULL) {
+pacfincatches <- function(pcatch = NULL, addtribal = 0) {
   
   mydir <- hakedatawd()
 
@@ -20,6 +23,13 @@ pacfincatches <- function(pcatch = NULL) {
     base::load(file.path(mydir, "extractedData", "Pacfincomp_ft_taylorCatch.Rdat"))
   }
   
+  pcatch <- rbind(pcatch,
+    data.frame("YEAR" = 2019, "FLEET" = "TI", "AGID" = "W", "GRID" = "MDT",
+      "TDATE" = "2019-12-31", "ARID" = "3B", "PCID" = "WPT",
+      "PORT" = 295, "IFQ_LANDING" = FALSE,
+      "OVERAGE" = FALSE, "PROC" = 128363, "DAHL_SECTOR" = 17, "FTID" = "UNKNOWN",
+      "DRVID" = "UNKNOWN", "COUNT_LE_PERMITS" = 0, "PARTICIPATION_GROUP_CODE" = "I",
+      "LBS" = addtribal * 2204.62, "MT" = addtribal, "RMT" = addtribal))
   utils::write.table(tapply(pcatch$MT,list(pcatch$YEAR, pcatch$FLEET), sum),
     file = file.path(mydir, "Catches", "PacFIN_Fleet.csv"),
     sep = ",", quote = FALSE, row.names = TRUE, col.names = NA)
