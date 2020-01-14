@@ -45,7 +45,7 @@ datatocomps <- function(dirdata, dirmod, cohorts) {
   catches$Sector <- factor(catches$Sector, 
     levels = temp, 
     labels = c("U.S. at-sea MS", "U.S. at-sea CP", "U.S. Shoreside",
-      "CAN JV", "CAN Shoreside", "CAN FreezerTrawl"))
+      "CAN_JV", "CAN_Shoreside", "CAN_FreezeTrawl"))
   all <- merge(comps, catches, all.x = TRUE)
   cw <- apply(all[, grepl("^a", colnames(all))], 2, as.numeric) * 
     as.numeric(all$Catch)
