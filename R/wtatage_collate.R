@@ -66,15 +66,23 @@ wtatage_collate <- function(year = hakedata_year()) {
     haul <- utils::read.csv(
       file.path(acdir, paste0(year, "_biodata_haul_CAN.csv")),
       stringsAsFactors = FALSE)
+    if (!"EQ_Date_Time" %in% colnames(haul) | all(is.na(haul$EQ_Date_Time))) {
+      haul$EQ_Date_Time <- haul$HB_Date_Time
+    }
     datCAN <- merge(
       datCAN,
       haul[, c("Haul", "EQ_Date_Time", "EQ_Latitude", "EQ_Longitude")],
       by = "Haul", all.x = TRUE)
+    if (grepl("^[0-9]{4}-", datCAN$EQ_Date_Time[1])) {
+      datCAN$EQ_Date_Time <- as.Date(datCAN$EQ_Date_Time, "%Y-%m-%d")
+    } else {
+      datCAN$EQ_Date_Time <- as.Date(datCAN$EQ_Date_Time, "%m/%d/%y")
+    }
     datCAN <- data.frame(Source = "Acoustic Canada", Weight_kg = datCAN$Weight, 
       Sex = datCAN$Sex2, Age_yrs = datCAN$Age,
       Length_cm = datCAN$Length, 
-      Month = as.numeric(format(as.Date(datCAN$EQ_Date_Time, "%m/%d/%y"), "%m")),
-      Year = as.numeric(format(as.Date(datCAN$EQ_Date_Time, "%m/%d/%y"), "%Y")))
+      Month = as.numeric(format(datCAN$EQ_Date_Time, "%m")),
+      Year = as.numeric(format(datCAN$EQ_Date_Time, "%Y")))
 
     dat <- rbind(datUS, datCAN)
     dat <- dat[!(is.na(dat$Age_yrs) | is.na(dat$Weight_kg)), ] 
