@@ -1,4 +1,4 @@
-datatocomps <- function(dirdata, dirmod) {
+datatocomps <- function(dirdata, dirmod, cohorts) {
 
   options(default.stringsAsFactors = FALSE)
   options(stringsAsFactors = FALSE)
@@ -84,6 +84,19 @@ datatocomps <- function(dirdata, dirmod) {
     final)
   write.table(final, file.path(dirdata, "ForSS_marginalages.csv"),
     sep = ",", row.names = FALSE)
+  if (!file.exists(file.path(dirmod, "hake_data.ss"))) {
+    warning("ss dat file doesn't exist in ", dirmod)
+  }
+  ssdat <- r4ss::SS_readdat(file.path(dirmod, "hake_data.ss"),
+    verbose = FALSE, echoall = FALSE)
+  ind <- !(ssdat$agecomp$Yr >= 2008 & ssdat$agecomp$FltSvy == 1)
+  new <- setNames(final[final[, 1] >= 2008, ], colnames(ssdat$agecomp))
+  ssdat$agecomp <- rbind(ssdat$agecomp[ind, ], new)
+  # Increment ageing error matrix
+  ssdat$N_ageerror_definitions <- ssdat$N_ageerror_definitions + 1
+  ssdat$ageerror <- rbind(ssdat$ageerror, ageerror_new(cohorts))
+  r4ss::SS_writedat(ssdat, file.path(dirmod, "hake_data.ss"),
+    overwrite = TRUE, verbose = FALSE)
   return(final)
 }
 
