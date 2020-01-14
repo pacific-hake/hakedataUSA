@@ -87,9 +87,8 @@ datatocomps <- function(dirdata, dirmod) {
   return(final)
 }
 
-datatoassessmentcomp <- function(
-  dircomp = file.path(hakedatawd(), "Catches", "Comps"),
-  dirassessment) {
+datatoassessment_comp <- function(dirassessment) {
+  dircomp = file.path(hakedatawd(), "Catches", "Comps")
   dirsave <- file.path(dirassessment, "data")
   aa <- utils::read.csv(file.path(dircomp, "CP.Age.Only", "comps.csv"))
   colnames(aa)[1:3] <- c("year", "n.fish", "n.hauls")
