@@ -3,28 +3,22 @@ datatocomps <- function(dirdata, dirmod) {
   options(default.stringsAsFactors = FALSE)
   options(stringsAsFactors = FALSE)
 
-  can <- readLines(file.path(dirdata, "can-age-data.csv"))
-  if (!grepl("\\d{4}", substring(can[2], 1, 2))) can <- can[-2]
-
-  cansplit <- strsplit(can, ",")
-  cansplit <- lapply(cansplit, function(x){c(x[1],x[!x == ""][-1])})
-  canlabel <- cansplit[which(sapply(cansplit, length) == 1)]
-  canlabel <- gsub(".+Trawler.+", "CAN FreezerTrawl", canlabel)
-  canlabel <- gsub(".+side.+", "CAN Shoreside", canlabel)
-  canlabel <- gsub(".+Venture.+", "CAN JV", canlabel)
-  temp <- which(sapply(cansplit, length) == 2)
-  ncan <- data.frame(rep(canlabel[4:6], 
-    diff(c(0, 
-      which(!diff(temp) == 1), length(temp)))), 
-      do.call("rbind", cansplit[temp]))
-  colnames(ncan) <- c("Sector", "Year", "Nsamples")
-  temp <- which(sapply(cansplit, length) > 2)
-  cancomp <- data.frame(rep(canlabel[1:3], 
-    diff(c(0, 
-      which(!diff(temp) == 1), length(temp)))), 
-      do.call("rbind", cansplit[temp]))
-  colnames(cancomp) <- c("Sector", "Year", paste0("a", 3:ncol(cancomp) - 2))
-  cancomp <- merge(cancomp, ncan, all.x = TRUE)
+  can.l <- lapply(
+    dir(dirdata, "canada.*-age", full.names = TRUE),
+    function(x) {
+      out <- read.csv(x, header = TRUE, check.names = FALSE)
+      out$Sector <- gsub(".*canada-([-a-z]*)-age.*", "\\1", x)
+      out$Sector[out$Sector == "freezer-trawler"] <- "CAN_FreezeTrawl"
+      out$Sector[out$Sector == "joint-venture"] <- "CAN_JV"
+      out$Sector[out$Sector == "shoreside"] <- "CAN_Shoreside"
+      colnames(out) <- gsub("^([1-9]{1})", "a\\1", colnames(out))
+      colnames(out) <- gsub("^N$", "Nsamples", colnames(out))
+      colnames(out)[1] <- "Year"
+      out <- out[, c("Sector", "Year", 
+        grep("a[0-9]", colnames(out), value = TRUE), "Nsamples")]
+      return(out)
+    })
+  can.l <- do.call(rbind, can.l)
   usc <- utils::read.csv(file = file.path(dirdata, "us-cp-age-data.csv"),
     stringsAsFactors = FALSE)
   usm <- utils::read.csv(file = file.path(dirdata, "us-ms-age-data.csv"),
@@ -38,7 +32,7 @@ datatocomps <- function(dirdata, dirmod) {
     data.frame("Sector" = "U.S. Shoreside", uss), all = TRUE)
   colnames(uscomp)[which(colnames(uscomp) == "n.hauls")] <- "Nsamples"
   colnames(uscomp)[which(colnames(uscomp) == "year")] <- "Year"
-  comps <- merge(cancomp, uscomp, all = TRUE)
+  comps <- merge(can.l, uscomp, all = TRUE)
   
   catch <- utils::read.csv(file.path(dirdata, "landings-tac-history.csv"))
   
