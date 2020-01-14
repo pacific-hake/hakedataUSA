@@ -28,8 +28,8 @@
 #' @return todo: document return
 #' 
 wtatage_extra <- function(dir, outliers = TRUE, maxage = 15,
-  yrs = 2008:format(Sys.Date(), "%Y"), 
   navgyears = c(5, 3)) {
+  yrs = 2008:hakedata_year(),
 
   # from maturity.ogives$maturity
   maturity <- c(0.000, 0.000, 0.261, 0.839, 0.961, 0.920, 
