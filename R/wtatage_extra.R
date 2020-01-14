@@ -8,6 +8,7 @@
 #' It can either be relative or absolute, but no working
 #' directory will be changed. Instead, the \code{dir} is
 #' just used to import data and save resulting plots in.
+#' @template dirmod
 #' @param outliers A logical value if outliers should be looked for
 #' in the individual files or if a summary file that was previously 
 #' generated using \code{weightatage} should be loaded.
@@ -20,6 +21,7 @@
 #' by the Scientific Review Group in 2017. The argument can be a single
 #' value or a vector of two values, where in the latter case the second
 #' value will be used for the most recent time period. 
+#' @template nforecast
 #' 
 #' @import ggplot2 r4ss utils
 #' @importFrom stats aggregate
@@ -27,18 +29,16 @@
 #' @author Ian Taylor
 #' @return todo: document return
 #' 
-wtatage_extra <- function(dir, outliers = TRUE, maxage = 15,
-  navgyears = c(5, 3)) {
+wtatage_extra <- function(dir, dirmodel = NULL, outliers = TRUE, maxage = 15,
   yrs = 2008:hakedata_year(),
+  navgyears = c(5, 3), nforecast = 3) {
 
   # from maturity.ogives$maturity
   maturity <- c(0.000, 0.000, 0.261, 0.839, 0.961, 0.920, 
     0.928, 0.926, 0.957, 0.944, 0.980, 
     0.962, 1.000, 0.958, 0.955, 0.900, 
     0.900, 0.900, 0.900, 0.900, 0.900) 
-
   if (length(navgyears) == 1) navgyears <- rep(navgyears, 2)
-
   if (outliers) {
     dat <- get_wtatagecsv(file = file.path(dir, "LWAdata_1975to2007.csv"),
       outlierplot = TRUE,
@@ -54,6 +54,10 @@ wtatage_extra <- function(dir, outliers = TRUE, maxage = 15,
           outlierPlotName = file.path(dir, "plots", paste0("wtAgeOutliers", yr, ".png")),
           elimUnsexed = FALSE))
     }
+    if (any(is.na(dat$Year))) {
+      stop("Year was not read in correctly for some weight-at-age data\n",
+        " probably Canadian Acoustic Data.")
+    }
     utils::write.csv(dat,
       file = file.path(dir, paste0("LWAdata_1975to", max(yrs), ".csv")))
   } else {
@@ -61,29 +65,12 @@ wtatage_extra <- function(dir, outliers = TRUE, maxage = 15,
       file = file.path(dir, paste0("LWAdata_1975to", max(yrs), ".csv")))
   }
   ### calculating average weight for early or late period for 2018 SRG request
-  avgearl <- avglate <- rep(NA, length(maturity))
-  early <- 1975:(1975 + navgyears[1] - 1)
+  early <- min(dat$Year):(min(dat$Year) + navgyears[1] - 1)
   late <- (max(yrs) - navgyears[2] + 1):(max(yrs))
-  for(a in 0:20){
-    avgearl[a+1] <- mean(dat$Weight_kg[dat$Age_yrs==a & dat$Year %in% early])
-    avglate[a+1] <- mean(dat$Weight_kg[dat$Age_yrs==a & dat$Year %in% late])
-    if(a >= maxage){
-      avgearl[(a+1):length(avgearl)] <- 
-        mean(dat$Weight_kg[dat$Age_yrs >= maxage & dat$Year %in% early])
-      avglate[(a+1):length(avgearl)] <- 
-        mean(dat$Weight_kg[dat$Age_yrs >= maxage & dat$Year %in% late])
-      break
-    }
-  } 
 
   # copied into wtatage.ss file for
   # alternative model developed during 2018 SRG
-  utils::write.table(t(avgearl*maturity),
-    file = file.path(dir, paste0("wtatage.ss_early", navgyears[1], ".txt")),
-    sep = " ", row.names = FALSE, col.names = FALSE)
-  utils::write.table(t(avglate*maturity),
-    file = file.path(dir, paste0("wtatage.ss_late", navgyears[2], ".txt")),
-    sep = " ", row.names = FALSE, col.names = FALSE)
+
   # separate data into acoustic (ac) and fishery (fs) subsets
   # note that "Acoustic Poland" is excluded from both sets,
   # not sure if that was intentional
@@ -119,14 +106,29 @@ wtatage_extra <- function(dir, outliers = TRUE, maxage = 15,
   if (dev.cur() > 1) dev.off()
 
   #### making input files for SS with the holes still present
-  wtage_All <- make_wtage_matrix(dat,fleetoption=2) # make matrix
-  wtage_All_wMean <- make_wtage_matrix(dat,fleetoption=2,getmean=TRUE) 
+  # NULL months keeps the Poland data
+  wtage_All <- make_wtage_matrix(dat,fleetoption=2,
+    months = NULL) # make matrix
+  wtage_All_wMean <- make_wtage_matrix(dat,fleetoption=2,getmean=TRUE,
+    yearsearly = unique(dat$Year),
+    months = NULL)
+
+  avgearl <- make_wtage_matrix(dat,fleetoption=2,getmean=TRUE,
+    yearsearly = early,
+    months = NULL)[1, ]
+  avgearl[2, ] <- avgearl[1, ] * c(rep(1, 6), maturity)
+  avgearl[2, "fleet"] <- -2
+  utils::write.table(avgearl,
+    file = file.path(dir, paste0("wtatage.ss_early", navgyears[1], ".txt")),
+    sep = " ", row.names = FALSE, col.names = FALSE)
 
   #### making alternative data.frame with mean lengths
-  lenage_All_wMean <- make_wtage_matrix(dat,fleetoption=2, value="length", getmean=TRUE) # make matrix
+  lenage_All_wMean <- make_wtage_matrix(dat,fleetoption=2, value="length", getmean=TRUE,
+    months = NULL) # make matrix
 
   # repeat but return sample sizes instead of mean weights
-  counts_All_wMean <- make_wtage_matrix(dat,fleetoption=2,getmean=TRUE, value="count")
+  counts_All_wMean <- make_wtage_matrix(dat,fleetoption=2,getmean=TRUE, value="count",
+    months = NULL)
 
   # new method does only linear interpolation within each age (only works with all data)
   wtageInterp1_All         <- dointerpSimple(wtage_All)
@@ -138,7 +140,7 @@ wtatage_extra <- function(dir, outliers = TRUE, maxage = 15,
   wtageInterp2_All$Note <- fill_wtage_matrix(wtage_All[,-23])$Note
 
   # write output combining all fleets closer to format used by SS
-  wtage_All_wMean$Note <- c(paste("# Mean from ",min(wtage_All_wMean[-1,1]),"-",max(wtage_All_wMean[,1]),sep=""),wtageInterp2_All$Note)
+  wtage_All_wMean$Note <- c(paste("# Mean from ",min(dat$Year),"-",max(dat$Year),sep=""),wtageInterp2_All$Note)
   wtageInterp2_All <- rbind(wtage_All_wMean[1,], wtageInterp2_All)
   mat_Interp2_All <- t(as.matrix(wtageInterp2_All[,
     -grep("^[^a]|Note", colnames(wtageInterp2_All))]))
@@ -159,12 +161,22 @@ wtatage_extra <- function(dir, outliers = TRUE, maxage = 15,
   colnames(wtage_extended)[grep("^a", colnames(wtage_extended))] <- 
     paste0("a", seq_along(maturity) - 1)
 
-  write_wtatage_file(
-    file = file.path(dir, 
-      paste0("wtatage_", max(yrs), "created_",
-        format(Sys.time(),"%d-%b-%Y_%H.%M"),".ss")),
-    data = wtage_extended)
+  ## Add forecast average
+  withforecast <- rbind(wtage_extended,
+    setNames(data.frame(max(late):(max(late)+nforecast - 1)+1, matrix(c(1, 1,1, 1, 0,
+    apply(wtage_extended[wtage_extended[, 1] %in% late, -c(1:6)], 2, mean)),
+    ncol = NCOL(wtage_extended)-1, nrow = nforecast, byrow = TRUE)),
+    colnames(wtage_extended)))
 
-  save(dat,mat_Interp2_All, wtage_All, wtage_All_wMean, 
+  filenameforss <- file.path(dir, paste0("wtatage_", max(yrs), "created_",
+    format(Sys.time(),"%d-%b-%Y_%H.%M"),".ss"))
+  if (file.exists(filenameforss)) file.remove(filenameforss)
+  write_wtatage_file(file = filenameforss, data = withforecast, maturity = maturity)
+  if (!is.null(dirmodel)) {
+    file.copy(filenameforss, file.path(dirmodel, "wtatage.ss"),
+      overwrite = TRUE)
+  }
+
+  save(dat,mat_Interp2_All, wtage_All, wtage_All_wMean, withforecast,
     file = file.path(dir, "LWAdata.Rdata"))
 }

@@ -187,9 +187,11 @@ get_wtatagecsv <- function(file, removeOutliers = TRUE, outlierplot = FALSE,
 #' weight- or length-at-age. 
 #' 
 make_wtage_matrix <- function(dat, fleetoption = 1, value = "weight",
-  months = 1:12, getmean = FALSE, maxage = 15) {
+  months = 1:12, getmean = FALSE, maxage = 15,
+  yearsearly = unique(dat$Year)) {
 
-  ha <- dat[!is.na(dat$Age_yrs) & dat$Month %in% months, ]
+  ha <- dat[!is.na(dat$Age_yrs), ]
+  if (!is.null(months)) ha <- dat[dat$Month %in% months, ]
 
   agebinspop  <- 0:maxage
   N_agebins <- length(agebinspop)
@@ -211,6 +213,8 @@ make_wtage_matrix <- function(dat, fleetoption = 1, value = "weight",
         as.character(ha$Source) %in% fleetinfo$name_WLdata[fleetinfo$ID == ID], ]
       if (y > 0) {
         htemp <- ha[ha$Year == y, ]
+      } else {
+        htemp <- ha[ha$Year %in% yearsearly, ]
       }
       # make empty vectors to hold value-by-age for this year
       sampsizes <- rep(0, N_agebins)
@@ -526,12 +530,14 @@ make_wtatage_plots <- function(plots=1:6, data, counts, lengths = NULL,
 #' 
 #' @param file A filename that you want to save the information as. The default is to have
 #' an extension of \code{.ss} such that the file can be used for Stock Synthesis.
-#' The file path can either be relative or absolute. 
+#' The file path can either be relative or absolute.
+#' @param data Weight at age matrix.
+#' @param maturity A vector of maturity at age.
 #' @template verbose
 #' 
 write_wtatage_file <- function(
   file = paste0("wtatage_",format(Sys.time(),"%Y"),"created_",format(Sys.time(),"%d-%b-%Y_%H.%M"),".ss"), 
-  data,
+  data, maturity,
   verbose = FALSE){
   # stuff copied from SS_writedat for printing tables
   on.exit({if(sink.number()>0) sink()}) # only needed if this is put into a function
@@ -562,15 +568,16 @@ write_wtatage_file <- function(
               "###################################################",
               "20 # Maximum age",
               "",
-              "#Maturity x Fecundity: Fleet = -2 (Values unchanged from 2012 Stock Assessment)",
+              "#Maturity x Fecundity: Fleet = -2 (Values maturity unchanged from 2012 Stock Assessment)",
+              "#Maturity x Fecundity: Fleet = -2 (are maturity * wtatage)",
               "")
   writeLines(header)
 
-  matfec <- data[1,]
-  matfec[1,6] <- -2
-  matfec[1,-(1:6)] <- c(0.0000, 0.0000, 0.1003, 0.2535, 0.3992, 0.5180, 0.6131, 0.6895, 0.7511, 0.8007, 0.8406, 0.8724, 0.8979, 0.9181, 0.9342, 0.9469, 0.9569, 0.9649, 0.9711, 0.9761, 0.9830)
-  names(matfec) <- colnames(data)
-  printdf(matfec)
+  # Make fleet -2 for most recent years
+  fleetn2 <- cbind(data[, c(1:6)],
+    t(apply((data[, -c(1:6)]),1, function(x) x*maturity)))
+  fleetn2$fleet <- -2
+  printdf(fleetn2)
 
   writeLines("#All matrices below use the same values, pooled across all data sources")
 
@@ -586,11 +593,12 @@ write_wtatage_file <- function(
   }
 
   # terminator line
-  terminator <- 0*matfec
-  terminator[1] <- -9999
+  terminator <- 0*fleetn2[1, ]
+  terminator[, 1] <- -9999
+  terminator[, "fleet"] <- 2
   writeLines("")
   writeLines("# terminator line")
-  printdf(matfec)
+  printdf(terminator)
 
   writeLines("# End of wtatage.ss file")
 
