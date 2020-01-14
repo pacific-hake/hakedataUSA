@@ -54,11 +54,12 @@ datatocomps <- function(dirdata, dirmod) {
     as.numeric(all$Nsamples)
   colnames(sw) <- gsub("^a", "sw", colnames(sw))
 
-  wtatage <- r4ss::SS_readwtatage(file.path(dirmod, "wtatage.ss"))
-  colnames(wtatage)[colnames(wtatage) == "Yr"] <- "Year"
-  colnames(wtatage)[colnames(wtatage) %in% 0:ncol(wtatage)] <- paste0("wtAtAge", 
-  colnames(wtatage)[colnames(wtatage) %in% 0:ncol(wtatage)])
-  all <- merge(all, wtatage[, c("Year", paste0("wtAtAge", 1:ncol(cw)))], 
+  wtatage <- r4ss::SS_readwtatage(file = file.path(dirmod, "wtatage.ss"),
+    verbose = FALSE)
+  colnames(wtatage) <- gsub("^([0-9])", "wtAtAge\\1", colnames(wtatage))
+  colnames(wtatage) <- gsub("^Yr", "Year", colnames(wtatage))
+  all <- merge(all,
+    wtatage[wtatage$Fleet == 1, c("Year", paste0("wtAtAge", 1:ncol(cw)))],
     all.x = TRUE)
   all <- all[order(all$Sector, all$Year), ]
   samplesize <- tapply(all$Nsamples, all$Year, function(x) sum(as.numeric(x)))
