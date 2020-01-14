@@ -1,6 +1,6 @@
 Package: hakedataUSA
 Title: Extract USA Data for Pacific Hake
-Version: 0.0.0.9000
+Version: 0.0.2020.0001
 Authors@R: c(
     person(given = c("Kelli", "F."),
            family = "Johnson",
