@@ -120,6 +120,8 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
     outfname = file.path(mydir, "Catches"))
 
   hcatch <- outncatch[outncatch$SPECIES == 206, ]
+  hcatch$Date <- as.Date(hcatch$RETRIEVAL_DATE, f = "%Y-%m-%d")
+  hcatch$year <- format(hcatch$Date, "%Y")
   hcatch$hrs <- hcatch$DURATION_IN_MIN/60
   hcatch$crate <- hcatch$EXTRAPOLATED_WEIGHT / 1000 / hcatch$hrs
   hcatch$FISHING_DEPTH_M <- hcatch$FISHING_DEPTH_FATHOMS * 1.8288
@@ -211,6 +213,14 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
   temp <- temp[temp$ntowsdeeper1500f > 3, ]
   utils::write.table(temp,
     file = file.path(mydir, "Catches", "NORPAC_DomesticAtSea_bdepthfathom_deeper1500f.csv"))
+  utils::write.table(
+    aggregate(Date ~ year, data = hcatch[hcatch$VESSEL_TYPE == 1, ], min),
+    file = file.path(mydir, "Catches", "us-cp-startdate.csv"),
+    sep = ",", quote = FALSE, row.names = FALSE)
+  utils::write.table(
+    aggregate(Date ~ year, data = hcatch[hcatch$VESSEL_TYPE == 2, ], min),
+    file = file.path(mydir, "Catches", "us-ms-startdate.csv"),
+    sep = ",", quote = FALSE, row.names = FALSE)
 
  hcatch$monthf <- droplevels(factor(hcatch$month, levels = 1:12, 
     labels = rep(paste(seq(1, 11, by = 2), seq(2, 12, by = 2), sep = "-"),

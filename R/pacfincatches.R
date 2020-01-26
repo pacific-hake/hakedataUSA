@@ -68,6 +68,9 @@ pacfincatches <- function(pcatch = NULL, addtribal = 0) {
   utils::write.table(research,
     file = file.path(mydir, "Catches", "us-research-catch-by-month.csv"),
     sep = ",", quote = FALSE, row.names = FALSE)
+  utils::write.table(aggregate(Date ~ year + DAHL_SECTOR, data = pcatch, min),
+    file = file.path(mydir, "Catches", "us-shore-startdate-by-dahl.csv"),
+    sep = ",", quote = FALSE, row.names = FALSE)
 
   #Look at tribal catch in shoreside (already added in above)
   tribal <- pcatch[pcatch$FLEET == "TI", ]
