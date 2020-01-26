@@ -78,7 +78,7 @@ pacfincatches <- function(pcatch = NULL, addtribal = 0) {
       list("month" = tribal$month, "year" = tribal$year),
       FUN = sum)
   utils::write.table(tribal.yr.per,
-    file = file.path(mydir, "Catches", "PacFIN_Tribal.csv"),
+    file = file.path(mydir, "Catches", "us-ti-catch-by-month.csv"),
     sep = ",", quote = FALSE, row.names = FALSE)
 
   invisible(list("PacFINTribal" = tribal, "Foreign" = xxcatch,
