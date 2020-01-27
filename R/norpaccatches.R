@@ -133,10 +133,10 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
   # todo: fix las to match between US and Canada
   keeptheseyears <- tail(1: max(hcatch$year, na.rm = TRUE), nyears)
   exportdepth(split(hcatch$FISHING_DEPTH_M, hcatch$year),
-    country = "US", type = "fishing_atsea", 
+    country = "US", type = "atsea-fishing", 
     dir = file.path(mydir, "Catches"))
   exportdepth(split(hcatch$BOTTOM_DEPTH_M, hcatch$year),
-    country = "US", type = "bottom_atsea", 
+    country = "US", type = "atsea-bottom", 
     dir = file.path(mydir, "Catches"))
   if (colour) {
     colors <- plotcolour(length(sort(unique(hcatch$year))))
