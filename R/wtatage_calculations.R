@@ -515,6 +515,14 @@ make_wtatage_plots <- function(plots=1:6, data, counts, lengths = NULL,
       main="Mean length at age (colors) with sample sizes (numbers)",
       yrvec = (year - ncol(len.mat) + 1):year)
     dev.off()
+
+    fileplot <- file.path(dir, paste0("EWAforDoc_Numbers.eps"))
+    grDevices::cairo_ps(fileplot, width = 7, height = 9, pointsize = 12)
+    makeimage(mat = len.mat, meanvec = len.meanvec, Ntext = TRUE,
+      Nsamp.meanvec = Nsamp.meanvec, Nsamp.mat = Nsamp.mat,
+      main = "Mean length at age (colors) with sample sizes (numbers)",
+      yrvec = (year - ncol(len.mat) + 1):year)
+    dev.off()
   }
 
   # write image to EPS format for inclusion in document
