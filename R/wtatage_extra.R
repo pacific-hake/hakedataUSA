@@ -44,15 +44,27 @@ wtatage_extra <- function(dir, dirmodel = NULL, outliers = TRUE, maxage = 15,
       outlierplot = TRUE,
       outlierPlotName = file.path(dir, "plots", "wtAgeOutliers1975to2007.png"),
       elimUnsexed = FALSE)
-    for(yr in yrs) {
+    # Eliminate all pre 2019 Canadian data from compiled files
+    # 2019 data comes from a separate csv file and is brought into the
+    # year file read in below.
+    dat <- dat[!grepl("Can[_a]", dat$Source, ignore.case = TRUE), ]
+    #Canadian data
+    canall <- wtatage_can(file.path(dir,
+      "LengthWeightAge_data_1975to2017_IncludeCanada.csv"))
+    #todo: calculate outlier for can data
+    canall$outlierL <- FALSE
+    dat <- rbind(dat, canall)
+    for (yr in yrs) {
       filename <- file.path(dir, paste0("LWAdata_", yr, ".csv"))
       if (!file.exists(filename)) next
-      dat <- rbind(
-        dat,
-        get_wtatagecsv(file = filename,
-          outlierplot = TRUE, 
-          outlierPlotName = file.path(dir, "plots", paste0("wtAgeOutliers", yr, ".png")),
-          elimUnsexed = FALSE))
+      thisyr <- get_wtatagecsv(file = filename,
+        outlierplot = TRUE,
+        outlierPlotName = file.path(dir, "plots", paste0("wtAgeOutliers", yr, ".png")),
+        elimUnsexed = FALSE)
+      remove <- (grepl("Can[_a]", thisyr$Source, ignore.case = TRUE) & 
+        thisyr$Year < 2019)
+      thisyr <- thisyr[!remove, ]
+      dat <- rbind(dat, thisyr)
     }
     if (any(is.na(dat$Year))) {
       stop("Year was not read in correctly for some weight-at-age data\n",
