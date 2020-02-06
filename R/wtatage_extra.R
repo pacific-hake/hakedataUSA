@@ -141,6 +141,10 @@ wtatage_extra <- function(dir, dirmodel = NULL, outliers = TRUE, maxage = 15,
   # repeat but return sample sizes instead of mean weights
   counts_All_wMean <- make_wtage_matrix(dat,fleetoption=2,getmean=TRUE, value="count",
     months = NULL)
+  utils::write.csv(
+    setNames(counts_All_wMean, gsub("#", "", colnames(counts_All_wMean))),
+    file.path(dir, "wtatage_all_samplesize.csv"),
+    row.names = FALSE)
 
   # new method does only linear interpolation within each age (only works with all data)
   wtageInterp1_All         <- dointerpSimple(wtage_All)
