@@ -191,7 +191,7 @@ make_wtage_matrix <- function(dat, fleetoption = 1, value = "weight",
   yearsearly = unique(dat$Year)) {
 
   ha <- dat[!is.na(dat$Age_yrs), ]
-  if (!is.null(months)) ha <- dat[dat$Month %in% months, ]
+  if (!is.null(months)) ha <- ha[ha$Month %in% months, ]
 
   agebinspop  <- 0:maxage
   N_agebins <- length(agebinspop)
