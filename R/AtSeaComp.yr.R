@@ -85,12 +85,13 @@ atseaComp.yr = function(dat,ncatch,BY_AGE=TRUE, BY_MONTH=FALSE, BY_GENDER=FALSE,
 
   #Create some variables
   dat$Month <- as.numeric(substring(dat$HAUL_OFFLOAD_DATE,6,7))
-  # Create trip, haul identifiers
-  dat$TripID = paste(dat$CRUISE, sep=".")
-  dat$HaulID <- paste(dat$CRUISE, dat$HAUL_OFFLOAD, sep=".")  #can match with the ncatch file
-  ncatch$HaulID <- paste(ncatch$CRUISE, ncatch$HAUL, sep=".") 
+  # Create trip, haul identifiers; use HAUL_JOIN b/c CRUISE is not unique to a
+  # single trip but rather an observer deployment
+  dat$HaulID <- paste(dat$HAUL_JOIN, dat$HAUL_OFFLOAD, sep = ".")  #can match with the ncatch file
+  ncatch$HaulID <- paste(ncatch[, grep("HAUL_JOIN\\)", colnames(ncatch))], ncatch$HAUL, sep = ".") 
   if(sum(table(ncatch$HaulID)>1) > 1) {
-    stop("The hauls in ncatch are not unique. Are you sure this is for only one species?\n")
+    stop("The hauls in ncatch are not unique.\n",
+      "Are you sure there is only one species in ", dat[1,"YEAR"], "?\n")
   }
   if (DEBUG) {print("created trip and haul identifiers")}
 
@@ -246,10 +247,10 @@ atseaComp.yr = function(dat,ncatch,BY_AGE=TRUE, BY_MONTH=FALSE, BY_GENDER=FALSE,
     report$vesselObs <- table(dat$VESSEL_TYPE)
     dat <- dat[dat$VESSEL_TYPE %in% vesselType, ]
   }
-
+  if (NROW(dat) == 0) return(NULL)
   #calculate sample weight by summing weights
   #first, fill in missing weights with median of weight-at-length or -age 
-  ### do this by onth first, if still missing weights, do it by year.
+  ### do this by month first, if still missing weights, do it by year.
 
   if(BY_AGE) {
     colnm <- "AGE"

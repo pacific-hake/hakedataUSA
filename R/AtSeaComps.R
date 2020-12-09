@@ -43,10 +43,11 @@ atseacomps <- function(atsea.ages = NULL, ncatch = NULL,
     report.filename <- file.path(direc[ii], paste0(Yr, 
       c(".Atsea.Ages.report.txt", ".MS.Ages.report.txt", ".CP.Ages.report.txt")[ii]))
     dat <- atsea.ages[atsea.ages$YEAR == Yr, ]
+
     ncatch.yr <- ncatch[
       substring(ncatch$RETRIEVAL_DATE,1,4) == Yr & 
       ncatch$SPECIES == 206, ]
-    
+
     if (ii != 1) {
       vesseltype <- ifelse(ii == 2, 2, 1)
     } else vesseltype <- NULL
@@ -59,6 +60,7 @@ atseacomps <- function(atsea.ages = NULL, ncatch = NULL,
                which="pct", min_Haul=0, min_T_weight=0,
                minSampleSize=1, remove_sparse=FALSE, NO_LENGTH=FALSE,
                report.filename=report.filename, DEBUG=FALSE)
+    if (is.null(tmp)) next
 
     #this works because it is essentially only age and no other dimensions
     comps[i,] <- c(tmp$nFish, tmp$nHauls, as.vector(apply(tmp$comps,2,function(x){x/sum(x,na.rm=T)})))
