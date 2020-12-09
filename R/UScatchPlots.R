@@ -13,17 +13,23 @@
 #' the final data pull is normally extracted from the data warehouses.
 #' The default, of \code{TRUE}, adds \code{"(preliminary)"} to the title
 #' of each plot.
+#' @param cex.title Font size for the main title placed above the figure.
+#' Originally, the default was 1.3, this has since been changed to reflect
+#' that an additional title is not printed on the slide for the JTC meeting.
+#' Thus, a larger title was needed and the default is now .
 #' @export
 #' @author Kelli Faye Johnson
 #'
 #' @return todo: document return of UScatchPlots
 #' 
-UScatchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE) {
+UScatchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE,
+  cex.title = c(3, 1.3)[1]) {
   mydir <- hakedatawd()
   args <- list(height = 5, width = 10, units = "in", pointsize = 10, res = 300)
-  args2 <- list(mfrow=c(2,2),mar=c(0.5,4.1,0.5,0.5),oma=c(4,0.1,2,0.1),
+  args2 <- list(mfrow=c(2,2),mar=c(0.5,4.1,0.5,0.5),
+    oma=c(4,0.1,ceiling(cex.title),0.1),
     mgp=c(2.1, 0.75, 0), las = 1)
-  args3 <- list(outer=TRUE,side=3,line=-0.3,cex=1.3)
+  args3 <- list(outer=TRUE,side=3,line=-0.1,cex=cex.title)
   args4 <- list(outer=TRUE,side=1,line=1.5,cex=1.3)
 
   quotas <- read.csv(file.path(mydir, "Catches", "quotas.csv"), 
