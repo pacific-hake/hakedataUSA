@@ -1,72 +1,71 @@
-#' Workup At-Sea Composition Data for Pacific Hake
+#' Workup At-Sea and PacFIN lengths and weights
 #'
-#' todo: add more information about this function here. 
-#' 
 #' @template atsea.ages
 #' @template ncatch
 #' @param years A vector of years that you want plotted.
-#' 
-#' @return #todo: document return
-#' @export 
+#' The default is to do the last five years.
+#'
+#' @return Four figures are saved to the disk. Figures are of length
+#' and weight distributions for the at-sea and shoreside sectors.
+#' @export
 #' @import ggplot2
 #' @author Kelli Faye Johnson
-#' 
-plot_rawmeasure <- function(atsea.ages = NULL, page = NULL, years = 2017) {
-  x_weight <- c(0, 3)
-  x_length <- c(0, 70)
+#'
+plot_rawmeasure <- function(
+  atsea.ages = NULL,
+  page = NULL,
+  years = as.numeric(format(Sys.time(), "%Y"))-0:4,
+  xlim_weight = c(0, 3), xlim_length = c(0, 70)) {
+
   mydir <- hakedatawd()
   if (is.null(atsea.ages)) {
-    base::load(file.path(mydir, "extractedData", "atsea.ageWt.Rdat"))
     base::load(file.path(mydir, "extractedData", "atsea.ages.Rdat"))
+  }
+  if (is.null(page)) {
     base::load(file.path(mydir, "extractedData", "page.Rdat"))
   }
-  g1 <- ggplot(atsea.ages[atsea.ages$YEAR %in% years,],
-    aes(LENGTH, group = factor(YEAR), na.rm = TRUE)) +
-    geom_line(stat = "density", aes(y = ..density.., col = factor(YEAR))) +
-    xlim(x_length) +
-    xlab("Length (cm)") +
+  gg <- ggplot(atsea.ages[atsea.ages$YEAR %in% years,],
+    aes(group = factor(.data[["YEAR"]]),  na.rm = TRUE)) +
     ylab("At-Sea") +
     labs(col = "Year") +
-    plottheme() + theme(legend.position = c(0.85, 0.55))
-    scale_color_manual(values=plotcolour(n = length(years)))
-  g2 <- ggplot(atsea.ages[atsea.ages$YEAR %in% years,],
-    aes(WEIGHT, group = factor(YEAR), na.rm = TRUE)) +
-    geom_line(stat = "density", aes(y = ..density.., col = factor(YEAR))) +
-    xlim(x_weight) +
-    xlab("Weight (kg)") +
-    ylab("At-Sea") +
-    labs(col = "Year") +
-    plottheme() + theme(legend.position = c(0.85, 0.55))
-    scale_color_manual(values=plotcolour(n = length(years)))
-  g3 <- ggplot(page[page$SAMPLE_YEAR %in% years,],
-    aes(FISH_LENGTH/10, group = factor(SAMPLE_YEAR), na.rm = TRUE)) +
-    geom_line(stat = "density", aes(y = ..density.., col = factor(SAMPLE_YEAR))) +
-    xlim(x_length) +
-    xlab("Length (cm)") +
+    plottheme() + theme(legend.position = c(0.85, 0.55)) +
+    scale_color_manual(values = plotcolour(n = length(years)))
+  g1 <- gg +
+    geom_line(stat = "density",
+      aes(x = .data[["LENGTH"]], y = ..density..,
+        col = factor(.data[["YEAR"]])))+
+    xlim(xlim_length) +
+    xlab("Length (cm)")
+  g2 <- gg +
+    geom_line(stat = "density",
+      aes(x = .data[["WEIGHT"]], y = ..density..,
+        col = factor(.data[["YEAR"]])))+
+    xlim(xlim_weight) +
+    xlab("Weight (kg)")
+
+  gg <- ggplot(page[page$SAMPLE_YEAR %in% years,],
+    aes(group = factor(.data[["SAMPLE_YEAR"]]), na.rm = TRUE)) +
     ylab("Shoreside") +
     labs(col = "Year") +
-    plottheme() + theme(legend.position = c(0.85, 0.55))
-    scale_color_manual(values=plotcolour(n = length(years)))
-  g4 <- ggplot(page[page$SAMPLE_YEAR %in% years,],
-    aes(FISH_WEIGHT / 1000,
-      group = factor(SAMPLE_YEAR), na.rm = TRUE)) +
-    geom_line(stat = "density", aes(y = ..density.., col = factor(SAMPLE_YEAR))) +
-    xlim(x_weight) +
-    xlab("Weight (kg)") +
-    ylab("Shoreside") +
-    labs(col = "Year") +
-    plottheme() + theme(legend.position = c(0.85, 0.55))
-    scale_color_manual(values=plotcolour(n = length(years)))
-  ggplot2::ggsave(filename = file.path(mydir, "Figures", "raw_length_AtSea.png"),
-    g1, width = 7, height = 2.5
-  )
-  ggplot2::ggsave(filename = file.path(mydir, "Figures", "raw_weight_AtSea.png"),
-    g2, width = 7, height = 2.5
-  )
-  ggplot2::ggsave(filename = file.path(mydir, "Figures", "raw_length_shore.png"),
-    g3, width = 7, height = 2.5
-  )
-  ggplot2::ggsave(filename = file.path(mydir, "Figures", "raw_weight_shore.png"),
-    g4, width = 7, height = 2.5
-  )
+    plottheme() + theme(legend.position = c(0.85, 0.55)) +
+    scale_color_manual(values = plotcolour(n = length(years)))
+  g3 <- gg +
+    geom_line(stat = "density", 
+      aes(x = .data[["FISH_LENGTH"]] / 10, y = ..density..,
+        col = factor(.data[["SAMPLE_YEAR"]]))) +
+    xlim(xlim_length) +
+    xlab("Length (cm)")
+  g4 <- gg +
+    geom_line(stat = "density",
+      aes(x = .data[["FISH_WEIGHT"]] / 1000, y = ..density..,
+        col = factor(.data[["SAMPLE_YEAR"]]))) +
+    xlim(xlim_weight) +
+    xlab("Weight (kg)")
+
+  ignore <- mapply(ggplot2::ggsave,
+    filename = file.path(mydir, "Figures",
+      c("raw_length_AtSea.png", "raw_weight_AtSea.png",
+        "raw_length_shore.png", "raw_weight_shore.png")),
+    plot = list(g1, g2, g3, g4), MoreArgs = list(width = 7, height = 2.5))
+
 }
