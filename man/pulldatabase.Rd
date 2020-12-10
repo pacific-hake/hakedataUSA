@@ -12,17 +12,17 @@ pulldatabase(
 )
 }
 \arguments{
-\item{database}{A vector of character values indicating 
+\item{database}{A vector of character values indicating
 which databases you want to pull information from.
 Options include \code{c("NORPAC", "PacFIN")}, one or both
-can be specified.}
+can be specified. The default is to pull from both data bases.}
 
 \item{startyear}{An ordered list the same length as \code{database} with
 at least one element per list entry specifying the start year for
 each database. If only a single value per database is provided, then
 then the number will be recycled for catches and ages. Otherwise,
-the first entry is the start year for catches and the second is the 
-start year for age compositions.}
+the first entry is the start year for catches and the second is the
+start year for the biological data.}
 
 \item{endyear}{An integer value specifying the final year of data
 to include in the extraction. The default uses
@@ -35,20 +35,20 @@ If this argument is \code{NULL}, the user will be prompted
 for their password.}
 }
 \value{
-An environment with several objects pulled from the 
+An environment with several objects pulled from the
 NORPAC and PacFIN databases. Several \code{Rdat} files are
-saved to the disk, i.e., one for each object and a summary 
-file.
+saved to the disk in the extractedData folder,
+one file for each object and a summary file.
 }
 \description{
-Extract catch, weight and age data from NORPAC and PacFIN databases
+Extract catch, weight, and age data from NORPAC and PacFIN databases
 for the hake stock assessment.
 }
 \details{
 There are many detailed parts to \code{pulldatabase} that lead to many files
 being saved to the disk. The steps are outlined below:
 \enumerate{
-  \item The folder where the data should be saved is found.
+  \item R finds the folder where the data should be saved.
   \item A summary file is saved to the disk.
   \item Extract data from NORPAC
     \enumerate{
@@ -59,10 +59,7 @@ being saved to the disk. The steps are outlined below:
   \item Extract data from PacFIN
     \enumerate{
       \item Catch data
-      \item Age data from bds table
-      \item Species cluster
-      \item Bds fish table
-      \item Bds species cluster
+      \item Age, length, and weight data from bds table
       \item At sea sector data
     }
   \item Save each item to the disk in the "extractedData" folder.

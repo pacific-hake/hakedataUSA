@@ -4,12 +4,31 @@
 \alias{UScatchPlots}
 \title{Plots of Catch for US Only}
 \usage{
-UScatchPlots(doPNG = TRUE, nyears = 5)
+UScatchPlots(
+  doPNG = TRUE,
+  nyears = 5,
+  preliminary = TRUE,
+  cex.title = c(3, 1.3)[1]
+)
 }
 \arguments{
 \item{doPNG}{A logical specifying if png files should be saved.}
 
-\item{nyears}{The number of years you want to plot.}
+\item{nyears}{The number of years you want to plot. The maximum year
+will be found and \code{nyears} will be sequenced into history until
+the desired range is found. Years will be included in this range even
+if they do not have any data.}
+
+\item{preliminary}{A logical value specifying if the data represents
+preliminary data available prior to the first week of January when
+the final data pull is normally extracted from the data warehouses.
+The default, of \code{TRUE}, adds \code{"(preliminary)"} to the title
+of each plot.}
+
+\item{cex.title}{Font size for the main title placed above the figure.
+Originally, the default was 1.3, this has since been changed to reflect
+that an additional title is not printed on the slide for the JTC meeting.
+Thus, a larger title was needed and the default is now .}
 }
 \value{
 todo: document return of UScatchPlots

@@ -4,12 +4,16 @@
 \alias{pacfincatches}
 \title{Clean catches extracted from PacFIN}
 \usage{
-pacfincatches(pcatch = NULL)
+pacfincatches(pcatch = NULL, addtribal = 0)
 }
 \arguments{
 \item{pcatch}{An R object with PacFIN catches. The default value is
 \code{NULL}, where the object will be read from a saved object within
 a directory called extractedData.}
+
+\item{addtribal}{A numeric value in metric tons that will be added
+to the US shoreside catch to account for tribal fish tickets not
+being in PacFIN yet.}
 }
 \value{
 A list of three data frames,

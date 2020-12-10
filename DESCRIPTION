@@ -49,4 +49,4 @@ Imports:
     RODBC,
     XML
 Remotes: github::r4ss/r4ss@development
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1

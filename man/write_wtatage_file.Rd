@@ -8,6 +8,7 @@ write_wtatage_file(
   file = paste0("wtatage_", format(Sys.time(), "\%Y"), "created_", format(Sys.time(),
     "\%d-\%b-\%Y_\%H.\%M"), ".ss"),
   data,
+  maturity,
   verbose = FALSE
 )
 }
@@ -15,6 +16,10 @@ write_wtatage_file(
 \item{file}{A filename that you want to save the information as. The default is to have
 an extension of \code{.ss} such that the file can be used for Stock Synthesis.
 The file path can either be relative or absolute.}
+
+\item{data}{Weight at age matrix.}
+
+\item{maturity}{A vector of maturity at age.}
 
 \item{verbose}{A logical value specifying whether or not to print
 information to the screen.}

@@ -7,22 +7,12 @@
 shorecomps(page = NULL, ages = 1:15, verbose = FALSE)
 }
 \arguments{
-\item{atsea.ages}{An R object with NORPAC ages. The default value is
-\code{NULL}, where the object will be read from a saved object within
-a directory called extractedData.}
+\item{page}{PacFIN biological data from the comprehensive database.}
 
-\item{bds.fish}{An R object with PacFIN information
-#todo: document better}
+\item{ages}{Vector of ages to keep.}
 
-\item{bds.sp.cluster}{An R object with PacFIN information for
-pacific hake. The default value is
-\code{NULL}, where the object will be read from a saved object within
-a directory called extractedData.}
-
-\item{bds.allsp.cluster}{An R object with PacFIN information for
-all species. The default value is
-\code{NULL}, where the object will be read from a saved object within
-a directory called extractedData.}
+\item{verbose}{A logical value specifying whether or not to print
+information to the screen.}
 }
 \value{
 todo: document the return

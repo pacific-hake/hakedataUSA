@@ -10,7 +10,7 @@ agedotoliths(agedata)
 \item{agedata}{A data frame of NORPAC ages, often called atsea.ages.}
 }
 \value{
-A data frame of proportions by year and month. The 
+A data frame of proportions by year and month. The
 function also saves a summary file (csv format) to the disk
 with sample sizes from which proportions can be calculated.
 }

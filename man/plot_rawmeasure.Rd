@@ -2,26 +2,34 @@
 % Please edit documentation in R/plot_rawmeasure.R
 \name{plot_rawmeasure}
 \alias{plot_rawmeasure}
-\title{Workup At-Sea Composition Data for Pacific Hake}
+\title{Workup At-Sea and PacFIN lengths and weights}
 \usage{
-plot_rawmeasure(atsea.ages = NULL, years = 2017)
+plot_rawmeasure(
+  atsea.ages = NULL,
+  page = NULL,
+  years = as.numeric(format(Sys.time(), "\%Y")) - 0:4,
+  xlim_weight = c(0, 3),
+  xlim_length = c(0, 70)
+)
 }
 \arguments{
 \item{atsea.ages}{An R object with NORPAC ages. The default value is
 \code{NULL}, where the object will be read from a saved object within
 a directory called extractedData.}
 
-\item{years}{}
+\item{years}{A vector of years that you want plotted.
+The default is to do the last five years.}
 
 \item{ncatch}{An R object with NORPAC catches. The default value is
 \code{NULL}, where the object will be read from a saved object within
 a directory called extractedData.}
 }
 \value{
-#todo: document return
+Four figures are saved to the disk. Figures are of length
+and weight distributions for the at-sea and shoreside sectors.
 }
 \description{
-todo: add more information about this function here.
+Workup At-Sea and PacFIN lengths and weights
 }
 \author{
 Kelli Faye Johnson

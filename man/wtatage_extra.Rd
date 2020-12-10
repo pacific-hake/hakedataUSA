@@ -6,10 +6,12 @@
 \usage{
 wtatage_extra(
   dir,
+  dirmodel = NULL,
   outliers = TRUE,
   maxage = 15,
-  yrs = 2008:format(Sys.Date(), "\%Y"),
-  navgyears = c(5, 3)
+  yrs = 2008:hakedata_year(),
+  navgyears = c(5, 3),
+  nforecast = 3
 )
 }
 \arguments{
@@ -17,6 +19,9 @@ wtatage_extra(
 It can either be relative or absolute, but no working
 directory will be changed. Instead, the \code{dir} is
 just used to import data and save resulting plots in.}
+
+\item{dirmodel}{A directory that houses the model files
+for the stock assessment.}
 
 \item{outliers}{A logical value if outliers should be looked for
 in the individual files or if a summary file that was previously 
@@ -33,6 +38,8 @@ of data.}
 by the Scientific Review Group in 2017. The argument can be a single
 value or a vector of two values, where in the latter case the second
 value will be used for the most recent time period.}
+
+\item{nforecasts}{The number of forecast years in the model.}
 }
 \value{
 todo: document return

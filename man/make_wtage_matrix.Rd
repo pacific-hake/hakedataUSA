@@ -10,7 +10,8 @@ make_wtage_matrix(
   value = "weight",
   months = 1:12,
   getmean = FALSE,
-  maxage = 15
+  maxage = 15,
+  yearsearly = unique(dat$Year)
 )
 }
 \arguments{
