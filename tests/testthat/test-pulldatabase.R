@@ -7,8 +7,9 @@ test_that("Files have positive size", {
 })
 
 test_that("Age structures without an age", {
-  expect_equal(sum(is.na(bds.age$AGE_YEARS)), 0,
-    label = "Number of PacFIN age structures without an age is")
+  # todo: find a way to get number of unaged structures from PacFIN
+  # expect_equal(sum(is.na(page$AGE_YEARS)), 0,
+  #   label = "Number of PacFIN age structures without an age is")
   # todo(eachyear): add historic info to compare to
   history_badages <- c("2008" = 10, "2009" = 11, "2010" = 76,
     "2011" = 5, "2012" = 84, "2013" = 5, "2014" = 17, "2015" = 175,
@@ -19,23 +20,18 @@ test_that("Age structures without an age", {
 })
 
 test_that("Data is available for every year.", {
-  maxyears <- unique(c(bds.age$SAMPLE_YEAR,
-    bds.fish$SAMPLE_YEAR, atsea.ages$YEAR))
+  maxyears <- unique(c(page$SAMPLE_YEAR, atsea.ages$YEAR))
   maxyears <- maxyears[order(maxyears)]
   temp <- data.frame(
-      "database" = c(rep("PacFIN", 2), rep("NORPAC", 1)),
-      "data" = c("fish samples", "otoliths", "otoliths"),
+      "database" = c(rep("PacFIN", 1), rep("NORPAC", 1)),
+      "data" = c("otoliths", "otoliths"),
       rbind(
-      table(factor(bds.fish$SAMPLE_YEAR, levels = maxyears)),
-      table(factor(bds.age$SAMPLE_YEAR, levels = maxyears)),
+      table(factor(page$SAMPLE_YEAR, levels = maxyears)),
       table(factor(atsea.ages$YEAR[!is.na(atsea.ages$AGE)], levels = maxyears))),
       check.names = FALSE)
-  expect_true(all(temp[1, -c(1:2)] > 3900),
-    label = "At least 3900 fish samples per year in PacFIN")
-  expect_true(all(temp[-1, -c(1:2)] > 1200),
+  expect_true(all(temp[, -c(1:2, NCOL(temp))] > 1200),
     label = "At least 1200 age samples per year per database")
-  write.csv(temp, file = file.path(test_dir_data, "summary_nsamples_year.csv"),
-    append = FALSE)
+  utils::write.csv(temp, file = file.path(test_dir_data, "summary_nsamples_year.csv"))
 })
 
 test_that("NORPAC cruises include a single vessel", {
@@ -50,11 +46,11 @@ test_that("", {
   atsea.ages$Month <- factor(as.numeric(format(as.Date(
     atsea.ages$HAUL_OFFLOAD_DATE), "%m")), levels = 1:12)
   temp <- merge(all = TRUE,
-    aggregate(list("Ages" = bds.age$AGE_YEARS),
+    aggregate(list("Ages" = !is.na(page$AGE_YEARS)),
       by = list(
-        "Month" = factor(bds.age$SAMPLE_MONTH, levels = 1:12),
-        "Year" = bds.age$SAMPLE_YEAR,
-        "State" = bds.age$SAMPLE_AGID), FUN = length),
+        "Month" = factor(page$SAMPLE_MONTH, levels = 1:12),
+        "Year" = page$SAMPLE_YEAR,
+        "State" = page$SOURCE_AGID), FUN = sum),
     data.frame(
       aggregate(AGE ~ YEAR + Month, data = atsea.ages[!is.na(atsea.ages$AGE),],
       FUN = length), "State" = "atsea"),

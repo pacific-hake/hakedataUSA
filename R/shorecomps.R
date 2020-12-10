@@ -4,10 +4,9 @@
 #' hake fishery. Written by Allan Hicks in 2016 and
 #' revised in 2017 by Ian Taylor.
 #' 
-#' @template atsea.ages
-#' @template bds.fish
-#' @template bds.sp.cluster
-#' @template bds.allsp.cluster
+#' @template page
+#' @param ages Vector of ages to keep.
+#' @template verbose
 #' 
 #' @export
 #' @author Kelli Faye Johnson
@@ -23,9 +22,9 @@ shorecomps <- function(
     recursive = TRUE, showWarnings = FALSE)
   if (is.null(page)) base::load(file.path(mydir, "extractedData", "page.Rdat"))
 
-  bds.fish.worked <- page[!is.na(page$AGE_YEARS), ]
-  bds.fish.worked$SEX <- factor(bds.fish.worked$SEX)
-  dat <- SetUpHakeBDS.fn(bds.fish.worked, verbose = verbose,
+  page.worked <- page[!is.na(page$AGE_YEARS), ]
+  page.worked$SEX <- factor(page.worked$SEX)
+  dat <- SetUpHakeBDS.fn(page.worked, verbose = verbose,
     max.mmLength = 1000, dataTypes = c("C"),
     sampleMethods = c("R"), sampleTypes = c(NA, "", "C", "M"),
     states = c("CA", "OR", "WA", "PW"))
@@ -81,13 +80,13 @@ shorecomps <- function(
   utils::write.csv(row.names = FALSE,
     file = file.path(mydir, "Catches", "Comps", "shoreside_AGID_Age.csv"),
     reshape(aggregate(FREQ ~ SOURCE_AGID + FISH_AGE_YEARS_FINAL+ SAMPLE_YEAR ,
-      data = bds.fish.worked, length),
+      data = page.worked, length),
       direction = "wide", timevar = "SOURCE_AGID",
       idvar = c("FISH_AGE_YEARS_FINAL", "SAMPLE_YEAR")))
   utils::write.csv(row.names = FALSE,
     file = file.path(mydir, "Catches", "Comps", "shoreside_AGID_Grid.csv"),
     reshape(aggregate(FREQ ~ GRID + FISH_AGE_YEARS_FINAL+ SAMPLE_YEAR ,
-      data = bds.fish.worked, length),
+      data = page.worked, length),
       direction = "wide", timevar = "GRID",
       idvar = c("FISH_AGE_YEARS_FINAL", "SAMPLE_YEAR")))
   utils::write.csv(row.names = FALSE,

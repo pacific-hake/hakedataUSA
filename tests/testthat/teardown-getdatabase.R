@@ -1,8 +1,7 @@
 # tear down getdatabase
 rm(atsea.ages)
 rm(atsea.ageWt)
-rm(bds.age)
-rm(bds.fish)
+rm(page)
 rm(ncatch)
 rm(pcatch)
 rm(pcatchatsea)

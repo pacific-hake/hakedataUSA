@@ -115,19 +115,19 @@ wtatage_collate <- function(year = hakedata_year()) {
 
   #US Shore-based fishery
   base::load(file.path(mydir, "extractedData", "page.Rdat"))
-  bds.fish.worked <- page[
+  page.worked <- page[
     !is.na(page$FISH_AGE_YEARS_FINAL) &
     !is.na(page$FISH_WEIGHT) &
     page$SAMPLE_YEAR %in% year, ]
-  bds.fish.worked$SEX <- factor(bds.fish.worked$SEX)
-  info$usshorebasedmean <- tapply(bds.fish.worked$FISH_WEIGHT / 1000, 
-    list("AGE" = bds.fish.worked$FISH_AGE_YEARS_FINAL), mean)
+  page.worked$SEX <- factor(page.worked$SEX)
+  info$usshorebasedmean <- tapply(page.worked$FISH_WEIGHT / 1000, 
+    list("AGE" = page.worked$FISH_AGE_YEARS_FINAL), mean)
   tmp <- data.frame(Source = "SHORE",
-    Weight_kg = bds.fish.worked$FISH_WEIGHT / 1000,
-    Sex = bds.fish.worked$SEX, Age_yrs = bds.fish.worked$FISH_AGE_YEARS_FINAL,
-    Length_cm = bds.fish.worked$FISH_LENGTH / 10, 
-    Month = bds.fish.worked$SAMPLE_MONTH, 
-    Year = bds.fish.worked$SAMPLE_YEAR)
+    Weight_kg = page.worked$FISH_WEIGHT / 1000,
+    Sex = page.worked$SEX, Age_yrs = page.worked$FISH_AGE_YEARS_FINAL,
+    Length_cm = page.worked$FISH_LENGTH / 10, 
+    Month = page.worked$SAMPLE_MONTH, 
+    Year = page.worked$SAMPLE_YEAR)
 
   dat <- rbind(dat, tmp)
   rm(tmp)
