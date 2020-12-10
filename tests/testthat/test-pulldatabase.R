@@ -34,13 +34,6 @@ test_that("Data is available for every year.", {
   utils::write.csv(temp, file = file.path(test_dir_data, "summary_nsamples_year.csv"))
 })
 
-test_that("NORPAC cruises include a single vessel", {
-  badNORPAC <- as.numeric(names(which(apply(
-    table(atsea.ages$CRUISE, atsea.ages$VESSEL_SEQ)>0, 1, sum) > 1)))
-  expect_true(all(badNORPAC %in% c(13788, 13836, 14254, 19661)),
-    label = "Bad NORPAC cruises were kept to 4 historical ones")
-  cat(paste(badNORPAC, collapse = "\n"), "\n")
-})
 
 test_that("", {
   atsea.ages$Month <- factor(as.numeric(format(as.Date(
