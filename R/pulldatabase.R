@@ -182,7 +182,8 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
   }
   if ("pacfin" %in% tolower(database)) {
     assign("pcatch", pcatch, envir = e1)
+    assign("pcatchatsea", pcatchatsea, envir = e1)
     assign("page", page, envir = e1)
   }
-  invisible(e1)
+  return(invisible(e1))
 }
