@@ -1,1 +1,8 @@
 password.txt
+inst/extdata/beamer/*.knit*
+inst/extdata/beamer/*.log
+inst/extdata/beamer/*.pdf
+inst/extdata/beamer/*.png
+inst/extdata/beamer/*.tex
+inst/extdata/beamer/*.utf8*
+inst/extdata/beamer/*.xmpi

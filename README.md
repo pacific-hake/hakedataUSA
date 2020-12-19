@@ -22,6 +22,7 @@ datatoassessment(dirout = file.path(local.assess, "data"), year = hakedata_year(
   filedat = file.path(local.assess, "models", local.model, "hake_data.ss"))
 datatocomps(dirdata = file.path(local.assess, "data"),
   dirmod = file.path(local.assess, "models", local.model))
+render("inst/extdata/beamer/hake_jtc_data_us.Rmd")
 ```
 
 # Issues
