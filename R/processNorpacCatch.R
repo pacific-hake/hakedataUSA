@@ -51,7 +51,6 @@ processNorpacCatch <- function(ncatch, species = 206, outfname = NULL,
   ncatch$year <- get_date(ncatch$RETRIEVAL_DATE, "%Y")
   ncatch$vesseltype <- norpac_vesseltype(ncatch$VESSEL_TYPE)
   ncatch$Sector <- "DomesticAtSea"
-  my.sum <- function(x) sum(x, na.rm = TRUE)
 
   ncatch$sampled <- ifelse(yes = 0, no = 1,
     is.na(ncatch$HAUL_SAMPLED_BY) | ncatch$HAUL_SAMPLED_BY == 0)
@@ -64,9 +63,9 @@ processNorpacCatch <- function(ncatch, species = 206, outfname = NULL,
   # to get the amount of hake in the tow based on average bycatch rate
   # bycatch rates are VESSEL_TYPE specific as of 2019 assessment
   ncatch$MonthlyByCatch <- stats::ave(ifelse(ncatch$sampled == 1, ncatch$ByCatch, 0),
-    ncatch$year, ncatch$month, ncatch$SPECIES == species, ncatch$VESSEL_TYPE, FUN = my.sum)
+    ncatch$year, ncatch$month, ncatch$SPECIES == species, ncatch$VESSEL_TYPE, FUN = get_sum)
   ncatch$MonthlyTotal <- stats::ave(ifelse(ncatch$sampled == 1, ncatch$OFFICIAL_TOTAL_CATCHkg, 0),
-    ncatch$year, ncatch$month, ncatch$SPECIES == species, ncatch$VESSEL_TYPE, FUN = my.sum)
+    ncatch$year, ncatch$month, ncatch$SPECIES == species, ncatch$VESSEL_TYPE, FUN = get_sum)
   ncatch$bycatchrate <- ncatch$MonthlyByCatch / ncatch$MonthlyTotal
   ncatch$Catch.MT <- ifelse(ncatch$sampled == 0,
     ncatch$OFFICIAL_TOTAL_CATCHkg * (1 - ncatch$bycatchrate),
@@ -84,11 +83,11 @@ processNorpacCatch <- function(ncatch, species = 206, outfname = NULL,
   catches <- stats::aggregate(Catch.MT ~ Sector + month + year,
     data = ncatch[ncatch$SPECIES == species, ], sum, na.rm = TRUE)
   catchout <- stats::aggregate(catch ~ Sector + vesseltype + month + year,
-    data = ncatch[ncatch$SPECIES == species, ], my.sum)
+    data = ncatch[ncatch$SPECIES == species, ], get_sum)
   TRout <- ncatch[ncatch$CDQ_CODE=="M01" & !is.na(ncatch$CDQ_CODE), ]
   TRout$Sector <- "DomesticAtSeaTribal"
   TRout.yr <- stats::aggregate(list("catch" = TRout$catch),
-    list("sector" = TRout$Sector, "year" = TRout$year), FUN = my.sum)
+    list("sector" = TRout$Sector, "year" = TRout$year), FUN = get_sum)
 
   if (!is.null(outfname)) {
     utils::write.table(nsampledhauls,
