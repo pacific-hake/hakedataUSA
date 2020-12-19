@@ -1,4 +1,4 @@
-#' Pull Information From NORPAC and PacFIN Databases
+#' Pull information from NORPAC and PacFIN databases for hake
 #'
 #' Extract catch, weight, and age data from NORPAC and PacFIN databases
 #' for the hake stock assessment.
@@ -7,21 +7,26 @@
 #' There are many detailed parts to \code{pulldatabase} that lead to many files
 #' being saved to the disk. The steps are outlined below:
 #' \enumerate{
-#'   \item R finds the folder where the data should be saved.
-#'   \item A summary file is saved to the disk.
-#'   \item Extract data from NORPAC
+#'   \item [hakedatawd] finds the folder where the data should be saved.
+#'   \item Start years for each database are determined from `startyear`.
+#'   \item Ending year of the data is determined using [hakedata_year] and
+#'     is assigned to `endyear`.
+#'   \item Extract data from NORPAC if included in `database`.
 #'     \enumerate{
 #'       \item Catch data
 #'       \item Weight and age data
 #'       \item Squash table of ages (that also includes lengths)
+#'       \item Foreign ages
+#'       \item Species list
 #'     }
-#'   \item Extract data from PacFIN
+#'   \item Extract data from PacFIN if included in `database`.
 #'     \enumerate{
 #'       \item Catch data
 #'       \item Age, length, and weight data from bds table
-#'       \item At sea sector data
+#'       \item At-sea-sector data
 #'     }
-#'   \item Save each item to the disk in the "extractedData" folder.
+#'   \item Save each object to the disk in the "extractedData" directory in
+#'     [hakedatawd].
 #' }
 #' @param database A vector of character values indicating
 #' which databases you want to pull information from.
@@ -41,7 +46,7 @@
 #' second being your PacFIN password without quotes.
 #' If this argument is \code{NULL}, the user will be prompted
 #' for their password.
-#' 
+#'
 #' @export
 #' @author Kelli Faye Johnson
 #' @return An environment with several objects pulled from the
@@ -51,15 +56,19 @@
 #'
 #' @examples
 #' \dontrun{
+#' # An environment with objects is returned
 #' dataenv <- pulldatabase()
+#' # Access individual objects using get
 #' head(get("ncatch", envir = dataenv))
+#' # Access individual objects pretending the environment is a list
+#' dataenv[["ncatch"]][1:5, ]
 #' }
 #'
-pulldatabase <- function(database = c("NORPAC", "PacFIN"), 
+pulldatabase <- function(database = c("NORPAC", "PacFIN"),
   startyear = list("NORPAC" = 2008, "PacFIN" = c(1980, 2008)),
   endyear = hakedata_year(),
   passwordfile = "password.txt") {
-  
+ 
   mydir <- hakedatawd()
   sqldir <- system.file("extdata", "sql", package = "hakedataUSA")
   if (!is.list(startyear)) {
@@ -98,10 +107,10 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     x <- deparse(substitute(data))
     assign(x, data)
     end <- paste0(trailingname, ".Rdat")
-    save(list = x, 
+    save(list = x,
       file = file.path(dir, "extractedData", end))
     ignore <- file.copy(from = file.path(dir, "extractedData", end),
-      to = file.path(dir, "extractedData", "copies", 
+      to = file.path(dir, "extractedData", "copies",
         gsub("\\.", paste0("_", format(Sys.time(), "%Y.%m.%d"), "."), end)),
       overwrite = TRUE)
     if (!ignore) stop("Something went wrong copying the file to copies")
@@ -112,24 +121,24 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     # Catches
     ncatch <- queryDB(
       queryFilename = dir(sqldir, "NORPACdomesticCatch", full.names = TRUE),
-      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw, 
+      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw,
       start = startyear$NORPAC[1], end = endyear)
     localsave(ncatch, "NORPACdomesticCatch")
     # Age and weight data
     atsea.ageWt <- queryDB(
       queryFilename = dir(sqldir, "atseaAgeWeight", full.names = TRUE),
-      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw, 
+      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw,
       sp = "206", start = startyear$NORPAC[2], end = endyear)
     localsave(atsea.ageWt, "atsea.ageWt")
     # Age and weight data from squash table
     atsea.ages <- queryDB(
       queryFilename = dir(sqldir, "atSeaSquashTableAges", full.names = TRUE),
-      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw, 
+      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw,
       sp = "206", start = startyear$NORPAC[2], end = endyear)
     localsave(atsea.ages, "atsea.ages")
     atsea.foreign <- queryDB(
       queryFilename = dir(sqldir, "atsea_foreign_ages", full.names = TRUE),
-      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw, 
+      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw,
       sp = "206", start = startyear$NORPAC[2], end = endyear)
     localsave(atsea.foreign, "atsea.foreign")
     # Get species list
@@ -145,7 +154,7 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     # Remove XXX fleet (foreign catch?)
     pcatch <- queryDB(
       queryFilename = dir(sqldir, "comp_ft_taylor_aliased", full.names = TRUE),
-      db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw, 
+      db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
       sp = "PWHT", start = startyear$PacFIN[1], end = endyear)
     localsave(pcatch, "Pacfincomp_ft_taylorCatch")
     # bds data

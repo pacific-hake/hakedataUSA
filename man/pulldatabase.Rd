@@ -2,7 +2,7 @@
 % Please edit documentation in R/pulldatabase.R
 \name{pulldatabase}
 \alias{pulldatabase}
-\title{Pull Information From NORPAC and PacFIN Databases}
+\title{Pull information from NORPAC and PacFIN databases for hake}
 \usage{
 pulldatabase(
   database = c("NORPAC", "PacFIN"),
@@ -48,27 +48,36 @@ for the hake stock assessment.
 There are many detailed parts to \code{pulldatabase} that lead to many files
 being saved to the disk. The steps are outlined below:
 \enumerate{
-  \item R finds the folder where the data should be saved.
-  \item A summary file is saved to the disk.
-  \item Extract data from NORPAC
-    \enumerate{
-      \item Catch data
-      \item Weight and age data
-      \item Squash table of ages (that also includes lengths)
-    }
-  \item Extract data from PacFIN
-    \enumerate{
-      \item Catch data
-      \item Age, length, and weight data from bds table
-      \item At sea sector data
-    }
-  \item Save each item to the disk in the "extractedData" folder.
+\item \link{hakedatawd} finds the folder where the data should be saved.
+\item Start years for each database are determined from \code{startyear}.
+\item Ending year of the data is determined using \link{hakedata_year} and
+is assigned to \code{endyear}.
+\item Extract data from NORPAC if included in \code{database}.
+\enumerate{
+\item Catch data
+\item Weight and age data
+\item Squash table of ages (that also includes lengths)
+\item Foreign ages
+\item Species list
+}
+\item Extract data from PacFIN if included in \code{database}.
+\enumerate{
+\item Catch data
+\item Age, length, and weight data from bds table
+\item At-sea-sector data
+}
+\item Save each object to the disk in the "extractedData" directory in
+\link{hakedatawd}.
 }
 }
 \examples{
 \dontrun{
+# An environment with objects is returned
 dataenv <- pulldatabase()
+# Access individual objects using get
 head(get("ncatch", envir = dataenv))
+# Access individual objects pretending the environment is a list
+dataenv[["ncatch"]][1:5, ]
 }
 
 }
