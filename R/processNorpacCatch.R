@@ -84,7 +84,10 @@ processNorpacCatch <- function(ncatch, species = 206, outfname = NULL,
     data = ncatch[ncatch$SPECIES == species, ], sum, na.rm = TRUE)
   catchout <- stats::aggregate(catch ~ Sector + vesseltype + month + year,
     data = ncatch[ncatch$SPECIES == species, ], get_sum)
-  TRout <- ncatch[ncatch$CDQ_CODE=="M01" & !is.na(ncatch$CDQ_CODE), ]
+  TRout <- ncatch[
+    ncatch$CDQ_CODE=="M01" &
+    !is.na(ncatch$CDQ_CODE) &
+    ncatch$SPECIES == species, ]
   TRout$Sector <- "DomesticAtSeaTribal"
   TRout.yr <- stats::aggregate(list("catch" = TRout$catch),
     list("sector" = TRout$Sector, "year" = TRout$year), FUN = get_sum)
