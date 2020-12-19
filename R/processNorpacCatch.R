@@ -62,11 +62,13 @@ processNorpacCatch <- function(ncatch, species = 206, outfname = NULL,
   # Find monthly rate for un-sampled tows and multiply times OFFICIAL_CATCH
   # to get the amount of hake in the tow based on average bycatch rate
   # bycatch rates are VESSEL_TYPE specific as of 2019 assessment
-  ncatch$MonthlyByCatch <- stats::ave(ifelse(ncatch$sampled == 1, ncatch$ByCatch, 0),
-    ncatch$year, ncatch$month, ncatch$SPECIES == species, ncatch$VESSEL_TYPE, FUN = get_sum)
-  ncatch$MonthlyTotal <- stats::ave(ifelse(ncatch$sampled == 1, ncatch$OFFICIAL_TOTAL_CATCHkg, 0),
-    ncatch$year, ncatch$month, ncatch$SPECIES == species, ncatch$VESSEL_TYPE, FUN = get_sum)
-  ncatch$bycatchrate <- ncatch$MonthlyByCatch / ncatch$MonthlyTotal
+  ncatch$bycatchrate <- stats::ave(
+    ifelse(ncatch$sampled == 1, ncatch$ByCatch, 0),
+    ncatch$year, ncatch$month, ncatch$SPECIES == species, ncatch$VESSEL_TYPE,
+    FUN = get_sum) /    stats::ave(
+    ifelse(ncatch$sampled == 1, ncatch$OFFICIAL_TOTAL_CATCHkg, 0),
+    ncatch$year, ncatch$month, ncatch$SPECIES == species, ncatch$VESSEL_TYPE,
+    FUN = get_sum)
   ncatch$Catch.MT <- ifelse(ncatch$sampled == 0,
     ncatch$OFFICIAL_TOTAL_CATCHkg * (1 - ncatch$bycatchrate),
     ncatch$EXTRAPOLATED_WEIGHT) / 1000
