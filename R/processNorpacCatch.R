@@ -46,8 +46,9 @@ processNorpacCatch <- function(ncatch, species = 206, outfname = NULL,
   colnames(ncatch)[col_hauljoin] <- "HAULJOIN"
   ncatch$SPECIFICHAUL <- paste(format(ncatch$HAULJOIN, digits = 19),
     ncatch$HAUL, sep = "_")
-  ncatch$month <- utils::type.convert(format(ncatch$RETRIEVAL_DATE, "%m"))
-  ncatch$year <- utils::type.convert(format(ncatch$RETRIEVAL_DATE, "%Y"))
+
+  ncatch$month <- get_date(ncatch$RETRIEVAL_DATE, "%m")
+  ncatch$year <- get_date(ncatch$RETRIEVAL_DATE, "%Y")
   ncatch$vesseltype <- norpac_vesseltype(ncatch$VESSEL_TYPE)
   ncatch$Sector <- "DomesticAtSea"
   my.sum <- function(x) sum(x, na.rm = TRUE)
