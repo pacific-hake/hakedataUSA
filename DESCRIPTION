@@ -38,6 +38,7 @@ Imports:
     mapdata,
     maps,
     maptools,
+    measurements,
     MASS,
     pbapply,
     PBSmapping,

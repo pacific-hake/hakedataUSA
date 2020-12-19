@@ -159,10 +159,13 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
       db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
       sp = "PWHT", start = startyear$PacFIN[2], end = endyear)
     # Fix weights to be in grams and lengths to be in mm
-    ind <- page$FISH_WEIGHT_UNITS %in% c("LBS", "P")
-    page$FISH_WEIGHT[ind] <- page$FISH_WEIGHT[ind] * 453.592
-    ind <- page$FISH_LENGTH_UNITS %in% c("CM")
-    page$FISH_LENGTH[ind] <- page$FISH_LENGTH[ind] * 10
+    page$FISH_WEIGHT <- ifelse(page$FISH_WEIGHT_UNITS %in% c("LBS", "P"),
+      measurements::conv_unit(page$FISH_WEIGHT, from = "lbs", to = "g"),
+      page$FISH_WEIGHT)
+    page$FISH_LENGTH <- ifelse(page$FISH_LENGTH_UNITS %in% c("CM"),
+      measurements::conv_unit(page$FISH_LENGTH, from = "cm", to = "mm"),
+      page$FISH_LENGTH)
+    # Sum weight of all clusters within a sample
     page$all_cluster_sum <- stats::ave(ifelse(
       duplicated(paste(page$SAMPLE_NO, page$CLUSTER_NO)),
       0, page$CLUSTER_WGT), page$SAMPLE_NO, FUN = sum)
