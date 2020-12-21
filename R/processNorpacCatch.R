@@ -48,6 +48,7 @@ processNorpacCatch <- function(ncatch, species = 206, outfname = NULL,
     ncatch$HAUL, sep = "_")
 
   ncatch$month <- get_date(ncatch$RETRIEVAL_DATE, "%m")
+  ncatch$Month <- format(ncatch$RETRIEVAL_DATE, format = "%b")
   ncatch$year <- get_date(ncatch$RETRIEVAL_DATE, "%Y")
   hcatch$Date <- as.Date(hcatch$RETRIEVAL_DATE, f = "%Y-%m-%d")
   hcatch$hrs <- hcatch$DURATION_IN_MIN/60
