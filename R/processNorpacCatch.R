@@ -49,6 +49,13 @@ processNorpacCatch <- function(ncatch, species = 206, outfname = NULL,
 
   ncatch$month <- get_date(ncatch$RETRIEVAL_DATE, "%m")
   ncatch$year <- get_date(ncatch$RETRIEVAL_DATE, "%Y")
+  hcatch$Date <- as.Date(hcatch$RETRIEVAL_DATE, f = "%Y-%m-%d")
+  hcatch$hrs <- hcatch$DURATION_IN_MIN/60
+  hcatch$crate <- hcatch$EXTRAPOLATED_WEIGHT / 1000 / hcatch$hrs
+  hcatch$FISHING_DEPTH_M <- measurements::conv_unit(
+    hcatch$FISHING_DEPTH_FATHOMS, from = "fathom", to = "m")
+  hcatch$BOTTOM_DEPTH_M <- measurements::conv_unit(
+    hcatch$BOTTOM_DEPTH_FATHOMS, from = "fathom", to = "m")
   ncatch$vesseltype <- norpac_vesseltype(ncatch$VESSEL_TYPE)
   ncatch$Sector <- "DomesticAtSea"
 

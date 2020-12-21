@@ -120,12 +120,6 @@ norpaccatches <- function(ncatch = NULL, writecsv = TRUE, colour = TRUE,
     outfname = file.path(mydir, "Catches"))
 
   hcatch <- outncatch[outncatch$SPECIES == 206, ]
-  hcatch$Date <- as.Date(hcatch$RETRIEVAL_DATE, f = "%Y-%m-%d")
-  hcatch$year <- format(hcatch$Date, "%Y")
-  hcatch$hrs <- hcatch$DURATION_IN_MIN/60
-  hcatch$crate <- hcatch$EXTRAPOLATED_WEIGHT / 1000 / hcatch$hrs
-  hcatch$FISHING_DEPTH_M <- hcatch$FISHING_DEPTH_FATHOMS * 1.8288
-  hcatch$BOTTOM_DEPTH_M <- hcatch$BOTTOM_DEPTH_FATHOMS * 1.8288
   splits <- lapply(split(hcatch, hcatch$year), 
     function(x) split(x[, "crate"], x[, "month"]))
   catch.yr <- split(hcatch, hcatch$year)
