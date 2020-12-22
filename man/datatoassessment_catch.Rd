@@ -11,7 +11,7 @@ datatoassessment_catch(dirout)
 for the stock assessment.}
 }
 \description{
-Copy the catch files from the US Catches directory to the assessment 
+Copy the catch files from the US Catches directory to the assessment
 data directory.
 }
 \author{

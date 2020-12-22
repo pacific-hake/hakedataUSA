@@ -8,7 +8,7 @@ create_fleetnames(option = 1)
 }
 \arguments{
 \item{option}{An integer value, where 1 leads to fishery and survey being
-identified as 1 and 2 in the \code{ID} column, 2 leads to a single fleet 
+identified as 1 and 2 in the \code{ID} column, 2 leads to a single fleet
 identified as 1, and 3 leads to two columns with the second column of a single
 fleet as \code{ID0}.}
 }
@@ -18,7 +18,7 @@ that are standardized for plotting purposes. The fishery is typically identified
 as 1 and the survey is identified as 2, but all data can be identified as 0 if desired.
 }
 \description{
-Implement consistency in fleet names and IDs for the hake fishery. The 
+Implement consistency in fleet names and IDs for the hake fishery. The
 function returns a data frame that is useful for plotting and table names.
 }
 \author{

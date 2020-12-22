@@ -45,6 +45,7 @@ Imports:
     plyr,
     RColorBrewer,
     r4ss,
+    reshape2,
     rgl,
     RgoogleMaps,
     RODBC,

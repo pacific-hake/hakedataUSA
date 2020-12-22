@@ -29,7 +29,7 @@ make_wtatage_plots(
 The default for this argument is \code{NULL}, and the function can be ran
 without supplying length data.}
 
-\item{dir}{The directory that you want to save the plots in. The default 
+\item{dir}{The directory that you want to save the plots in. The default
 is to save the plots in your current working directory.}
 
 \item{year}{A character value giving the current year that will be used in

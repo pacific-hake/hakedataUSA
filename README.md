@@ -10,7 +10,7 @@ local.model <- "2020.03.00_base_model"
 library(devtools)
 devtools::install_github("pacific-hake/hakedataUSA")
 hakedata <- pulldatabase()
-norpaccatches(hakedata$ncatch, writecsv = TRUE, colour = TRUE, nyears = 5)
+norpaccatches(hakedata$ncatch, nyears = 5)
 catch_pacfin <- pacfincatches(hakedata$pcatch)
 UScatchPlots(doPNG = TRUE, nyears = 5)
 age_norpac <- atseacomps(hakedata$atsea.ages, hakedata$ncatch)

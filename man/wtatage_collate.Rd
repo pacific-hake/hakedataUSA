@@ -10,19 +10,19 @@ wtatage_collate(year = hakedata_year())
 \item{year}{An integer value specifying the year of data you would like to summarize.}
 }
 \value{
-A list of weight-at-age information that includes the following items: 
+A list of weight-at-age information that includes the following items:
 \enumerate{
-  \item acousticmean: Mean weight-at-age from the survey, if the s
+\item acousticmean: Mean weight-at-age from the survey, if the s
 survey operated in that year.
-  \item usatseamean: mean weight-at-age from the US-at-sea data.
-  \item usshorebasedmean: mean weight-at-age from the US-shore-based data.
-  \item outliers: A table of outliers by Agency for the US-shore-based fishery.
-  \item largefishtable: A table of large fish (i.e., greater than 10 kg) 
+\item usatseamean: mean weight-at-age from the US-at-sea data.
+\item usshorebasedmean: mean weight-at-age from the US-shore-based data.
+\item outliers: A table of outliers by Agency for the US-shore-based fishery.
+\item largefishtable: A table of large fish (i.e., greater than 10 kg)
 by data source.
-  \item dat: The data that was saved to the disk for the given year.
-  \item survey: A logical value specifying if it was a survey year.
-  \item year: The year for which the data was compiled.
-  \item file: The file path used to save the \code{dat}.
+\item dat: The data that was saved to the disk for the given year.
+\item survey: A logical value specifying if it was a survey year.
+\item year: The year for which the data was compiled.
+\item file: The file path used to save the \code{dat}.
 }
 }
 \description{

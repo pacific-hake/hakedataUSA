@@ -11,7 +11,7 @@ A \code{\link[ggplot2]{theme}} object with specific
 instructions on how to create plots for this repository.
 }
 \description{
-Create a special theme for hake plots when plotting using the 
+Create a special theme for hake plots when plotting using the
 \code{\link[ggplot2]{ggplot}} functions.
 }
 \author{

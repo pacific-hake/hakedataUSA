@@ -4,20 +4,21 @@
 \alias{norpaccatches}
 \title{Workup NORPAC Catches}
 \usage{
-norpaccatches(ncatch = NULL, writecsv = TRUE, colour = TRUE, nyears = 5)
+norpaccatches(ncatch = NULL, nyears = 5, species_norpac = 206)
 }
 \arguments{
-\item{ncatch}{An R object with NORPAC catches. If \code{NULL}, 
+\item{ncatch}{An R object with NORPAC catches. If \code{NULL},
 which is the default, then the \code{.Rdat} file will be read
 from the disk.}
 
-\item{writecsv}{A logical specifying if csv files should be
-written to the disk.}
-
-\item{colour}{A logical value specifying if the plots should be 
-made in colour or gray scale, where the latter occurs if \code{FALSE}.}
-
 \item{nyears}{The number of years for plotting.}
+
+\item{species_norpac}{An integer specifying the species for NORPAC data.
+This will be three digits and is associated with the species name in
+\code{NORPAC.DOMESTIC_SPECIES}, using the column \code{SPECIES_NO}. Note that this
+value is often called the \code{OBS} species code in observer landings from the
+Alaska Fisheries Science Center and is not the \code{AKR} species code.
+For example, \code{206} is Pacific Hake and is the default.}
 
 \item{x}{A named list of values by year, more than likely
 made by tapply or split.}
@@ -27,7 +28,7 @@ is only relevant if you are saving the data to the disk
 for naming purposes.}
 
 \item{type}{A character value that will be used for the name
-of the file. 
+of the file.
 The first portion should be the sector such as "atsea".
 The second portion should be "fishing" if the file is not
 bottom depth, which what the Canadians export.}
@@ -37,15 +38,36 @@ bottom depth, which what the Canadians export.}
 be returned.}
 }
 \value{
-Saves files to the disk
-todo: summarize return in more detail
+Figures and csv files are saved to the disk regarding
+catch rates and depth (fishing and bottom depths).
+In the \code{Figures} directory, the following png or csv files are saved:
+\itemize{
+\item fishDepthsUS.png
+\item fishDepthsUSallyears.png
+\item fish_FISHING_DEPTH_FATHOMS_US.png
+\item fish_BOTTOM_DEPTH_FATHOMS_US.png
+\item fishBottomDepthByVesselUS.png
+\item fishCatchRatesUSByYear.png
+\item fishDepthByYearUS.png
+\item fishCatchRatesUS.png
+\item NORPAC_DomesticAtSea_bdepthfathom_range.csv
+\item NORPAC_DomesticAtSea_bdepthfathom_deeper1500f.csv
+\item us-cp-startdate.csv
+\item us-ms-startdate.csv
+}
+
+In the \code{Catches} directory, the following csv files are saved:
+\itemize{
+\item depth-us-atsea-bottom.csv
+\item depth-us-atsea-fishing.csv
+}
 }
 \description{
 Summarize and plot NORPAC catches for the at-sea hake fishery.
 Fleet types are assigned to create summaries by fleet and year.
 }
 \details{
-*Tribal catches*
+\emph{Tribal catches}
 }
 \author{
 Kelli Faye Johnson

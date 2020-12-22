@@ -21,8 +21,8 @@ information to the screen.}
 }
 \value{
 \enumerate{
-  \item A data frame of monthly catches in metric tons.
-  \item A csv file is saved if \code{outfname} is specified.
+\item A data frame of monthly catches in metric tons.
+\item A csv file is saved if \code{outfname} is specified.
 }
 }
 \description{
@@ -39,15 +39,15 @@ weight to get just the weight of the species of interest.
 \details{
 Definitions
 \enumerate{
-  \item @template official_total_catch
-  \item @template extrapolated_weight
+\item @template official_total_catch
+\item @template extrapolated_weight
 }
 
 Assumptions
 \enumerate{
-  \item sampled hauls have an entry in the \code{SPECIES} column,
-  i.e., hake are denoted with 206
-  \item an unsampled haul is represented by one unique record
+\item sampled hauls have an entry in the \code{SPECIES} column,
+i.e., hake are denoted with 206
+\item an unsampled haul is represented by one unique record
 }
 }
 \author{

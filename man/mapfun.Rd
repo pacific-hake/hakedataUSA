@@ -9,11 +9,11 @@ mapfun(data, doPNG = FALSE, dir = hakedatawd())
 \arguments{
 \item{data}{A data frame created in mappingagesamples.}
 
-\item{doPNG}{A logical value specifying whether or not to print the 
+\item{doPNG}{A logical value specifying whether or not to print the
 plots to png files.}
 
 \item{dir}{A file path specifying the base directory for which you
-have the hake data. Plots will be created in nested folders based on 
+have the hake data. Plots will be created in nested folders based on
 your input value for this argument.}
 }
 \value{

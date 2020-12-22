@@ -14,13 +14,13 @@ want login information for.}
 
 \item{file}{A file path specifying where to find the passwords.
 The path must be of a text file with two lines, where the first line
-is the NORPAC password and the second line is the PacFIN password. 
+is the NORPAC password and the second line is the PacFIN password.
 These passwords should not be surrounded with quotes.
 User will be prompted for passwords if a file is not specified, i.e.,
 \code{file = NULL} or if the file that is specified cannot be found.}
 }
 \value{
-A list with two entries, usernames and passwords, for the 
+A list with two entries, usernames and passwords, for the
 databases you specified in the argument \code{database}.
 }
 \description{

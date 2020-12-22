@@ -15,7 +15,7 @@ wtatage_extra(
 )
 }
 \arguments{
-\item{dir}{The directory where the data is stored. 
+\item{dir}{The directory where the data is stored.
 It can either be relative or absolute, but no working
 directory will be changed. Instead, the \code{dir} is
 just used to import data and save resulting plots in.}
@@ -24,7 +24,7 @@ just used to import data and save resulting plots in.}
 for the stock assessment.}
 
 \item{outliers}{A logical value if outliers should be looked for
-in the individual files or if a summary file that was previously 
+in the individual files or if a summary file that was previously
 generated using \code{weightatage} should be loaded.}
 
 \item{maxage}{The age of the plus group used for the stock assessment.}

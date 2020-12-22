@@ -11,7 +11,7 @@ A full file path, not a relative file path.
 }
 \description{
 Find the working directory based on your user name
-for the given computer that you on. The working 
+for the given computer that you on. The working
 directory is for the hake-data repository cloned
 from github.
 }

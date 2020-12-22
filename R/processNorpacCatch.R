@@ -24,8 +24,7 @@
 #' }
 #'
 #' @template ncatch
-#' @param species A numeric value that denotes the species of interest in the
-#' column \code{SPECIES}.
+#' @template species
 #' @param outfname A file path to save the output to.
 #' @template verbose
 #' @importFrom stats aggregate
@@ -47,16 +46,24 @@ processNorpacCatch <- function(ncatch, species = 206, outfname = NULL,
   ncatch$SPECIFICHAUL <- paste(format(ncatch$HAULJOIN, digits = 19),
     ncatch$HAUL, sep = "_")
 
+  ncatch$Date <- as.Date(ncatch$RETRIEVAL_DATE, f = "%Y-%m-%d")
   ncatch$month <- get_date(ncatch$RETRIEVAL_DATE, "%m")
   ncatch$Month <- format(ncatch$RETRIEVAL_DATE, format = "%b")
+  ncatch$fMonth <- factor(ncatch[, "Month"],
+    levels = month.abb[type.convert(sort(unique(format(
+      ncatch[, "Date"],"%m"))), as.is = TRUE)]
+    )
+  ncatch$Month <- factor(ncatch[, "Month"],
+    levels = month.abb[type.convert(sort(unique(format(
+      ncatch[,"Date"],"%m"))), as.is = TRUE)]
+    )
   ncatch$year <- get_date(ncatch$RETRIEVAL_DATE, "%Y")
-  hcatch$Date <- as.Date(hcatch$RETRIEVAL_DATE, f = "%Y-%m-%d")
-  hcatch$hrs <- hcatch$DURATION_IN_MIN/60
-  hcatch$crate <- hcatch$EXTRAPOLATED_WEIGHT / 1000 / hcatch$hrs
-  hcatch$FISHING_DEPTH_M <- measurements::conv_unit(
-    hcatch$FISHING_DEPTH_FATHOMS, from = "fathom", to = "m")
-  hcatch$BOTTOM_DEPTH_M <- measurements::conv_unit(
-    hcatch$BOTTOM_DEPTH_FATHOMS, from = "fathom", to = "m")
+  ncatch$hrs <- ncatch$DURATION_IN_MIN/60
+  ncatch$crate <- ncatch$EXTRAPOLATED_WEIGHT / 1000 / ncatch$hrs
+  ncatch$FISHING_DEPTH_M <- measurements::conv_unit(
+    ncatch$FISHING_DEPTH_FATHOMS, from = "fathom", to = "m")
+  ncatch$BOTTOM_DEPTH_M <- measurements::conv_unit(
+    ncatch$BOTTOM_DEPTH_FATHOMS, from = "fathom", to = "m")
   ncatch$vesseltype <- norpac_vesseltype(ncatch$VESSEL_TYPE)
   ncatch$Sector <- "DomesticAtSea"
 

@@ -18,9 +18,9 @@ being in PacFIN yet.}
 \value{
 A list of three data frames,
 \enumerate{
-  \item tribal catches,
-  \item removed foreign catches, and
-  \item catches by year and sector.
+\item tribal catches,
+\item removed foreign catches, and
+\item catches by year and sector.
 }
 }
 \description{
