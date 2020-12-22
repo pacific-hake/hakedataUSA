@@ -14,7 +14,15 @@
 #'   \item tribal catches,
 #'   \item removed foreign catches, and
 #'   \item catches by year and sector.
-#' }
+#' } are returned and the following files are saved to the disk:
+#'   * PacFIN_Fleet.csv
+#'   * PacFIN_Sector.cs
+#'   * USshoreCatchByPeriodComp_ft.csv
+#'   * us-shore-catch-by-month.csv
+#'   * us-research-catch-by-month.csv
+#'   * us-shore-startdate-by-dahl.csv
+#'   * us-ti-catch-by-month.csv
+#'
 pacfincatches <- function(pcatch = NULL, addtribal = 0) {
   
   mydir <- hakedatawd()
@@ -22,7 +30,7 @@ pacfincatches <- function(pcatch = NULL, addtribal = 0) {
   if (is.null(pcatch)) {
     base::load(file.path(mydir, "extractedData", "Pacfincomp_ft_taylorCatch.Rdat"))
   }
-  
+
   pcatch <- rbind(pcatch,
     data.frame("YEAR" = 2019, "FLEET" = "TI", "AGID" = "W", "GRID" = "MDT",
       "TDATE" = "2019-12-31", "ARID" = "3B", "PCID" = "WPT",
@@ -34,17 +42,17 @@ pacfincatches <- function(pcatch = NULL, addtribal = 0) {
     file = file.path(mydir, "Catches", "PacFIN_Fleet.csv"),
     sep = ",", quote = FALSE, row.names = TRUE, col.names = NA)
 
-  #todo: determine if these catches are foreign?
-  # are they already accounted for in Canada?
+  # FLEET XXX is in the hake assessment as shore-based catches,
+  # although 1986 differs from data used
+  # database  1986 3431.9436
+  # assesment 1986 3465.00
   xxcatch <- pcatch[pcatch$FLEET == "XX", ]
-  pcatch <- pcatch[pcatch$FLEET != "XX",]
 
   pcatch$Date <- as.Date(pcatch$TDATE)
-  pcatch$month <- as.numeric(substr(pcatch$TDATE,6,7))
+  pcatch[, "month"] <- get_date(pcatch[, "Date"], "%m")
   colnames(pcatch)[colnames(pcatch) == "YEAR"] <- "year"
-  pcatch <- pcatch[order(pcatch$Date),]
-  pcatch$sector <- "USshore"
-  pcatch$sector[grep("R[[:space:]]*", pcatch$FLEET)] <- "USresearch"
+  pcatch <- pcatch[order(pcatch$Date), ]
+  pcatch$sector <- ifelse(grepl("^R", pcatch[, "FLEET"]), "USresearch", "USshore")
 
   utils::write.table(tapply(pcatch$MT, list(pcatch$year, pcatch$sector), sum), 
     file = file.path(mydir, "Catches", "PacFIN_Sector.csv"),

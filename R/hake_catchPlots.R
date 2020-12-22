@@ -1,7 +1,6 @@
 #' Plots of Catch for US Only
 #'
 #' Plots for the JTC of US catch data.
-#' todo: Make CP and MS use NORPAC data instead of PacFIN.
 #' 
 #' @param doPNG A logical specifying if png files should be saved.
 #' @param nyears The number of years you want to plot. The maximum year
@@ -16,17 +15,20 @@
 #' @param cex.title Font size for the main title placed above the figure.
 #' Originally, the default was 1.3, this has since been changed to reflect
 #' that an additional title is not printed on the slide for the JTC meeting.
-#' Thus, a larger title was needed and the default is now .
+#' Thus, a larger title was needed and the default is now 3.
 #' @export
 #' @author Kelli Faye Johnson
 #'
-#' @return todo: document return of UScatchPlots
+#' @return The following three figures are saved:
+#' CpCatchMonthYear.png
+#' MsCatchMonthYear.png
+#' shoresideCatchMonthYear.png
 #' 
-UScatchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE,
+hake_catchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE,
   cex.title = c(3, 1.3)[1]) {
   mydir <- hakedatawd()
   args <- list(height = 5, width = 10, units = "in", pointsize = 10, res = 300)
-  args2 <- list(mfrow=c(2,2),mar=c(0.5,4.1,0.5,0.5),
+  args2 <- list(mfrow=c(2,2), mar=c(0.5,3.1,0.5,0.1),
     oma=c(4,0.1,ceiling(cex.title),0.1),
     mgp=c(2.1, 0.75, 0), las = 1)
   args3 <- list(outer=TRUE,side=3,line=-0.1,cex=cex.title)
@@ -52,7 +54,7 @@ UScatchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE,
       file = file.path(mydir, "Figures", "shoresideCatchMonthYear.png")))
   } else {windows(height = args$height, width = args$width)}
   do.call("par", args2)
-  plotHakeCatchMonthYear.fn(shore[shore$sector=="USshore",],
+  plot_catchvmonthbyyear(shore[shore$sector=="USshore",],
     Yrs=Yrs,quotas=quotas[3,],lineWds=lineWds,lineTypes=lineTypes,
     cols=cols,leg.cex=0.7)
   do.call("mtext", c(args3,
@@ -60,7 +62,6 @@ UScatchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE,
       "U.S. Shoreside Catches",
       ifelse(preliminary, " (preliminary)", "")))
   )
-  do.call("mtext", c(args4, text = "Month"))
   if (doPNG) dev.off()
 
   if (doPNG) {
@@ -68,7 +69,7 @@ UScatchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE,
       file = file.path(mydir, "Figures", "CpCatchMonthYear.png")))
   } else {windows(height = args$height, width = args$width)}
   do.call("par", args2)
-  plotHakeCatchMonthYear.fn(cp,
+  plot_catchvmonthbyyear(cp,
     Yrs=Yrs,quotas=quotas[1,-1],lineWds=lineWds,lineTypes=lineTypes,
     cols=cols,leg.cex=0.7)
   do.call("mtext", c(args3,
@@ -76,15 +77,14 @@ UScatchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE,
       "U.S. CP Catches",
       ifelse(preliminary, " (preliminary)", "")))
   )
-  do.call("mtext", c(args4, text = "Month"))
-  if(doPNG) dev.off()  
+  if(doPNG) dev.off()
 
   if (doPNG) {
     do.call("png", c(args, 
       file = file.path(mydir, "Figures", "MsCatchMonthYear.png")))
   } else {windows(height = args$height, width = args$width)}
   do.call("par", args2)
-  plotHakeCatchMonthYear.fn(ms,
+  plot_catchvmonthbyyear(ms,
     Yrs=Yrs,quotas=quotas[2,-1],lineWds=lineWds,lineTypes=lineTypes,
     cols=cols,leg.cex=0.7)
   do.call("mtext", c(args3,
@@ -92,7 +92,6 @@ UScatchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE,
       "U.S. MS Catches",
       ifelse(preliminary, " (preliminary)", "")))
   )
-  do.call("mtext", c(args4, text = "Month"))
   if(doPNG) dev.off()  
 
   tmp <- tapply(cp$catch,cp$year,sum)["2017"]

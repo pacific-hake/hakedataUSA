@@ -21,6 +21,15 @@ A list of three data frames,
 \item tribal catches,
 \item removed foreign catches, and
 \item catches by year and sector.
+} are returned and the following files are saved to the disk:
+\itemize{
+\item PacFIN_Fleet.csv
+\item PacFIN_Sector.cs
+\item USshoreCatchByPeriodComp_ft.csv
+\item us-shore-catch-by-month.csv
+\item us-research-catch-by-month.csv
+\item us-shore-startdate-by-dahl.csv
+\item us-ti-catch-by-month.csv
 }
 }
 \description{

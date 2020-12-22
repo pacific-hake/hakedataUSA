@@ -4,7 +4,7 @@
 \alias{norpaccatches}
 \title{Workup NORPAC Catches}
 \usage{
-norpaccatches(ncatch = NULL, nyears = 5, species_norpac = 206)
+norpaccatches(ncatch = NULL, nyears = 5, species = 206)
 }
 \arguments{
 \item{ncatch}{An R object with NORPAC catches. If \code{NULL},
@@ -13,12 +13,14 @@ from the disk.}
 
 \item{nyears}{The number of years for plotting.}
 
-\item{species_norpac}{An integer specifying the species for NORPAC data.
-This will be three digits and is associated with the species name in
+\item{species}{An integer specifying the species for given data base.
+For NORPAC data, this will be three digits and
+is associated with the species name in
 \code{NORPAC.DOMESTIC_SPECIES}, using the column \code{SPECIES_NO}. Note that this
 value is often called the \code{OBS} species code in observer landings from the
 Alaska Fisheries Science Center and is not the \code{AKR} species code.
-For example, \code{206} is Pacific Hake and is the default.}
+For example, \code{206} is Pacific Hake and is the default.
+For PacFIN data, this will be the entry in \code{SPID}.}
 
 \item{x}{A named list of values by year, more than likely
 made by tapply or split.}
@@ -50,6 +52,7 @@ In the \code{Figures} directory, the following png or csv files are saved:
 \item fishCatchRatesUSByYear.png
 \item fishDepthByYearUS.png
 \item fishCatchRatesUS.png
+\item fishCatchRatesUSnolog.png
 \item NORPAC_DomesticAtSea_bdepthfathom_range.csv
 \item NORPAC_DomesticAtSea_bdepthfathom_deeper1500f.csv
 \item us-cp-startdate.csv

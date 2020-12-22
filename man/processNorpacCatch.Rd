@@ -11,8 +11,14 @@ processNorpacCatch(ncatch, species = 206, outfname = NULL, verbose = FALSE)
 \code{NULL}, where the object will be read from a saved object within
 a directory called extractedData.}
 
-\item{species}{A numeric value that denotes the species of interest in the
-column \code{SPECIES}.}
+\item{species}{An integer specifying the species for given data base.
+For NORPAC data, this will be three digits and
+is associated with the species name in
+\code{NORPAC.DOMESTIC_SPECIES}, using the column \code{SPECIES_NO}. Note that this
+value is often called the \code{OBS} species code in observer landings from the
+Alaska Fisheries Science Center and is not the \code{AKR} species code.
+For example, \code{206} is Pacific Hake and is the default.
+For PacFIN data, this will be the entry in \code{SPID}.}
 
 \item{outfname}{A file path to save the output to.}
 

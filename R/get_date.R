@@ -8,7 +8,7 @@
 #' @return A vector of numeric objects, such as months.
 #' 
 get_date <- function(data, formatout = c("%m", "%Y")) {
-  stopifnot("POSIXct" %in% class(data) | "POSIXt" %in% class(data))
+  stopifnot(any(c("POSIXct", "POSIXt", "Date") %in% class(data)))
   out <- format(data, formatout)
   return(utils::type.convert(out, as.is = TRUE))
 }
