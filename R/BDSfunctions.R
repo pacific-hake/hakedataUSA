@@ -171,6 +171,9 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
     if(any(is.na(bds$predWtSum))) {
         stop("There are some predicted weights that are NA. This means that there are NA's in lengths, the parameters, or somewhere else.")
     }
+    bds[, "all_cluster_sum"] <- stats::ave(ifelse(
+      duplicated(paste(bds$SAMPLE_NO, bds$CLUSTER_NO)),
+      0, bds$CLUSTER_WGT), bds$SAMPLE_NO, FUN = sum)
 
     #WA does not have a sample weight
     #I will calcualte sample weight from individual fish weights (filled in using setUp function) or l-w parameters
@@ -491,7 +494,6 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
 
     return(list(female=femaleLenComps,male=maleLenComps,both=bothSexLenComps,unsexed=unsexedLenComps,all=allSexLenComps,bds=bds[,c("SAMPLE_NO","SAMPLE_YEAR","state","expand","effN")]))
 }
-
 
 
 lfsForSS3_combinedsex.fn <- function(LFs,years,season=1,fleet,gender=0,partition=0,lens) {

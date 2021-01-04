@@ -174,10 +174,6 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     page$FISH_LENGTH <- ifelse(page$FISH_LENGTH_UNITS %in% c("CM"),
       measurements::conv_unit(page$FISH_LENGTH, from = "cm", to = "mm"),
       page$FISH_LENGTH)
-    # Sum weight of all clusters within a sample
-    page$all_cluster_sum <- stats::ave(ifelse(
-      duplicated(paste(page$SAMPLE_NO, page$CLUSTER_NO)),
-      0, page$CLUSTER_WGT), page$SAMPLE_NO, FUN = sum)
     localsave(page, "page")
   }
 
