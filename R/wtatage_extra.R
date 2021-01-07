@@ -1,14 +1,14 @@
-# Extra Calculations Related to Weight-At-Age
-#
-# This script depends on stuff created in the script WtAtAgeCollate.R
-# which in turn depends on functions in wtatage_calculations.R 
+#' Extra Calculations Related to Weight-At-Age
+#'
+#' This script depends on stuff created in the script WtAtAgeCollate.R
+#' which in turn depends on functions in wtatage_calculations.R 
 #' todo: give a better description
 #' 
-#' @param dir The directory where the data is stored. 
+#' @param dir The directory where the data is stored.
 #' It can either be relative or absolute, but no working
 #' directory will be changed. Instead, the \code{dir} is
 #' just used to import data and save resulting plots in.
-#' @template dirmod
+#' @template dirmodel
 #' @param outliers A logical value if outliers should be looked for
 #' in the individual files or if a summary file that was previously 
 #' generated using \code{weightatage} should be loaded.
@@ -50,7 +50,7 @@ wtatage_extra <- function(dir, dirmodel = NULL, outliers = TRUE, maxage = 15,
     dat <- dat[!grepl("Can[_a]", dat$Source, ignore.case = TRUE), ]
     #Canadian data
     canall <- wtatage_can(file.path(dir,
-      "LengthWeightAge_data_1975to2017_IncludeCanada.csv"))
+      "LengthWeightAge_data_Canada1985t02020_US1975to2017.csv"))
     #todo: calculate outlier for can data
     canall$outlierL <- FALSE
     dat <- rbind(dat, canall)
@@ -61,6 +61,7 @@ wtatage_extra <- function(dir, dirmodel = NULL, outliers = TRUE, maxage = 15,
         outlierplot = TRUE,
         outlierPlotName = file.path(dir, "plots", paste0("wtAgeOutliers", yr, ".png")),
         elimUnsexed = FALSE)
+      # Remove the CAN data because it is in canall
       remove <- (grepl("Can[_a]", thisyr$Source, ignore.case = TRUE) & 
         thisyr$Year < 2019)
       thisyr <- thisyr[!remove, ]
@@ -80,20 +81,13 @@ wtatage_extra <- function(dir, dirmodel = NULL, outliers = TRUE, maxage = 15,
   early <- min(dat$Year):(min(dat$Year) + navgyears[1] - 1)
   late <- (max(yrs) - navgyears[2] + 1):(max(yrs))
 
-  # copied into wtatage.ss file for
-  # alternative model developed during 2018 SRG
-
   # separate data into acoustic (ac) and fishery (fs) subsets
-  # note that "Acoustic Poland" is excluded from both sets,
-  # not sure if that was intentional
-  dat$cat <- gsub("Acoustic [CU].+", "Acoustic", 
-    ifelse(grepl("acoustic", dat$Source, ignore.case = TRUE), 
-      as.character(dat$Source), "Trawl"))
-
+  dat$cat <- ifelse(grepl("acoustic", dat$Source, ignore.case = TRUE),
+      "Survey", "Fishery")
   mtable <- stats::aggregate(Weight_kg ~ cat + Year + Age_yrs, 
     data = dat[dat$Age_yrs %in% 1:10, ],
     mean, na.rm = TRUE)
-  ggplot2::ggplot(data.frame(mtable[!grepl("Poland", mtable$cat), ]), 
+  ggplot2::ggplot(data.frame(mtable), 
     ggplot2::aes(x = Year, y = Weight_kg, col = factor(Age_yrs))) + 
   ggplot2::geom_line() + ggplot2::geom_point() + 
   ggplot2::facet_grid(cat ~ .) +
@@ -102,9 +96,8 @@ wtatage_extra <- function(dir, dirmodel = NULL, outliers = TRUE, maxage = 15,
   ggplot2::scale_color_manual(values = rich.colors.short(20)[1:10]) + 
   ggplot2::theme_bw() +
   ggplot2::theme(strip.background = ggplot2::element_rect(fill = "white"))
-  ggplot2::ggsave(filename = file.path(dir, "meanweightatage_survey.png"))
+  ggplot2::ggsave(filename = file.path(dir, "meanweightatage_source.png"))
 
-  # Includes acoustic samples from Poland in 1977
   ggplot2::ggplot(stats::aggregate(Weight_kg ~ Year + Age_yrs, 
     data = dat[dat$Age_yrs %in% 1:maxage, ],
     mean, na.rm = TRUE), 

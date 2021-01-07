@@ -634,11 +634,32 @@ write_wtatage_file <- function(
 #' 
 create_fleetnames <- function(option = 1) {
   if (!option %in% 1:3) stop("Option must be 1, 2, or 3.")
+  fishery <- c(
+    "Acoustic Poland",
+    "US_FOREIGN",
+    "US_JV",
+    "ATSEA",
+    "SHORE",
+    "",
+    "CAN_JV",
+    "CAN_shoreside",
+    "CAN_domestic"
+    )
+  survey <- c(
+    "Acoustic U.S.",
+    "Acoustic Canada",
+    "CAN_acoustic"
+    )
   fleetinfo <- data.frame(
-    "ID" = c(rep(1, 7), 2, 2),
-    "name_WLdata" = c("US_FOREIGN", "US_JV", "ATSEA", "SHORE", "",
-      "CAN_JV", "CAN_domestic", "Acoustic U.S.", "Acoustic Canada"),
-    "name_model" = c(rep("Fishery",7), "Acoustic_Survey", "Acoustic_Survey")
+    "ID" = c(
+      rep(1, length(fishery)),
+      rep(2, length(survey))
+      ),
+    "name_WLdata" = c(fishery, survey),
+    "name_model" = c(
+      rep("Fishery", length(fishery)),
+      rep("Acoustic_Survey", length(survey))
+      )
     )
   if (option == 2) fleetinfo$ID <- 0
   if (option == 3) fleetinfo$ID0 <- 0
