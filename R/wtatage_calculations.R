@@ -197,7 +197,12 @@ make_wtage_matrix <- function(dat, fleetoption = 1, value = "weight",
   N_agebins <- length(agebinspop)
   Ncols <- N_agebins + 6
   fleetinfo <- create_fleetnames(option = fleetoption)
-
+  if (length(unique(
+    ha$Source[which(!ha$Source %in% fleetinfo$name_WLdata)]
+    )) > 0) {
+    warning("Weight-at-age 'Source' contains entries other than:\n",
+      paste0("'", fleetinfo$name_WLdata, "'", collapse = "\n"))
+  }
   # create empty data.frame
   wtage <- data.frame(matrix(NA, nrow = 0, ncol = Ncols))
 
@@ -212,9 +217,9 @@ make_wtage_matrix <- function(dat, fleetoption = 1, value = "weight",
       htemp <- ha[
         as.character(ha$Source) %in% fleetinfo$name_WLdata[fleetinfo$ID == ID], ]
       if (y > 0) {
-        htemp <- ha[ha$Year == y, ]
+        htemp <- htemp[htemp$Year == y, ]
       } else {
-        htemp <- ha[ha$Year %in% yearsearly, ]
+        htemp <- htemp[htemp$Year %in% yearsearly, ]
       }
       # make empty vectors to hold value-by-age for this year
       sampsizes <- rep(0, N_agebins)
