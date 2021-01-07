@@ -16,7 +16,7 @@ shorecomps <- function(
   page = NULL,
   ages = 1:15,
   verbose = FALSE) {
-  
+
   mydir <- hakedatawd()
   dir.create(file.path(mydir, "Catches", "Comps", "Shoreside.Age.Only"),
     recursive = TRUE, showWarnings = FALSE)
@@ -34,7 +34,7 @@ shorecomps <- function(
     table(dat$SAMPLE_YEAR,dat$SAMPLE_NO),
     1,
     function(x){sum(x>0)})
-  nFish <- table(dat$SAMPLE_MONTH,dat$SAMPLE_YEAR)
+  nFish <- table(dat$SAMPLE_YEAR, useNA = "ifany")
 
   dat$state <- "PW"  #so that it doesn't need to expand up states and won't need a catch file
   # Relationship assumes FISH_WEIGHT is in grams and FISH_LENGTH is cm
@@ -57,8 +57,8 @@ shorecomps <- function(
 
   tmp <- LFs$all$PW
   afs <- matrix(NA,
-    ncol = length(ages) + 2, nrow = length(tmp),
-    dimnames = list(NULL, c("Year", "nTrips", paste0("a", ages))))
+    ncol = length(ages) + 3, nrow = length(tmp),
+    dimnames = list(NULL, c("Year", "n.fish", "nTrips", paste0("a", ages))))
   for(i in 1:length(tmp)) {
     tmp2 <- tmp[[i]]
     afs[i, "Year"] <- tmp2$year[1]
@@ -74,6 +74,7 @@ shorecomps <- function(
   }
 
   afs[, "nTrips"] <- nSamp[as.character(afs[, "Year"])]
+  afs[, "n.fish"] <- nFish[as.character(afs[, "Year"])]
   utils::write.csv(afs,
     file = file.path(mydir, "Catches", "Comps", "Shoreside.Age.Only",
       "shoresideAgeComps.csv"), row.names = FALSE)
@@ -92,6 +93,10 @@ shorecomps <- function(
   utils::write.csv(row.names = FALSE,
     file = file.path(mydir, "Catches", "Comps", "shoreside_PCID.csv"),
     aggregate(totalWt ~ PCID + SAMPLE_YEAR, data = dat, FUN = sum))
+  savebds <- LFs[["bds"]]
+  save(savebds,
+    file = file.path(mydir,
+      "Catches", "Comps", "Shoreside.Age.Only", "shoresidePacFIN.Rdata"))
 
   return(afs)
 }

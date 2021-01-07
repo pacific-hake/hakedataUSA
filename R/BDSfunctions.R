@@ -137,12 +137,8 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
     # maxExpansion of 300 is about where 20% ofthe samples would be capped, it is also where there is a kink in cumsum
     ######################################################################################
 
-    if(!is.null(gear)) {
-        bds <- bds[!is.na(bds$gear)&bds$gear==gear,]             #use only a specific gear code (see BDS_filterData.R for gear code assignments)
-    }
-    if(!is.null(state)) {
-        bds <- bds[bds$state==state,]             #use only a specific state (see BDS_filterData.R for state assignments)
-    }
+  ### Fixes (2021-01-04)
+  bds[bds[, "SAMPLE_NO"] == 'OR140657', "EXP_WT"] <- 306280 # Ali knows and is fixing it
 
     # set up the expansion based on landed weight to cluster weight
     #if that isn't available, check for species landed weight (RWT_LBS) to species weight
@@ -468,6 +464,7 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
             normalizeLF.fn <- function(xx) {
               lapply(xx,function(x){
                 prop <- x$x/sum(x$x)
+                # prop <- x$x/sum(x$x, na.rm = TRUE)
                 ret <- data.frame(state=x$state,year=x$year,sex=x$sex,length=x$length,lf=prop)
                 if(ageComp) names(ret)[4] <- "age"
                 return(ret)
@@ -492,7 +489,7 @@ commLFs.fn <- function(bds,lw,gear="TWL",state=NULL,catchFile=NULL,
         bothSexLenComps <- lapply(bothSexLenComps,normalizeLF.fn)
     }
 
-    return(list(female=femaleLenComps,male=maleLenComps,both=bothSexLenComps,unsexed=unsexedLenComps,all=allSexLenComps,bds=bds[,c("SAMPLE_NO","SAMPLE_YEAR","state","expand","effN")]))
+    return(list(female=femaleLenComps,male=maleLenComps,both=bothSexLenComps,unsexed=unsexedLenComps,all=allSexLenComps,bds=bds[,]))
 }
 
 
