@@ -11,8 +11,11 @@ library(devtools)
 devtools::install_github("pacific-hake/hakedataUSA")
 hakedata <- pulldatabase()
 norpaccatches(hakedata$ncatch, nyears = 5)
-catch_pacfin <- pacfincatches(hakedata$pcatch)
+# todo: remove the added catches for 2020 in 2021
+catch_pacfin <- pacfincatches(hakedata$pcatch,
+  addtribal = 133.19)
 hake_catchPlots(doPNG = TRUE, nyears = 5)
+
 age_norpac <- atseacomps(hakedata$atsea.ages, hakedata$ncatch)
 age_shore <- shorecomps(verbose = TRUE)
 age_yearlyweights <- mappingagesamples(hakedata$atsea.ages, hakedata$ncatch, savepng = TRUE)

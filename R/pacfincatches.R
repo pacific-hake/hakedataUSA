@@ -31,9 +31,14 @@ pacfincatches <- function(pcatch = NULL, addtribal = 0) {
     base::load(file.path(mydir, "extractedData", "Pacfincomp_ft_taylorCatch.Rdat"))
   }
 
+  tyear <- type.convert(as.is = TRUE, format(Sys.Date(),"%Y")) -
+         ifelse(format(Sys.Date(),"%m") %in% c("01", "02", "03"), 1, 0)
   pcatch <- rbind(pcatch,
-    data.frame("YEAR" = 2019, "FLEET" = "TI", "AGID" = "W", "GRID" = "MDT",
-      "TDATE" = "2019-12-31", "ARID" = "3B", "PCID" = "WPT",
+    data.frame(
+      "YEAR" = tyear,
+      "FLEET" = "TI", "AGID" = "W", "GRID" = "MDT",
+      "TDATE" = paste0(tyear, "-12-31"),
+      "ARID" = "3B", "PCID" = "WPT",
       "PORT" = 295, "IFQ_LANDING" = FALSE,
       "OVERAGE" = FALSE, "PROC" = 128363, "DAHL_SECTOR" = 17, "FTID" = "UNKNOWN",
       "DRVID" = "UNKNOWN", "COUNT_LE_PERMITS" = 0, "PARTICIPATION_GROUP_CODE" = "I",
