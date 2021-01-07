@@ -3,8 +3,7 @@
 #' Copy the catch files from the US Catches directory to the assessment 
 #' data directory.
 #' 
-#' @param dirout A directory that houses the \code{.csv} data files
-#' for the stock assessment.
+#' @template dirout
 #' @author Kelli Faye Johnson
 datatoassessment_catch <- function(dirout) {
   mydir <- hakedatawd()
