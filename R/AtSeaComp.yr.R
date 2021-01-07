@@ -87,8 +87,9 @@ atseaComp.yr = function(dat,ncatch,BY_AGE=TRUE, BY_MONTH=FALSE, BY_GENDER=FALSE,
   dat$Month <- as.numeric(substring(dat$HAUL_OFFLOAD_DATE,6,7))
   # Create trip, haul identifiers; use HAUL_JOIN b/c CRUISE is not unique to a
   # single trip but rather an observer deployment
-  dat$HaulID <- paste(dat$HAUL_JOIN, dat$HAUL_OFFLOAD, sep = ".")  #can match with the ncatch file
-  ncatch$HaulID <- paste(ncatch[, grep("HAUL_JOIN\\)", colnames(ncatch))], ncatch$HAUL, sep = ".") 
+  dat[, "HaulID"] <- apply(dat[, c("CRUISE", "PERMIT", "HAUL_OFFLOAD")],
+    1, paste, collapse = ".")
+
   if(sum(table(ncatch$HaulID)>1) > 1) {
     stop("The hauls in ncatch are not unique.\n",
       "Are you sure there is only one species in ", dat[1,"YEAR"], "?\n")
@@ -239,7 +240,11 @@ atseaComp.yr = function(dat,ncatch,BY_AGE=TRUE, BY_MONTH=FALSE, BY_GENDER=FALSE,
   #link ncatch hauls to dat hauls
   #EXTRAPOLATED_WEIGHT is the weight of hake in the haul
 
-  dat <- merge(dat,ncatch[,c("HaulID","EXTRAPOLATED_WEIGHT","VESSEL_TYPE")],by="HaulID",all.x=T)
+  dat <- merge(dat,
+    ncatch[,c("EXTRAPOLATED_WEIGHT","VESSEL_TYPE", "CRUISE", "HAUL", "PERMIT")],
+    by.x = c("CRUISE", "HAUL_OFFLOAD", "PERMIT"), 
+    by.y = c("CRUISE", "HAUL", "PERMIT"),
+    all.x = TRUE)
 
   #subset by vessel_type if desired
   if(!is.null(vesselType)) {
@@ -277,9 +282,8 @@ atseaComp.yr = function(dat,ncatch,BY_AGE=TRUE, BY_MONTH=FALSE, BY_GENDER=FALSE,
 
   dat$WEIGHT[is.na(dat$WEIGHT)] <- tmp[is.na(dat$WEIGHT)]
 
-  sampWt <- aggregate(dat$WEIGHT,list(dat$HaulID),sum)
-  names(sampWt) <- c("HaulID","sampWt")
-  dat <- merge(dat,sampWt,by="HaulID",all.x=T)
+  dat[, "sampWt"] <- stats::ave(dat$WEIGHT,
+    dat$CRUISE, dat$HAUL_OFFLOAD, dat$PERMIT, FUN = sum)
 
   #Expansion factor 
   #Fill in missing values with median
