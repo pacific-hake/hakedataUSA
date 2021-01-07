@@ -5,7 +5,7 @@ Code to extract and workup the US data for the Pacific hake assessment.
 To extract code for this year's assessment open a new R session and run the following:
 ```
 local.assess <- file.path("c:", "stockAssessment", "hake-assessment")
-local.model <- "2020.03.00_base_model"
+local.model <- "2021.01.03_newdata"
 
 library(devtools)
 devtools::install_github("pacific-hake/hakedataUSA")
@@ -21,10 +21,20 @@ age_shore <- shorecomps(verbose = TRUE)
 age_yearlyweights <- mappingagesamples(hakedata$atsea.ages, hakedata$ncatch, savepng = TRUE)
 jtcdecotoliths <- agedotoliths(hakedata$atsea.ages)
 plot_rawmeasure(hakedata$atsea.ages, years = 2020:(2020-4))
-datatoassessment(dirout = file.path(local.assess, "data"), year = hakedata_year(), 
+
+# Send catches to hake-assessment/data
+datatoassessment_catch(file.path(local.assess, "data"))
+# fix end year and catches
+new_catch(dirout = file.path(local.assess, "data"), year = hakedata_year(),
   filedat = file.path(local.assess, "models", local.model, "hake_data.ss"))
+# Send compositions to hake-assessment/data
+datatoassessment_comp(file.path(local.assess, "data"))
 datatocomps(dirdata = file.path(local.assess, "data"),
   dirmod = file.path(local.assess, "models", local.model))
+
+# Weight-at-age
+wtatage_collate()
+wtatage_extra(dir = file.path(hakedatawd(), "LengthWeightAge"))
 render("inst/extdata/beamer/hake_jtc_data_us.Rmd")
 ```
 
