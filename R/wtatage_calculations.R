@@ -211,6 +211,14 @@ make_wtage_matrix <- function(dat, fleetoption = 1, value = "weight",
     "length" = "Length_cm",
     "Weight_kg")
 
+  # The below code does the same thing as the loop, but doesn't filter
+  # the data ... todo: think about how to simplify the code
+  # applylist <- list(
+  #     Year = ha$Year,
+  #     Age = ifelse(ha$Age_yrs > maxage, maxage, ha$Age_yrs)
+  #     )
+  # tapply(ha[,colname], applylist, mean)
+  # tapply(ha[,colname],applylist, length)
   useyears <- c(switch(getmean + 1, NULL, -1940), sort(unique(ha$Year)))
   for (ID in unique(fleetinfo$ID)) {
     for (y in useyears) {
