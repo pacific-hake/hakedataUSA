@@ -4,7 +4,7 @@
 \alias{new_catch}
 \title{Move US Catch Information to Assessment Files}
 \usage{
-new_catch(dirout, year, filedat = NULL)
+new_catch(dirout, year, filedat = NULL, digits = 5)
 }
 \arguments{
 \item{dirout}{A directory that houses the \code{.csv} data files
@@ -16,6 +16,9 @@ in updating, although most years get updated since 2008.}
 \item{filedat}{The Stock Synthesis dat file that you want to
 integrate catches into. The default is \code{NULL}, which allows
 you to run the function without writing a new dat file.}
+
+\item{digits}{The number of digits you want the results to
+saved to. \verb{[round](..., digits = digits)} will be used.}
 }
 \value{
 todo: document what this function returns.

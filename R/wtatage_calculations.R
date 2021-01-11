@@ -1,3 +1,223 @@
+#' Create weight-at-age files for hake assessment
+#'
+#' Create weight-at-age files for the hake stock assessment.
+#' Updated csv or rds files must exist prior to running.
+#'
+#' @param dir The directory where the data is stored.
+#' It can either be relative or absolute because the working
+#' directory will not be changed. Instead, \code{dir} is
+#' used to import data and export results to.
+#' @param maxage The age of the plus group used for the stock assessment.
+#' This will correspond to the maximum age group in the data, not in the
+#' model because SS can model many ages when there is only information in
+#' the data for a few ages.
+#' @param yrs A vector of years to search for recent data. Typically,
+#' the vector starts with 2008 and ends with the most recent year
+#' of data. This will allow files created from `wtatage_collate()` to
+#' be included in the analysis, i.e., recent US data. Typically, you
+#' should not have to change this value from the default entry.
+#' @param navgyears The number of early and late years to average since
+#' 1975 and \code{max(yrs)} for the early and late analysis asked for
+#' by the Scientific Review Group in 2017. The argument can be a single
+#' value or a vector of two values, where in the latter case the second
+#' value will be used for the most recent time period.
+#' @param nforecast The number of years to forecast into the future.
+#' Typically, this is three for the hake assessment and will lead to
+#' this many rows of mean weight-at-age data being copied to the data frame
+#' beyond the last year of empirical data.
+#' @param maturity A vector of maturity values from the maturity ogive.
+#' The length needs to be the same as the number of ages in the model,
+#' not the number of ages in the data.
+#'
+#' @import ggplot2 r4ss utils
+#' @export
+#' @author Ian Taylor
+#' @return todo: document return
+#'
+data_wtatage <- function(
+  dir,
+  maxage = 15,
+  yrs = 2008:hakedata_year(),
+  navgyears = c(5, 5),
+  nforecast = 3,
+  maturity = c(
+    0.000, 0.000, 0.261, 0.839, 0.961,
+    0.920, 0.928, 0.926, 0.957, 0.944,
+    0.980, 0.962, 1.000, 0.958, 0.955,
+    0.900, 0.900, 0.900, 0.900, 0.900, 0.900)
+  ) {
+
+  if (length(navgyears) == 1) navgyears <- rep(navgyears, 2)
+  dir.create(file.path(dir, "plots"))
+
+  # Data provided by CG on 2021-01-09 in google drive #703
+  # filtered by area rather than month and provided as rds rather
+  # than csv to save on size, contains all US samples in
+  # LWAdata_1975to2007.csv, so eliminated that file.
+  dat <- get_wtatagecsv(
+    file = file.path(dir, "LengthWeightAge_data.rds"),
+    verbose = TRUE,
+    outlierplot = TRUE,
+    outlierPlotName = file.path(dir, "plots", "wtAgeOutliers1975to2007.png"),
+    elimUnsexed = FALSE)
+  # Fix some names
+  dat[, "Source"] <- gsub("jv", "JV", dat[, "Source"])
+  dat[, "Source"] <- gsub("Poland_acoustic", "Acoustic Poland", dat[, "Source"])
+  # Eliminate all post 2007 US data b/c read in below
+  dat <- dat[
+    !(grepl("US_", dat[, "Source"], ignore.case = TRUE) &
+      dat[, "Year"] > 2007),
+    ]
+  for (yr in yrs) {
+    filename <- file.path(dir, paste0("LWAdata_", yr, ".csv"))
+    if (!file.exists(filename)) next
+    thisyr <- get_wtatagecsv(file = filename,
+      outlierplot = TRUE,
+      outlierPlotName = file.path(dir, "plots", paste0("wtAgeOutliers", yr, ".png")),
+      elimUnsexed = FALSE)
+    # Remove the CAN data because it is in dat
+    remove <- (grepl("Can[_a]", thisyr$Source, ignore.case = TRUE) &
+      thisyr$Year < 2019)
+    thisyr <- thisyr[!remove, ]
+    dat <- rbind(dat, thisyr)
+  }
+  if (any(is.na(dat$Year))) {
+    stop("Year was not read in correctly for some weight-at-age data\n",
+      " probably Canadian Acoustic Data.")
+  }
+  utils::write.csv(dat,
+    file = file.path(dir, paste0("LWAdata_1975to", max(yrs), ".csv")))
+
+  ### calculating average weight for early or late period for 2018 SRG request
+  early <- min(dat$Year):(min(dat$Year) + navgyears[1] - 1)
+  late <- (max(yrs) - navgyears[2] + 1):(max(yrs))
+
+  # separate data into acoustic (ac) and fishery (fs) subsets
+  dat$cat <- ifelse(grepl("acoustic", dat$Source, ignore.case = TRUE),
+      "Survey", "Fishery")
+  mtable <- stats::aggregate(Weight_kg ~ cat + Year + Age_yrs,
+    data = dat[dat[, "Age_yrs"] %in% 1:10, ],
+    mean, na.rm = TRUE)
+  gg <- ggplot2::ggplot(data.frame(mtable),
+    ggplot2::aes(x = Year, y = Weight_kg, col = factor(Age_yrs))) +
+  ggplot2::geom_line() + ggplot2::geom_point() +
+  ggplot2::facet_grid(cat ~ .) +
+  ggplot2::xlab("Year") + ggplot2::ylab("Mean weight-at-age (kg)") +
+  ggplot2::labs(col = "Age\n(years)") +
+  ggplot2::scale_color_manual(values = rich.colors.short(20)[1:10]) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(strip.background = ggplot2::element_rect(fill = "white"))
+  ggplot2::ggsave(gg,
+    width = 7, height = 7, units = "in",
+    filename = file.path(dir, "plots", "meanweightatage_source.png"))
+
+  gg <- ggplot2::ggplot(stats::aggregate(Weight_kg ~ Year + Age_yrs,
+    data = dat[dat[, "Age_yrs"] %in% 1:maxage, ],
+    mean, na.rm = TRUE),
+    ggplot2::aes(x = Year, y = Weight_kg, col = factor(Age_yrs))) +
+  ggplot2::geom_line() + ggplot2::geom_point() +
+  ggplot2::xlab("Year") + ggplot2::ylab("Mean weight-at-age (kg)") +
+  ggplot2::labs(col = "Age\n(years)") +
+  ggplot2::scale_color_manual(values = rich.colors.short(20)[1:maxage]) +
+  ggplot2::theme_bw()
+  ggplot2::ggsave(gg,
+    width = 7, height = 7, units = "in",
+    filename = file.path(dir, "plots", "meanweightatage_all.png"))
+
+  #### making input files for SS with the holes still present
+  # NULL months keeps the Poland data
+  wtage_All <- make_wtage_matrix(dat,fleetoption=2,
+    months = NULL) # make matrix
+  wtage_All_wMean <- make_wtage_matrix(dat,fleetoption=2,getmean=TRUE,
+    yearsearly = unique(dat$Year),
+    months = NULL)
+
+  avgearl <- make_wtage_matrix(dat,fleetoption=2,getmean=TRUE,
+    yearsearly = early,
+    months = NULL)[1, ]
+  avgearl[2, ] <- avgearl[1, ] * c(rep(1, 6), maturity)
+  avgearl[2, "fleet"] <- -2
+  utils::write.table(avgearl,
+    file = file.path(dir, paste0("wtatage.ss_early", navgyears[1], ".txt")),
+    sep = " ", row.names = FALSE, col.names = FALSE)
+
+  #### making alternative data.frame with mean lengths
+  lenage_All_wMean <- make_wtage_matrix(dat,fleetoption=2, value="length", getmean=TRUE,
+    months = NULL) # make matrix
+
+  # repeat but return sample sizes instead of mean weights
+  counts_All_wMean <- make_wtage_matrix(dat,fleetoption=2,getmean=TRUE, value="count",
+    months = NULL)
+  utils::write.csv(
+    setNames(counts_All_wMean, gsub("#", "", colnames(counts_All_wMean))),
+    file.path(dirname(normalizePath(dir)), "wtatage_all_samplesize.csv"),
+    row.names = FALSE)
+
+  # new method does only linear interpolation within each age (only works with all data)
+  wtageInterp1_All         <- dointerpSimple(wtage_All)
+
+  #### do 2nd interpolation (actually an extrapolation at the edges)
+  ### there is no 23rd column to remove, but the commands work anyway
+  # all data
+  wtageInterp2_All <- fill_wtage_matrix(wtageInterp1_All[,-23])
+  wtageInterp2_All$Note <- fill_wtage_matrix(wtage_All[,-23])$Note
+
+  # write output combining all fleets closer to format used by SS
+  wtage_All_wMean$Note <- c(paste("# Mean from ",min(dat$Year),"-",max(dat$Year),sep=""),wtageInterp2_All$Note)
+  wtageInterp2_All <- rbind(wtage_All_wMean[1,], wtageInterp2_All)
+  mat_Interp2_All <- t(as.matrix(wtageInterp2_All[,
+    -grep("^[^a]|Note", colnames(wtageInterp2_All))]))
+
+  # matrices for plotting
+  make_wtatage_plots(plots = 1:6,
+    data = wtage_All_wMean,
+    counts = counts_All_wMean,
+    lengths = lenage_All_wMean,
+    dir = file.path(dir, "plots"),
+    year = max(yrs), maxage = maxage, verbose = FALSE)
+
+  # adding ages 16-20 as repeats of age 15
+  wtage_extended <- wtageInterp2_All[, -grep("Note", colnames(wtageInterp2_All))]
+  wtage_extended <- wtage_extended[, c(1:ncol(wtage_extended),
+    rep(ncol(wtage_extended), times = sum(!(1:length(maturity)-1) %in% 0:maxage)))]
+  wtage_extended[, -grep("^[^a]|Note", colnames(wtage_extended))] <-
+    round(wtage_extended[, -grep("^[^a]|Note", colnames(wtage_extended))], 4)
+  colnames(wtage_extended)[grep("^a", colnames(wtage_extended))] <-
+    paste0("a", seq_along(maturity) - 1)
+
+  ## Add forecast average
+  withforecast <- rbind(wtage_extended,
+    setNames(data.frame(max(late):(max(late)+nforecast - 1)+1, matrix(c(1, 1,1, 1, 0,
+    apply(wtage_extended[wtage_extended[, 1] %in% late, -c(1:6)], 2, mean)),
+    ncol = NCOL(wtage_extended)-1, nrow = nforecast, byrow = TRUE)),
+    colnames(wtage_extended)))
+  # Create data frame for "last year's data with this year's analysis"
+  # because sometimes the way that the data is worked up changes and
+  # you can't just subtract a year of data because of the forecast average
+  # used in bridging.
+  withforecast_old <- rbind(wtage_extended[-NROW(wtage_extended), ],
+    setNames(data.frame(
+      max(late):(max(late)+nforecast - 1),
+      matrix(c(1, 1,1, 1, 0,
+    apply(
+      X = wtage_extended[wtage_extended[, 1] %in% (late - 1), -c(1:6)],
+      MARGIN = 2, FUN = mean)),
+    ncol = NCOL(wtage_extended)-1,
+    nrow = nforecast, byrow = TRUE)),
+    colnames(wtage_extended)))
+
+  filenameforss <- file.path(dir, paste0("wtatage_", max(yrs), "created_",
+    format(Sys.time(),"%d-%b-%Y_%H.%M"),".ss"))
+  filenameforbridge <- gsub("created_.+\\.ss", "createdforbridge.ss", filenameforss)
+  unlink(x = c(filenameforss, filenameforbridge))
+  write_wtatage_file(file = filenameforss, data = withforecast, maturity = maturity)
+  write_wtatage_file(file = filenameforbridge,
+    data = withforecast_old, maturity = maturity)
+
+  save(dat,mat_Interp2_All, wtage_All, wtage_All_wMean, withforecast,
+    file = file.path(dir, "LWAdata.Rdata"))
+}
+
 #' Remove Weight-At-Age Outliers
 #'
 #' Get saved weight-at-age data and remove any outliers and/or plot
@@ -49,7 +269,11 @@ get_wtatagecsv <- function(file, removeOutliers = TRUE, outlierplot = FALSE,
   elimAge = 99,
   verbose = FALSE) {
 
-  h <- read.csv(file)
+  if (tools::file_ext(file) == "csv") {
+    h <- read.csv(file)
+  } else {
+    h <- readRDS(file)
+  }
   if (verbose) cat("Looking for outliers in", file, "\n")
   if (!is.null(outlierPlotName) & outlierplot) {
     outlierTxtName <- gsub("\\.png", "\\.txt", outlierPlotName)
@@ -70,6 +294,14 @@ get_wtatagecsv <- function(file, removeOutliers = TRUE, outlierplot = FALSE,
     sink()
   }
 
+  if (basename(file) == "LengthWeightAge_data.rds") {
+    old <- c(CAN_acoustic = 5719, CAN_jv = 136, CAN_JV = 507,
+      CAN_polish = 487, CAN_shoreside = 636, Poland_acoustic = 2092,
+      US_acoustic = 15718, US_atsea = 27939, US_foreign = 29767,
+      US_JV = 29421, US_shore = 35824)
+    testthat::expect_equal(old, 
+      c(table(h[h$Year < 2008, "Source"])))
+  } else {
   sourcetable <- table(h$Source)
   # Some more samples added Dec 2018 / Jan 2019
   old <- c("Acoustic Poland" = 2094, "US_JV" = 29431, "US_FOREIGN" = 29778)
@@ -87,7 +319,8 @@ get_wtatagecsv <- function(file, removeOutliers = TRUE, outlierplot = FALSE,
     testthat::expect_equal(sourcetable[foreign], old["US_FOREIGN"],
       check.attributes = FALSE)
     rm(foreign)
-  } 
+  }
+  }
 
   # plot of outliers
   if (outlierplot){
@@ -97,7 +330,7 @@ get_wtatagecsv <- function(file, removeOutliers = TRUE, outlierplot = FALSE,
     } else { dev.new() }
     par(mfrow = c(1, 3))
     plot(h$Length_cm,h$Weight_kg,
-      pch = 16, col = rgb(0, 0, 0, 0.2), xlab = "Length", ylab = "Weight",
+      pch = 16, col = rgb(0, 0, 0, 0.2), xlab = "Length (cm)", ylab = "Weight (kg)",
       main = "All outliers")
     points(h$Length_cm[outlierL],h$Weight_kg[outlierL], pch = 16, col = 2)
     lines(x, 2e-6*x^3, col = 4)
@@ -105,11 +338,11 @@ get_wtatagecsv <- function(file, removeOutliers = TRUE, outlierplot = FALSE,
     #todo: think about age-0 fish
     #todo: change the colours to match those used in hake-assessment
     plot(Weight_kg ~ Age_yrs, data = h[h$Age_yrs > 0, ],
-      pch = 16, col = rgb(0,0,0,.2), xlab = "Age", ylab = "Weight",
+      pch = 16, col = rgb(0,0,0,.2), xlab = "Age", ylab = "Weight (kg)",
       main = "Weight vs Age (log space)", log = "xy")
     points(h$Age_yrs[outlierL], h$Weight_kg[outlierL], pch = 16, col = 2)
     plot(h$Age_yrs, h$Length_cm, 
-      pch = 16, col = rgb(0, 0, 0, 0.2), xlab = "Age", ylab = "Length",
+      pch = 16, col = rgb(0, 0, 0, 0.2), xlab = "Age", ylab = "Length (cm)",
       main = "Length vs Age")
     points(h$Age_yrs[outlierL], h$Length_cm[outlierL], pch = 16, col = 2)
     if (!is.null(outlierPlotName)) dev.off()
@@ -650,18 +883,23 @@ create_fleetnames <- function(option = 1) {
   fishery <- c(
     "Acoustic Poland",
     "US_FOREIGN",
+    "US_foreign",
     "US_JV",
     "ATSEA",
+    "US_atsea",
+    "US_shore",
     "SHORE",
     "",
     "CAN_JV",
     "CAN_shoreside",
-    "CAN_domestic"
+    "CAN_domestic",
+    "CAN_polish"
     )
   survey <- c(
     "Acoustic U.S.",
     "Acoustic Canada",
-    "CAN_acoustic"
+    "CAN_acoustic",
+    "US_acoustic"
     )
   fleetinfo <- data.frame(
     "ID" = c(
