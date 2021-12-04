@@ -1,11 +1,13 @@
 #' Find the Working Directory for hake-data
 #' 
-#' Find the working directory based on your user name
-#' for the given computer that you on. The working 
-#' directory is for the hake-data repository cloned
-#' from github.
+#' Find the working directory called `hake-data` based on your user name.
+#' `hake-data` stores all of the U.S. and Canadian data for the annual
+#' stock assessment of Pacific Hake.
+#' If you user name is not one of the default, pre-specified user names
+#' available within this function, then `hakedatawd` will create a directory
+#' on your `c:` drive called `stockassessment` and place `hake-data` in there.
 #' 
-#' @return A full file path, not a relative file path.
+#' @return A full file path for the `hake-data` directory is returned.
 #' @export
 #' @author Kelli Faye Johnson
 #' @examples
@@ -23,7 +25,9 @@ hakedatawd <- function() {
     },
     "Ian.Taylor" = {
         file.path("C:", "github", "hake-data")
-    })
+    },
+    file.path("c:", "stockassessment", "hake-data")
+  )
   fs::dir_create(wd)
   wd
 }
