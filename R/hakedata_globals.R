@@ -24,12 +24,8 @@ hakedatawd <- function() {
     "Ian.Taylor" = {
         file.path("C:", "github", "hake-data")
     })
-  if (!file.exists(wd)) {
-    stop("The file path found from wd_hakedata,\n",
-      wd, "\nwas not found.")
-  } else {
-    return(wd)
-  }
+  fs::dir_create(wd)
+  wd
 }
 
 #' Find username for hake-data sql accounts
