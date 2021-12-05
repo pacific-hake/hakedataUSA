@@ -143,7 +143,7 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     localsave(atsea.foreign, "atsea.foreign")
     # Get species list
     nspecies <- queryDB(
-      queryFilename = file.path(hakedatawd(), "sql", "NORPACspecies.query"),
+      queryFilename = file.path(sqldir, "NORPACspecies.query"),
       db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw,
       start = startyear$NORPAC[2], end = endyear)
     localsave(nspecies, "NORPACspecies")
