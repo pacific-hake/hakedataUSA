@@ -175,6 +175,11 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
       measurements::conv_unit(page$FISH_LENGTH, from = "cm", to = "mm"),
       page$FISH_LENGTH)
     localsave(page, "page")
+    pspec <- queryDB(
+      queryFilename = dir(sqldir, "pacfin_spec", full.names = TRUE),
+      db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
+      sp = "PWHT", start = startyear$PacFIN[1], end = endyear)
+    pspec <- pspec[!duplicated(pspec[, "YEAR"]), ]
   }
 
   e1 <- new.env()
@@ -189,6 +194,7 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     assign("pcatch", pcatch, envir = e1)
     assign("pcatchatsea", pcatchatsea, envir = e1)
     assign("page", page, envir = e1)
+    assign("pspec", pspec, envir = e1)
   }
   return(invisible(e1))
 }

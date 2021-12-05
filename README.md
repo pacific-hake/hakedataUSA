@@ -5,7 +5,7 @@ Code to extract and workup the US data for the Pacific hake assessment.
 To extract code for this year's assessment open a new R session and run the following:
 ```
 local.assess <- file.path("c:", "stockAssessment", "hake-assessment")
-local.model <- "2021.01.03_newdata"
+local.model <- "2020.01.03_data"
 
 library(devtools)
 devtools::install_github("pacific-hake/hakedataUSA")
@@ -29,12 +29,13 @@ new_catch(dirout = file.path(local.assess, "data"), year = hakedata_year(),
   filedat = file.path(local.assess, "models", local.model, "hake_data.ss"))
 # Send compositions to hake-assessment/data
 datatoassessment_comp(file.path(local.assess, "data"))
-datatocomps(dirdata = file.path(local.assess, "data"),
-  dirmod = file.path(local.assess, "models", local.model))
+compdata <- datatocomps(dirdata = file.path(local.assess, "data"),
+  dirmod = file.path(local.assess, "models", local.model),
+  cohorts = c(7, 11))
 
 # Weight-at-age
 wtatage_collate()
-wtatage_extra(dir = file.path(hakedatawd(), "LengthWeightAge"))
+data_wtatage(dir = file.path(local.assess, "data", "LengthWeightAge"))
 render("inst/extdata/beamer/hake_jtc_data_us.Rmd")
 ```
 
