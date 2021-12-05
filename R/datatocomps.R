@@ -43,11 +43,8 @@ datatocomps <- function(dirdata, dirmod, cohorts) {
       })
     can.l <- do.call(rbind, can.l)
   }
-<<<<<<< HEAD
-=======
   can.l[, "Sector"] <- gsub("CAN ([A-Z])", "CAN_\\1", can.l$Sector)
   can.l[, "Sector"] <- gsub("FreezerTrawl", "FreezeTrawl", can.l$Sector)
->>>>>>> c2a12fc (fix(datatocomps): CAN keeps changing how comps are saved,)
 
   usc <- utils::read.csv(file = file.path(dirdata, "us-cp-age-data.csv"),
     stringsAsFactors = FALSE)
