@@ -56,7 +56,7 @@ Imports:
     tools,
     XML
 Remotes:
-  github::r4ss/r4ss@development
+  github::r4ss/r4ss@development,
   github::nwfsc-assess/PacFIN.Utilities
 RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
