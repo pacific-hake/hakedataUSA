@@ -202,7 +202,9 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
       db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
       sp = "PWHT", start = startyear$PacFIN[1], end = endyear
     )
-    pspec <- pspec[!duplicated(pspec[, "YEAR"]), ]
+    if (NCOL(pspec) != 1) {
+      pspec <- pspec[!duplicated(pspec[, "YEAR"]), ]
+    }
   }
 
   e1 <- new.env()
