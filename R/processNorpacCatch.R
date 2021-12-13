@@ -110,6 +110,10 @@ processNorpacCatch <- function(ncatch, species = 206, outfname = NULL,
     list("sector" = TRout$Sector, "year" = TRout$year), FUN = get_sum)
 
   if (!is.null(outfname)) {
+    dir.create(outfname,
+      showWarnings = FALSE,
+      recursive = TRUE,
+    )
     utils::write.table(nsampledhauls,
       file = file.path(outfname, "NORPAC_DomesticAtSea_nsampledhauls.csv"),
       row.names = FALSE, sep = ",", append = FALSE)
