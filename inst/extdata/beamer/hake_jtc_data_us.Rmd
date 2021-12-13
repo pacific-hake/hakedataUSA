@@ -12,7 +12,7 @@ decdays <- seq(
   as.Date(paste0(year,"/12/1")),
   as.Date(paste0(year,"/12/31")),
   "day")
-meetingday <- decdays[weekdays(decdays)=="Wednesday"][2]
+meetingday <- decdays[weekdays(decdays)=="Wednesday"][3]
 ```
 
 ---
