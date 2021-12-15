@@ -58,5 +58,5 @@ Imports:
 Remotes:
   github::r4ss/r4ss,
   github::nwfsc-assess/PacFIN.Utilities
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Roxygen: list(markdown = TRUE)

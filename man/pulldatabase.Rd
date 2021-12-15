@@ -2,7 +2,7 @@
 % Please edit documentation in R/pulldatabase.R
 \name{pulldatabase}
 \alias{pulldatabase}
-\title{Pull information from NORPAC and PacFIN databases for hake}
+\title{Pull data from databases for Pacific Hake}
 \usage{
 pulldatabase(
   database = c("NORPAC", "PacFIN"),
@@ -26,48 +26,60 @@ start year for the biological data.}
 
 \item{endyear}{An integer value specifying the final year of data
 to include in the extraction. The default uses
-\code{\link{hakedata_year}} to determine the terminal year.}
+\code{hakedata_year} to determine the terminal year.}
 
 \item{passwordfile}{A file path directing R to a file that contains
-two lines, with the first being your NORPAC password and the
-second being your PacFIN password without quotes.
-If this argument is \code{NULL}, the user will be prompted
-for their password.}
+a password for each database listed in \code{database}.
+Each password should be on its own line. The default case would place
+your NORPAC password on the first line and the
+second line would be your PacFIN password without quotes.
+If this argument is \code{NULL}, users will be prompted
+for their passwords.
+Passwords are needed because the databases store confidential data.}
 }
 \value{
-An environment with several objects pulled from the
+An environment or \code{list} with several objects pulled from the
 NORPAC and PacFIN databases. Several \code{Rdat} files are
 saved to the disk in the extractedData folder,
 one file for each object and a summary file.
 }
 \description{
-Extract catch, weight, and age data from NORPAC and PacFIN databases
-for the hake stock assessment.
+Extraction of
+\itemize{
+\item catch data,
+\item weight measurements,
+\item length measurements,
+\item age reads, and
+\item management quantities
+from databases for the Pacific Hake assessment.
+Current databases that are queried include the NORPAC and PacFIN databases,
+though other databases may be added in the future through the
+\verb{database =} argument.
+}
 }
 \details{
-There are many detailed parts to \code{pulldatabase} that lead to many files
+There are many detailed parts to this function that lead to files
 being saved to the disk. The steps are outlined below:
-\enumerate{
-\item \link{hakedatawd} finds the folder where the data should be saved.
-\item Start years for each database are determined from \code{startyear}.
-\item Ending year of the data is determined using \link{hakedata_year} and
-is assigned to \code{endyear}.
-\item Extract data from NORPAC if included in \code{database}.
-\enumerate{
+\itemize{
+\item \code{\link[=hakedatawd]{hakedatawd()}} finds the folder where the data should be saved.
+\item Extract data from NORPAC.
+\itemize{
 \item Catch data
 \item Weight and age data
 \item Squash table of ages (that also includes lengths)
 \item Foreign ages
 \item Species list
 }
-\item Extract data from PacFIN if included in \code{database}.
-\enumerate{
+\item Extract data from PacFIN.
+\itemize{
 \item Catch data
 \item Age, length, and weight data from bds table
-\item At-sea-sector data
+\item At-sea data
+\item Management quantities such as allowable catch limits (ACL) for the
+Pacific Fisheries Management Council, i.e., U.S. quantities of interest.
 }
 \item Save each object to the disk in the "extractedData" directory in
-\link{hakedatawd}.
+\code{\link[=hakedatawd]{hakedatawd()}}.
 }
 }
 \examples{

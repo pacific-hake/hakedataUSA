@@ -4,7 +4,13 @@
 \alias{new_catch}
 \title{Move US Catch Information to Assessment Files}
 \usage{
-new_catch(dirout, year, filedat = NULL, digits = 5)
+new_catch(
+  dirout,
+  year,
+  filedat = NULL,
+  digits = 5,
+  lastassessmentvals = c(NA, NA, NA)
+)
 }
 \arguments{
 \item{dirout}{A directory that houses the \code{.csv} data files
@@ -19,6 +25,15 @@ you to run the function without writing a new dat file.}
 
 \item{digits}{The number of digits you want the results to
 saved to. \verb{[round](..., digits = digits)} will be used.}
+
+\item{lastassessmentvals}{A vector of three values,
+\itemize{
+\item estimate of spawning stock biomass for terminal year
+in thousands of metric tons,
+\item estimate of depletion in percent with one decimal place,
+\item estimate of TAC for the first year of the forecast period
+in metric tons rounded to the nearest whole number.
+}}
 }
 \value{
 todo: document what this function returns.
@@ -27,6 +42,12 @@ todo: document what this function returns.
 Integrate the latest catch information from the US hake fishery
 into the hake-assessment files used in the building of the
 stock assessment.
+}
+\examples{
+\dontrun{
+new_catch(file.path("hake-assessment", "data"),
+  year = 2020, lastassessmentvals = c(1.379, 65.0, 66458))
+}
 }
 \author{
 Kelli Faye Johnson

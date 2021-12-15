@@ -7,13 +7,15 @@
 hakedatawd()
 }
 \value{
-A full file path, not a relative file path.
+A full file path for the \code{hake-data} directory is returned.
 }
 \description{
-Find the working directory based on your user name
-for the given computer that you on. The working
-directory is for the hake-data repository cloned
-from github.
+Find the working directory called \code{hake-data} based on your user name.
+\code{hake-data} stores all of the U.S. and Canadian data for the annual
+stock assessment of Pacific Hake.
+If you user name is not one of the default, pre-specified user names
+available within this function, then \code{hakedatawd} will create a directory
+on your \verb{c:} drive called \code{stockassessment} and place \code{hake-data} in there.
 }
 \examples{
 hakedatawd()

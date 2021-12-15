@@ -20,6 +20,7 @@ plot_boxplot(
   nrow = NULL,
   ncol = NULL,
   legend.position,
+  legend.direction = "vertical",
   ...
 )
 }
@@ -85,6 +86,12 @@ be specific to each panel.}
 \link[ggplot2:facet_wrap]{ggplot2::facet_wrap}. The default values of \code{NULL} allow the function to
 determine the appropriate number of rows and columns. If changed from the
 default, use integer values to predetermine the number of rows or columns.}
+
+\item{legend.position}{Coordinates for where you would like the legend
+to be placed.}
+
+\item{legend.direction}{\code{"vertical"} or `"horizontal",
+where the default is the former.}
 
 \item{...}{Arguments passed to \link[ggplot2:ggsave]{ggplot2::ggsave} other than \code{filename}
 which is passed using \code{file}.}
