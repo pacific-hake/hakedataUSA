@@ -3,41 +3,73 @@ title: Preliminary information on U.S. fishery
 author: Joint Technical Committee (JTC)
 output:  beamer_presentation
 lang: en
+params:
+  wednesdaynumber: 3
 ---
 
-```{r calc_secondwed, echo = FALSE}
+```{r setup, echo = FALSE}
 options(scipen = 999)
-year <- format(Sys.time(),"%Y")
-decdays <- seq(
-  as.Date(paste0(year,"/12/1")),
-  as.Date(paste0(year,"/12/31")),
-  "day")
-meetingday <- decdays[weekdays(decdays)=="Wednesday"][3]
-```
 
----
-date: `r format(meetingday, "%b. %d, %Y")`
----
+year <- format(Sys.time(), "%Y")
+assessmentyear <- as.numeric(year) - 
+  as.numeric(as.numeric(format(Sys.time(), "%m")) < 5)
 
-```{r load_info, echo = FALSE}
 mydir <- hakedatawd()
-for (i in dir(full.names = TRUE, file.path(mydir, "extractedData"), pattern = "\\.Rdat")) {
+mydirfiles <- dir(
+  full.names = TRUE,
+  file.path(mydir, "extractedData"),
+  pattern = "\\.Rdat"
+)
+for (i in mydirfiles) {
   load(i)
 }
-atseacatch <- aggregate(OFFICIAL_TOTAL_CATCH ~ VESSEL_TYPE + format(as.Date(HAUL_DATE),"%Y"),
-  data = ncatch[ncatch$SPECIES == 206 & ncatch$VESSEL_TYPE %in% 1:2, ], sum)
-atseacatch.ms <- atseacatch[atseacatch$VESSEL_TYPE == 2 & atseacatch[, 2] == year, 3]
-atseacatch.cp <- atseacatch[atseacatch$VESSEL_TYPE == 1 & atseacatch[, 2] == year, 3]
-shorecatch <- tail(aggregate(MT ~ YEAR, data = pcatch,sum)[, "MT"], 1)
-allcatch <- sum(c(atseacatch.ms, atseacatch.cp, shorecatch))
-# todo: make this automated
-tacs <- c(CP = 132249, MS = 93352, SS = 163367)
-xformat <- function(x) {
-  format(x, format = "f", big.mark = ",", digits = 0)
-}
 ```
 
-```{r calc_numread, echo = FALSE}
+---
+date: `r format(ithweekdate(params$wednesdaynumber), "%b. %d, %Y")`
+---
+
+```{r calc-attainment, echo = FALSE}
+
+atseacatch <- aggregate(
+  OFFICIAL_TOTAL_CATCH ~ VESSEL_TYPE + format(as.Date(HAUL_DATE),"%Y"),
+  data = ncatch[ncatch$SPECIES == 206 & ncatch$VESSEL_TYPE %in% 1:2, ],
+  sum
+)
+atseacatchMS <- atseacatch[atseacatch$VESSEL_TYPE == 2 & atseacatch[, 2] == year, 3]
+atseacatchCP <- atseacatch[atseacatch$VESSEL_TYPE == 1 & atseacatch[, 2] == year, 3]
+
+tribalcatchinpacfin <- 3319.9764 - pcatch %>%
+  dplyr::filter(FLEET == "TI", YEAR == year) %>%
+  dplyr::summarize(MT = sum(MT)) %>%
+  dplyr::pull(MT)
+shorecatch <- tribalcatchinpacfin + pcatch %>%
+  dplyr::filter(
+    YEAR == assessmentyear,
+    FLEET %in% c("LE", "TI", "OA")
+  ) %>%
+  dplyr::group_by(YEAR) %>%
+  dplyr::summarize(MT = sum(MT)) %>%
+  dplyr::pull(MT)
+researchcatch <- pcatch %>%
+  dplyr::filter(
+    YEAR == assessmentyear,
+    FLEET %in% c("R")
+  ) %>%
+  dplyr::group_by(YEAR) %>%
+  dplyr::summarize(MT=sum(MT)) %>%
+  dplyr::pull(MT)
+
+allcatch <- atseacatchMS + atseacatchCP + shorecatch + researchcatch
+
+tacsraw <- read.csv(
+  file.path(mydir, "Catches", "quotas.csv")
+)
+tacs <- c(tacsraw[, NCOL(tacsraw)])
+names(tacs) <- tacsraw[, 1]
+```
+
+```{r calc-numread, echo = FALSE}
 ntable <- read.table(file.path(mydir, "Catches", "Comps", "NORPACOtolithSum.csv"),
   sep = ",", header = TRUE)
 ptable <- table(
@@ -62,67 +94,98 @@ Attainment =  `r format(allcatch/sum(tacs)*100, nsmall = 1, digits = 1)` (\%)
 
 ## Mothership (MS)
 \centering
-Catch = `r xformat(atseacatch.ms)` (mt)
+Catch = `r xformat(atseacatchMS)` (mt)
 
 TAC =  `r xformat(tacs["MS"])` (mt)
 
-Attainment =  `r format(atseacatch.ms/tacs["MS"]*100, nsmall = 1, digits = 1)` (\%)
+Attainment =  `r format(atseacatchMS/tacs["MS"]*100, nsmall = 1, digits = 1)` (\%)
 
 ## Catcher/Processor (CP)
 \centering
-Catch =  `r xformat(atseacatch.cp)` (mt)
+Catch =  `r xformat(atseacatchCP)` (mt)
 
 TAC =  `r xformat(tacs["CP"])` (mt)
 
-Attainment =  `r format(atseacatch.cp/tacs["CP"]*100, nsmall = 1, digits = 1)` (\%)
+Attainment =  `r format(atseacatchCP/tacs["CP"]*100, nsmall = 1, digits = 1)` (\%)
 
 ## Shoreside
 \centering
-Catch = `r xformat(shorecatch)` (mt)
+Catch = `r xformat(shorecatch)` (mt; includes `r round(tribalcatchinpacfin, 0)` mt tribal not in PacFIN)
 
-TAC = `r xformat(tacs["SS"])` (mt)
+TAC = `r xformat(tacs["Shore"])` (mt)
 
-Attainment =  `r format(shorecatch/tacs["SS"]*100, nsmall = 1, digits = 1)` (\%)
+Attainment =  `r format(shorecatch/tacs["Shore"]*100, nsmall = 1, digits = 1)` (\%)
 
 # Mothership (MS) catch
+
 ![](c:/stockAssessment/hake-data/Figures/MsCatchMonthYear.png){width=100% height=100% alt="U.S. fishery catch: Mothership"}
 
 # Catcher/Processor (CP) catch
+
 ![](c:/stockAssessment/hake-data/Figures/CpCatchMonthYear.png){width=100% height=100% alt="U.S. fishery catch: Catcher/Processor"}
 
 # Shoreside catch
+
 ![](c:/stockAssessment/hake-data/Figures/shoresideCatchMonthYear.png){width=100% height=100% alt="U.S. fishery catch: Shoreside"}
 
 # At-sea fishing depths
+
 ![](c:/stockAssessment/hake-data/Figures/fishDepthsUS.png){width=100% height=100% alt="U.S. at-sea fishery catch depths (fathoms)"}
 
-# At-sea catch-rate
+# At-Sea catch-rate
+
 ![](c:/stockAssessment/hake-data/Figures/fishCatchRatesUSnolog.png){width=100% height=100% alt="U.S. at-sea fishery catch-rate"}
 
 # Raw length
+
 ![](c:/stockAssessment/hake-data/Figures/raw_length_AtSea.png){width=100% height=100% alt="U.S. at-sea fishery length distribution"}
 ![](c:/stockAssessment/hake-data/Figures/raw_length_shore.png){width=100% height=100% alt="U.S. shoreside fishery length distribution"}
 
 # Raw weight
+
 ![](c:/stockAssessment/hake-data/Figures/raw_weight_AtSea.png){width=100% height=100% alt="U.S. at-sea fishery weight distribution"}
 ![](c:/stockAssessment/hake-data/Figures/raw_weight_shore.png){width=100% height=100% alt="U.S. shoreside fishery weight distribution"}
 
 # Recent age structures
+
 ```{r tableagestructures, asis = TRUE, echo = FALSE}
-knitr::kable(final, format = "markdown", row.names = FALSE, label = NULL,
-  caption = "Number of ages for at-sea and shoreside sectors by year.")
+knitr::kable(final, row.names = FALSE, label = NULL,
+  format = "markdown",
+  caption = "Preliminary number of ages for at-sea and shoreside sectors.")
 ```
 
-# 2020 age structures
+# Recent age structures by month
+
 ```{r tableagesbymonth, asis = TRUE, echo = FALSE}
 a <- data.frame(
-  table(as.numeric(format(subset(atsea.ages,YEAR == 2020&!is.na(AGE))$HAUL_OFFLOAD_DATE, "%m")))
-  )
+  table(as.numeric(
+    format(
+      subset(
+        atsea.ages,
+        YEAR == assessmentyear & !is.na(AGE))$HAUL_OFFLOAD_DATE,
+      "%m"
+    )
+  ))
+)
 b <- data.frame(
-  table(subset(page,SAMPLE_YEAR==2020&!is.na(AGE_YEARS))$SAMPLE_MONTH)
+  table(subset(
+    page,
+    SAMPLE_YEAR == assessmentyear & !is.na(AGE_YEARS))$SAMPLE_MONTH
   )
-bymonth <- merge(a,b,by = "Var1", all = TRUE)
-knitr::kable(merge(a, b, by = "Var1", all = TRUE), format = "markdown",
-  col.names = c("Month", "At-sea", "Shoreside"), row.names = FALSE, label = NULL,
-  caption = "Number of 2020 ages for at-sea and shoreside sectors by month.")
+)
+knitr::kable(
+  merge(a, b, by = "Var1", all = TRUE) %>% arrange(Var1),
+  format = "markdown",
+  col.names = c("Month", "At-Sea", "Shoreside"),
+  row.names = FALSE,
+  label = NULL,
+  caption = glue::glue('Number of {assessmentyear} ages for at-sea and shoreside sectors by month.')
+)
 ```
+
+# Delays in accessing data
+
+* Lack of electronic fish tickets by some in shoreside fishery
+* Delayed access to data from at-sea observers because of protocols related to covid-19
+* Lack of access to lab space because of covid-19 protocols
+* Timing of official end of fishery (i.e., December 31, 2021) and data deadline (i.e., January 03, 2022)
