@@ -29,8 +29,9 @@ hake_catchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE,
   mydir <- hakedatawd()
   args <- list(height = 5, width = 10, units = "in", pointsize = 10, res = 300)
   args2 <- list(mfrow=c(2,2), mar=c(0.5,3.1,0.5,0.1),
-    oma=c(4,0.1,ceiling(cex.title),0.1),
-    mgp=c(2.1, 0.75, 0), las = 1)
+    oma=c(4,0.1, ceiling(cex.title), 0.1),
+    mgp=c(2.1, 0.75, 0), las = 1
+  )
   args3 <- list(outer=TRUE,side=3,line=-0.1,cex=cex.title)
   args4 <- list(outer=TRUE,side=1,line=1.5,cex=1.3)
 
@@ -56,7 +57,7 @@ hake_catchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE,
   do.call("par", args2)
   plot_catchvmonthbyyear(shore[shore$sector=="USshore",],
     Yrs=Yrs,quotas=quotas[3,],lineWds=lineWds,lineTypes=lineTypes,
-    cols=cols,leg.cex=0.7)
+    cols=cols,leg.cex=1.2)
   do.call("mtext", c(args3,
     text = paste(
       "U.S. Shoreside Catches",
@@ -71,7 +72,7 @@ hake_catchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE,
   do.call("par", args2)
   plot_catchvmonthbyyear(cp,
     Yrs=Yrs,quotas=quotas[1,-1],lineWds=lineWds,lineTypes=lineTypes,
-    cols=cols,leg.cex=0.7)
+    cols=cols,leg.cex=1.2)
   do.call("mtext", c(args3,
     text = paste(
       "U.S. CP Catches",
@@ -86,7 +87,7 @@ hake_catchPlots <- function(doPNG = TRUE, nyears = 5, preliminary = TRUE,
   do.call("par", args2)
   plot_catchvmonthbyyear(ms,
     Yrs=Yrs,quotas=quotas[2,-1],lineWds=lineWds,lineTypes=lineTypes,
-    cols=cols,leg.cex=0.7)
+    cols=cols,leg.cex=1.2)
   do.call("mtext", c(args3,
     text = paste(
       "U.S. MS Catches",
