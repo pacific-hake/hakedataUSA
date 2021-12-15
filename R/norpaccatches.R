@@ -189,10 +189,11 @@ norpaccatches <- function(ncatch = NULL, nyears = 5,
 
   #### Figure: catch rate
   hcatch <- get_confidential(hcatch, yvar = "vcolumn", xvar = c("year", "month"))
+  ylabelexpression <- expression(Unstandardized~catch~rates~(mt~'*'~hr^{-1}))
   gg <- plot_boxplot(data = hcatch,
     xvar = c("month", "year"),
     yvar = "crate",
-    ylab = "Unstandardized catch-per-hour (mt/hour)",
+    ylab = ylabelexpression,
     mlab = "U.S. at-sea unstandardized yearly catch-rates.",
     file = file.path(mydir, "Figures", "Confidential", "fishCatchRatesUSByYear.png"),
     width = args[["width"]], height = args[["height"]],
@@ -216,8 +217,9 @@ norpaccatches <- function(ncatch = NULL, nyears = 5,
       xvar = c("Month"), showmedian = TRUE,
       incolor = "year",
       yvar = "crate",
-      ylab = "Unstandardized catch-per-hour (mt/hour)",
-      legend.position = c(0.1, 0.23),
+      ylab = ylabelexpression,
+      legend.position = c(0.5, 0.95),
+      legend.direction = "horizontal",
       width = args[["width"]], height = args[["height"]],
       units = args[["units"]], dpi = args[["res"]]
       ))
