@@ -36,6 +36,10 @@
 #' [ggplot2::facet_wrap]. The default values of `NULL` allow the function to
 #' determine the appropriate number of rows and columns. If changed from the
 #' default, use integer values to predetermine the number of rows or columns.
+#' @param legend.position Coordinates for where you would like the legend
+#'   to be placed.
+#' @param legend.direction `"vertical"` or `"horizontal",
+#'   where the default is the former.
 #' @param ... Arguments passed to [ggplot2::ggsave] other than `filename`
 #' which is passed using `file`.
 #'
@@ -73,6 +77,7 @@ plot_boxplot <- function(data,
   scales = "fixed",
   nrow = NULL, ncol = NULL,
   legend.position,
+  legend.direction = "vertical",
   ...
   ) {
 
@@ -137,8 +142,11 @@ plot_boxplot <- function(data,
       ggplot2::theme(legend.position = "none")
       if (!missing(legend.position)) {
         gg <- gg + 
-          ggplot2::theme(legend.position = legend.position,
-            legend.background = element_rect(fill = "transparent")) +
+          ggplot2::theme(
+            legend.direction = legend.direction,
+            legend.position = legend.position,
+            legend.background = element_rect(fill = "transparent")
+          ) +
           ggplot2::labs(
             fill = tools::toTitleCase(paste(collapse = " x ", incolor))
             )
