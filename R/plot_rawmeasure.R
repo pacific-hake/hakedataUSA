@@ -32,14 +32,14 @@ plot_rawmeasure <- function(
     scale_color_manual(values = plotcolour(n = length(years)))
   g1 <- gg +
     geom_line(stat = "density",
-      aes(x = .data[["LENGTH"]], y = ..density..,
-        col = factor(.data[["YEAR"]])))+
+      aes(x = .data[["LENGTH"]], y = ..scaled..,
+        col = factor(.data[["YEAR"]]))) +
     xlim(xlim_length) +
     xlab("Length (cm)")
   g2 <- gg +
     geom_line(stat = "density",
-      aes(x = .data[["WEIGHT"]], y = ..density..,
-        col = factor(.data[["YEAR"]])))+
+      aes(x = .data[["WEIGHT"]], y = ..scaled..,
+        col = factor(.data[["YEAR"]]))) +
     xlim(xlim_weight) +
     xlab("Weight (kg)")
 
@@ -51,13 +51,13 @@ plot_rawmeasure <- function(
     scale_color_manual(values = plotcolour(n = length(years)))
   g3 <- gg +
     geom_line(stat = "density", 
-      aes(x = .data[["FISH_LENGTH"]] / 10, y = ..density..,
+      aes(x = .data[["FISH_LENGTH"]] / 10, y = ..scaled..,
         col = factor(.data[["SAMPLE_YEAR"]]))) +
     xlim(xlim_length) +
     xlab("Length (cm)")
   g4 <- gg +
     geom_line(stat = "density",
-      aes(x = .data[["FISH_WEIGHT"]] / 1000, y = ..density..,
+      aes(x = .data[["FISH_WEIGHT"]] / 1000, y = ..scaled..,
         col = factor(.data[["SAMPLE_YEAR"]]))) +
     xlim(xlim_weight) +
     xlab("Weight (kg)")
