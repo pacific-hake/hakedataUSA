@@ -1,18 +1,18 @@
-#' Find the Working Directory for hake-data
-#' 
+#' Find the working directory for `hake-data`
+#'
 #' Find the working directory called `hake-data` based on your user name.
 #' `hake-data` stores all of the U.S. and Canadian data for the annual
 #' stock assessment of Pacific Hake.
 #' If you user name is not one of the default, pre-specified user names
-#' available within this function, then `hakedatawd` will create a directory
+#' available within this function, then `hakedatawd()` will create a directory
 #' on your `c:` drive called `stockassessment` and place `hake-data` in there.
-#' 
+#'
 #' @return A full file path for the `hake-data` directory is returned.
 #' @export
-#' @author Kelli Faye Johnson
+#' @author Kelli F. Johnson
 #' @examples
 #' hakedatawd()
-#' 
+#'
 hakedatawd <- function() {
   user <- Sys.info()["user"]
   wd <- switch(user,
