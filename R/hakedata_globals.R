@@ -32,52 +32,85 @@ hakedatawd <- function() {
   wd
 }
 
-#' Find username for hake-data sql accounts
-#' Find the username specific to the computer for
-#' accessing the NORPAC or PacFIN data repository. 
-#' 
+#' Find username and passwords for databases
+#'
+#' Find the username and passwords specific given the username of the computer
+#' and stored or entered passwords for accessing databases that store
+#' confidential information about landings of Pacific Hake.
+#'
 #' @param database A vector of character values specifying which databases you
-#' want login information for.
+#'   want login information for.
 #' @param file A file path specifying where to find the passwords.
-#' The path must be of a text file with two lines, where the first line
-#' is the NORPAC password and the second line is the PacFIN password. 
-#' These passwords should not be surrounded with quotes.
-#' User will be prompted for passwords if a file is not specified, i.e.,
-#' \code{file = NULL} or if the file that is specified cannot be found.
+#'   The path can be full or relative to your current working directory.
+#'   If a path is provided, the file that it leads to
+#'   must be for a text file with one password per line for each database
+#'   in the `database` argument and in that order.
+#'   The default for `database` means that the file would have two lines,
+#'   where the first line is the NORPAC password and
+#'   the second line is the PacFIN password.
+#'   These passwords should not be surrounded with quotes.
+#'   If a file name is not provided, which is the default behaviour, then
+#'   the user will be prompted for their passwords. This also happens if
+#'   the file cannot be found given the path provided.
 #' 
-#' @return A list with two entries, usernames and passwords, for the 
-#' databases you specified in the argument \code{database}.
+#' @return A list with two entries, `usernames` and `passwords`.
+#' Each element will have the same number of entries as the
+#' input argument `database` and be named using the elements of `database`.
+#' The list is invisibly returned to ensure that the passwords are not printed
+#' to the screen. Thus, the function call should be assigned to an object.
 #' @export
-#' @author Kelli Faye Johnson
-#' 
-hakedatasqlpw <- function(database = c("NORPAC", "PacFIN"), file = NULL) {
+#' @author Kelli F. Johnson
+#' @examples
+#' \dontrun{
+#' # Prompted for passwords for each database
+#' test <- hakedatasqlpw()
+#' # Prompted for passwords for each database because file is not found
+#' test <- hakedatasqlpw(file = "doesnotwork.txt")
+#' # On Kelli Johnson's machine, the following will work
+#' test <- hakedatasqlpw(file = "password.txt")
+#' # Doesn't work because entry for database is not in the list
+#' # of allowed databases, i.e., the default for `database`.
+#' test <- hakedatasqlpw(database = "onedatabase")
+#' # Only look for one password
+#' test <- hakedatasqlpw(database = "NORPAC")
+#' }
+hakedatasqlpw <- function(database = c("NORPAC", "PacFIN"), file) {
   user <- Sys.info()["user"]
   database <- match.arg(database, several.ok = TRUE)
   name <- switch(user,
     "Kelli.Johnson" = {
-      c("JOHNSONK", "kjohnson")
+      c("NORPAC" = "JOHNSONK", "PacFIN" = "kjohnson")[database]
     },
     "Aaron.Berger" = {
-      c("BERGERA", "aberger")
+      c("NORPAC" = "BERGERA", "PacFIN" = "aberger")[database]
     },
     "Ian.Taylor" = {
-      c("TAYLORI", "itaylor")
+      c("NORPAC" = "TAYLORI", "PacFIN" = "itaylor")[database]
     })
-  keep <- c("norpac", "pacfin") %in% tolower(database)
-  if (length(keep) == 0) stop("The databases are not NORPAC or PacFIN")
+  stopifnot(!is.null(name))
 
-  if (!file.exists(file)) file <- NULL
+  if (missing(file)) {
+    file <- NULL
+  } else {
+    if (!file.exists(file)) file <- NULL
+  }
 
   if (is.null(file)) {
-    passwords <- c(NA, NA)
-    if ("norpac" %in% tolower(database)) {
-      passwords[1] <- readline(prompt = "Enter NORPAC password without quotes\n")
-    }
-    if ("pacfin" %in% tolower(database)) {
-      passwords[2] <- readline(prompt = "Enter PacFIN password without quotes\n")
+    passwords <- rep(NA, length(database))
+    for (ii in seq_along(database)) {
+      passwords[ii] <- readline(
+        prompt = glue::glue("
+          Enter password for {database[ii]} database without quotes and \\
+          hit Enter.
+
+          "
+        )
+      )
     }
   } else {
     passwords <- readLines(file, warn = FALSE)
   }
-  invisible(list("username" = name[keep], "password" = passwords[keep]))
+
+  names(passwords) <- database
+  invisible(list("username" = name, "password" = passwords))
 }
