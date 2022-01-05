@@ -32,14 +32,10 @@
 #'
 get_confidential <- function(data,
   xvar,
-  yvar = "VESSEL",
-  verbose = FALSE
+  yvar = "VESSEL"
   ) {
 
   #### Input checks
-  if ("ngroups" %in% colnames(data) & verbose) {
-    message("The column ngroups is being overwritten by get_confidential.")
-  }
   stopifnot(length(yvar) == 1)
   stopifnot(all(xvar %in% colnames(data)))
   stopifnot(yvar %in% colnames(data))
@@ -47,23 +43,9 @@ get_confidential <- function(data,
   #### Find the number of unique yvar entries per grouping
   # xvar defines the columns to use as groups
   # a new column named 'ngroups' will be added to the returned data frame
-  data[, "ngroups"] <- type.convert(stats::ave(data[, yvar],
-    interaction(apply(data[, xvar, drop = FALSE], 2, factor, simplify = FALSE)),
-    FUN = function(x) length(unique(x))), as.is = TRUE
-  )
+  data %>%
+    dplyr::group_by(year) %>%
+    dplyr::mutate(ngroups = dplyr::n_distinct(vcolumn, na.rm = TRUE)) %>%
+    dplyr::ungroup()
 
-  #### Print info to the screen
-  if (verbose) {
-    printme <- stats::aggregate(
-      stats::as.formula(paste("ngroups ~ ", paste(xvar, collapse = " + "))),
-      data = data, unique
-      )
-    message("Number of groups per category\n")
-    utils::capture.output(
-      printme[utils::type.convert(printme$ngroups, as.is = TRUE) < 3, ],
-      type = "message"
-      )
-  }
-
-  return(data)
 }

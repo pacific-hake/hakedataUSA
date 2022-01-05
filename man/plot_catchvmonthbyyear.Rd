@@ -2,38 +2,35 @@
 % Please edit documentation in R/plot_catchvmonthbyyear.R
 \name{plot_catchvmonthbyyear}
 \alias{plot_catchvmonthbyyear}
-\title{todo:document plot_catchvmonthbyyear}
+\title{Plot catch versus month by year}
 \usage{
 plot_catchvmonthbyyear(
   data,
-  Yrs = range(dat$year),
+  file,
+  title,
+  Yrs,
   quotas = NULL,
-  lineWds,
-  lineTypes,
   cols,
-  leg.cex = 1,
-  divisor = 1000,
-  plotNum = 1:4
+  leg.cex = 1.2,
+  divisor = 1000
 )
 }
 \arguments{
 \item{data}{A data frame.}
 
+\item{file}{todo: document}
+
+\item{title}{todo: document}
+
 \item{Yrs}{todo: document}
 
 \item{quotas}{todo: document}
-
-\item{lineWds}{todo: document}
-
-\item{lineTypes}{todo: document}
 
 \item{cols}{todo: document}
 
 \item{leg.cex}{todo: document}
 
 \item{divisor}{todo: document}
-
-\item{plotNum}{todo: document}
 }
 \description{
 todo:document plot_catchvmonthbyyear

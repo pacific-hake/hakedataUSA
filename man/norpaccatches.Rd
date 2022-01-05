@@ -4,12 +4,18 @@
 \alias{norpaccatches}
 \title{Workup NORPAC Catches}
 \usage{
-norpaccatches(ncatch = NULL, nyears = 5, species = 206)
+norpaccatches(
+  ncatch = loadlocal(file = "NORPACdomesticCatch.Rdat"),
+  nyears = 5,
+  species = 206,
+  savedir = hakedatawd()
+)
 }
 \arguments{
-\item{ncatch}{An R object with NORPAC catches. If \code{NULL},
-which is the default, then the \code{.Rdat} file will be read
-from the disk.}
+\item{ncatch}{An R object with catch information extracted from the
+NORPAC database. The default is to read the \code{.Rdat} file
+from the disk using \code{\link[=loadlocal]{loadlocal()}}. Else, users can just pass the R object
+itself, which would typically be \code{hakedata[["ncatch"]]}.}
 
 \item{nyears}{The number of years for plotting.}
 
@@ -21,23 +27,6 @@ value is often called the \code{OBS} species code in observer landings from the
 Alaska Fisheries Science Center and is not the \code{AKR} species code.
 For example, \code{206} is Pacific Hake and is the default.
 For PacFIN data, this will be the entry in \code{SPID}.}
-
-\item{x}{A named list of values by year, more than likely
-made by tapply or split.}
-
-\item{country}{The country the data is coming from, which
-is only relevant if you are saving the data to the disk
-for naming purposes.}
-
-\item{type}{A character value that will be used for the name
-of the file.
-The first portion should be the sector such as "atsea".
-The second portion should be "fishing" if the file is not
-bottom depth, which what the Canadians export.}
-
-\item{dir}{A directory where you want to save the data. If left
-\code{NULL} then no data will be saved and just a data frame will
-be returned.}
 }
 \value{
 Figures and csv files are saved to the disk regarding
@@ -72,6 +61,33 @@ Fleet types are assigned to create summaries by fleet and year.
 \details{
 \emph{Tribal catches}
 }
+\section{Raw data}{
+Raw data consists of sampled and unsampled hauls with the total weight
+including bycatch weight. For sampled hauls, \code{EXTRAPOLATED_WEIGHT}
+is the weight of the catch only. For unsampled hauls that have no knowledge
+of the amount of bycatch included in the haul, \code{OFFICIAL_TOTAL_CATCH}
+must be used along with a estimated bycatch rate to calculate
+\code{EXTRAPOLATED_WEIGHT}. Monthly bycatch rates are estimated from
+the sampled hauls and multiplied by the \code{OFFICIAL_TOTAL_CATCH} to get
+an estimate of the amount of bycatch that should be subtracted from the total
+weight to get just the weight of the species of interest.
+}
+
+\section{Definitions}{
+\enumerate{
+\item @template official_total_catch
+\item @template extrapolated_weight
+}
+}
+
+\section{Assumptions}{
+\enumerate{
+\item sampled hauls have an entry in the \code{SPECIES} column,
+i.e., hake are denoted with 206
+\item an unsampled haul is represented by one unique record
+}
+}
+
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }

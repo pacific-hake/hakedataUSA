@@ -1,2 +1,3 @@
-#' @param verbose A logical value specifying whether or not to print
-#' information to the screen.
+#' @param verbose A logical specifying whether or not to print
+#'   information to the screen.
+#'   The default is `FALSE`.

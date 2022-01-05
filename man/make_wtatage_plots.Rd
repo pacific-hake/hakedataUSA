@@ -38,8 +38,9 @@ the file names for each plot.}
 \item{maxage}{The maximum age of fish modelled in the stock assessment, i.e.,
 what is the age at which all fish are grouped into a plus group.}
 
-\item{verbose}{A logical value specifying whether or not to print
-information to the screen.}
+\item{verbose}{A logical specifying whether or not to print
+information to the screen.
+The default is \code{FALSE}.}
 }
 \description{
 todo: write a description for make_wtatage_plots

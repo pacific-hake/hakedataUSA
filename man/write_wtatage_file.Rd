@@ -21,8 +21,9 @@ The file path can either be relative or absolute.}
 
 \item{maturity}{A vector of maturity at age.}
 
-\item{verbose}{A logical value specifying whether or not to print
-information to the screen.}
+\item{verbose}{A logical specifying whether or not to print
+information to the screen.
+The default is \code{FALSE}.}
 }
 \description{
 Write weight-at-age file

@@ -2,26 +2,29 @@
 % Please edit documentation in R/pacfincatches.R
 \name{pacfincatches}
 \alias{pacfincatches}
-\title{Clean catches extracted from PacFIN}
+\title{Print summaries and figures for catches from PacFIN}
 \usage{
-pacfincatches(pcatch = NULL, addtribal = 0)
+pacfincatches(
+  pcatch = loadlocal(file = "Pacfincomp_ft_taylorCatch.Rdat"),
+  nyears = 5,
+  savedir = hakedatawd()
+)
 }
 \arguments{
-\item{pcatch}{An R object with PacFIN catches. The default value is
-\code{NULL}, where the object will be read from a saved object within
-a directory called extractedData.}
+\item{pcatch}{An R object of PacFIN catches.
+The default value is loaded from the disk using \code{\link[=loadlocal]{loadlocal()}}.
+Otherwise, the R object is typically stored in the \code{hakedata} environment.}
 
-\item{addtribal}{A numeric value in metric tons that will be added
-to the US shoreside catch to account for tribal fish tickets not
-being in PacFIN yet.}
+\item{nyears}{An integer specifying the number of years you want to plot,
+where the most recent year will be sequenced back in time \code{nyears}.
+The default is typically five years.}
+
+\item{savedir}{A full path to a directory where you want files saved.
+The default is to save them in a folder found using \code{\link[=hakedatawd]{hakedatawd()}},
+which returns a path specific to the personal preferences of JTC members.}
 }
 \value{
-A list of three data frames,
-\enumerate{
-\item tribal catches,
-\item removed foreign catches, and
-\item catches by year and sector.
-} are returned and the following files are saved to the disk:
+The following files are saved to the disk:
 \itemize{
 \item PacFIN_Fleet.csv
 \item PacFIN_Sector.cs
@@ -33,5 +36,5 @@ A list of three data frames,
 }
 }
 \description{
-Remove foreign catches and fix column names of catches from PacFIN.
+Print summaries and figures for catches from PacFIN
 }

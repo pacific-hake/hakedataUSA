@@ -11,9 +11,9 @@ mappingagesamples(atsea.ages = NULL, ncatch = NULL, savepng = FALSE)
 \code{NULL}, where the object will be read from a saved object within
 a directory called extractedData.}
 
-\item{ncatch}{An R object with NORPAC catches. The default value is
-\code{NULL}, where the object will be read from a saved object within
-a directory called extractedData.}
+\item{ncatch}{An R object of NORPAC catches.
+The default value is loaded from the disk using \code{\link[=loadlocal]{loadlocal()}}.
+Otherwise, the R object is typically stored in the \code{hakedata} environment.}
 
 \item{savepng}{A logical specifying if the png plots of mapfun should
 be saved to the disk. If \code{FALSE} the plots will neither be created

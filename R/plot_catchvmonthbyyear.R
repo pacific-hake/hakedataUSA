@@ -46,94 +46,115 @@ lines.bymonth <- function(x, y,
   graphics::lines(xx, yy, type = "b", pch = 20, ...)
 }
 
-#' todo:document plot_catchvmonthbyyear
+#' Plot catch versus month by year
 #'
 #' todo:document plot_catchvmonthbyyear
 #' @template data
+#' @param file todo: document
+#' @param title todo: document
 #' @param Yrs todo: document
 #' @param quotas todo: document
-#' @param lineWds todo: document
-#' @param lineTypes todo: document
 #' @param cols todo: document
 #' @param leg.cex todo: document
 #' @param divisor todo: document
-#' @param plotNum todo: document
 #'
 plot_catchvmonthbyyear <- function(data,
-  Yrs = range(dat$year), quotas = NULL,
-  lineWds, lineTypes, cols, leg.cex = 1,
-  divisor = 1000, plotNum = 1:4) {
-#Take hake dataframe of Fleet, Month, Year, MT and plots year specific catches by month
-#Does not discriminate by fleet
-#Assumes that there is one observation of Month in each year
+                                  file,
+                                  title,
+                                  Yrs,
+                                  quotas = NULL,
+                                  cols,
+                                  leg.cex = 1.2,
+                                  divisor = 1000) {
+  lineWds <- c(rep(2, length(Yrs) - 1), 3)
+  lineTypes <- rep(1,length(Yrs))
+  cols <- plotcolour(length(Yrs))
+ # Take hake dataframe of Fleet, Month, Year, MT and
+ # plots year specific catches by month
+ # Does not discriminate by fleet
+ # Assumes that there is one observation of Month in each year
 
   plot.base <- function(ylim = c(0, 1.05), ylab) {
     plot(1, 1, xlim = c(1, 12), ylim = ylim,
       type = "n", xaxt = "n",
       xlab = "", ylab = ylab, yaxs = "i")
   }
+
+  png(height = 5, width = 10,
+    units = "in", pointsize = 10, res = 300,
+    file = file
+  )
+  cex.title <- c(3, 1.3)[1]
+  par(mfrow = c(2, 2),
+    mar = c(0.5, 3.1, 0.5, 0.1),
+    oma = c(4,0.1, ceiling(cex.title), 0.1),
+    mgp = c(2.1, 0.75, 0),
+    las = 1
+  )
   units <- paste0("(", ifelse(divisor != 1, paste(divisor, " "), ""), "mt)")
-  dat.yr <- split(data[data[, "year"] %in% Yrs,], data$year[data[, "year"] %in% Yrs])
-  maxYlim <- 
-  if (1 %in% plotNum) {
-    plot.base(ylab = paste("Catch", units),
-      ylim=c(0,max(data[data[, "year"] %in% Yrs, "catch"]) / divisor)
-      )
-    for (i in 1:length(Yrs)) {
-      lines.bymonth(
-        dat.yr[[Yrs[i]]]$month,
-        dat.yr[[Yrs[i]]]$catch/divisor,
-        col = cols[i], lwd = lineWds[i], lty = lineTypes[i])
-    }
-    axis(side = 1, mgp = c(1.0, 0, 0), labels = NA)
+  dat.yr <- split(
+    data[data[, "year"] %in% Yrs, ],
+    data$year[data[, "year"] %in% Yrs]
+  )
+  plot.base(ylab = paste("Catch", units),
+    ylim=c(0,max(data[data[, "year"] %in% Yrs, "catch"]) / divisor)
+    )
+  for (i in 1:length(Yrs)) {
+    lines.bymonth(
+      dat.yr[[Yrs[i]]]$month,
+      dat.yr[[Yrs[i]]]$catch/divisor,
+      col = cols[i], lwd = lineWds[i], lty = lineTypes[i])
   }
+  axis(side = 1, mgp = c(1.0, 0, 0), labels = NA)
 
-  if(2 %in% plotNum) {
-    plot.base(ylab = paste0("Cumulative Catch", units),
-      ylim=c(0, max(unlist(lapply(dat.yr,function(x){sum(x$catch)}))[Yrs],
-        na.rm = TRUE) / divisor)
-      )
-    for(i in 1:length(Yrs)) {
-      lines.bymonth(
-        dat.yr[[Yrs[i]]]$month,
-        dat.yr[[Yrs[i]]]$catch/divisor,
-        plotType = "cumulative",
-        col = cols[i], lwd = lineWds[i], lty = lineTypes[i])
-    }
-    legend("topleft", legend = Yrs, col = cols,
-      lty = lineTypes, lwd = lineWds, cex = leg.cex, bty = "n")
-    axis(side = 1, mgp = c(1.0, 0, 0), labels = NA)
+  plot.base(ylab = paste0("Cumulative Catch", units),
+    ylim=c(0, max(unlist(lapply(dat.yr,function(x){sum(x$catch)}))[Yrs],
+      na.rm = TRUE) / divisor)
+    )
+  for(i in 1:length(Yrs)) {
+    lines.bymonth(
+      dat.yr[[Yrs[i]]]$month,
+      dat.yr[[Yrs[i]]]$catch/divisor,
+      plotType = "cumulative",
+      col = cols[i], lwd = lineWds[i], lty = lineTypes[i])
   }
+  legend("topleft", legend = Yrs, col = cols,
+    lty = lineTypes, lwd = lineWds, cex = leg.cex, bty = "n")
+  axis(side = 1, mgp = c(1.0, 0, 0), labels = NA)
 
-  if(1 %in% plotNum) {
-    plot.base(ylab = "Proportion of Total Catch")
-    abline(h = 1, col = gray(0.5))
-    for (i in 1:length(Yrs)) {
-      lines.bymonth(
-        dat.yr[[Yrs[i]]]$month,
-        dat.yr[[Yrs[i]]]$catch / divisor,
-        plotType = "proportion",
-        col = cols[i], lwd = lineWds[i], lty = lineTypes[i])
-    }
-    axis(side = 1)
+  plot.base(ylab = "Proportion of Total Catch")
+  abline(h = 1, col = gray(0.5))
+  for (i in 1:length(Yrs)) {
+    lines.bymonth(
+      dat.yr[[Yrs[i]]]$month,
+      dat.yr[[Yrs[i]]]$catch / divisor,
+      plotType = "proportion",
+      col = cols[i], lwd = lineWds[i], lty = lineTypes[i])
   }
+  axis(side = 1)
 
-  if(!is.null(quotas) & 1 %in% plotNum) {
-    plot.base(ylab = "Proportion of Sector Quota")
-    abline(h = 1, col = gray(0.5))
-    for(i in 1:length(Yrs)) {
-      if (is.null(dim(dat.yr[[Yrs[i]]])[1])) next
-      dat.yr[[Yrs[i]]] <- rbind(dat.yr[[Yrs[i]]],
-        c(NA, 13,
-          as.numeric(Yrs[i]),
-          quotas[[Yrs[i]]] - sum(dat.yr[[Yrs[i]]][,"catch"])))
-      lines.bymonth(
-        dat.yr[[Yrs[i]]]$month,
-        dat.yr[[Yrs[i]]]$catch/divisor,
-        plotType="proportion",
-        col = cols[i], lwd = lineWds[i], lty = lineTypes[i])
-    }
-    axis(side = 1)
+  plot.base(ylab = "Proportion of Sector Quota")
+  abline(h = 1, col = gray(0.5))
+  for(i in 1:length(Yrs)) {
+    if (is.null(dim(dat.yr[[Yrs[i]]])[1])) next
+    dat.yr[[Yrs[i]]] <- rbind(dat.yr[[Yrs[i]]],
+      c(13,
+        as.numeric(Yrs[i]),
+        quotas[[Yrs[i]]] - sum(dat.yr[[Yrs[i]]][,"catch"])))
+    lines.bymonth(
+      dat.yr[[Yrs[i]]]$month,
+      dat.yr[[Yrs[i]]]$catch/divisor,
+      plotType = "proportion",
+      col = cols[i], lwd = lineWds[i], lty = lineTypes[i])
   }
-  mtext(side = 1, outer = TRUE, "Month", line = 1.5)
+  axis(side = 1)
+  mtext(side = 1, outer = TRUE,
+    text = "Month",
+    line = 1.5
+  )
+  mtext(side = 3, outer = TRUE,
+    text = title,
+    line = -0.1, cex = cex.title
+  )
+  dev.off()
 }

@@ -38,8 +38,9 @@ eliminated from the data set.}
 fish with an age of 99.
 Use \code{elimAge = NULL} to not eliminate fish of any age.}
 
-\item{verbose}{A logical value specifying whether or not to print
-information to the screen.}
+\item{verbose}{A logical specifying whether or not to print
+information to the screen.
+The default is \code{FALSE}.}
 }
 \value{
 A cleaned data frame of weight-at-age information for hake.

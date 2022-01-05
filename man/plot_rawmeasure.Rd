@@ -20,9 +20,9 @@ a directory called extractedData.}
 \item{years}{A vector of years that you want plotted.
 The default is to do the last five years.}
 
-\item{ncatch}{An R object with NORPAC catches. The default value is
-\code{NULL}, where the object will be read from a saved object within
-a directory called extractedData.}
+\item{ncatch}{An R object of NORPAC catches.
+The default value is loaded from the disk using \code{\link[=loadlocal]{loadlocal()}}.
+Otherwise, the R object is typically stored in the \code{hakedata} environment.}
 }
 \value{
 Four figures are saved to the disk. Figures are of length

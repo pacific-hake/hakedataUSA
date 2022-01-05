@@ -11,8 +11,9 @@ shorecomps(page = NULL, ages = 1:15, verbose = FALSE)
 
 \item{ages}{Vector of ages to keep.}
 
-\item{verbose}{A logical value specifying whether or not to print
-information to the screen.}
+\item{verbose}{A logical specifying whether or not to print
+information to the screen.
+The default is \code{FALSE}.}
 }
 \value{
 todo: document the return

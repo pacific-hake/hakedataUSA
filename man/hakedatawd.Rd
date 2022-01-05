@@ -2,7 +2,7 @@
 % Please edit documentation in R/hakedata_globals.R
 \name{hakedatawd}
 \alias{hakedatawd}
-\title{Find the Working Directory for hake-data}
+\title{Find the working directory for \code{hake-data}}
 \usage{
 hakedatawd()
 }
@@ -14,7 +14,7 @@ Find the working directory called \code{hake-data} based on your user name.
 \code{hake-data} stores all of the U.S. and Canadian data for the annual
 stock assessment of Pacific Hake.
 If you user name is not one of the default, pre-specified user names
-available within this function, then \code{hakedatawd} will create a directory
+available within this function, then \code{hakedatawd()} will create a directory
 on your \verb{c:} drive called \code{stockassessment} and place \code{hake-data} in there.
 }
 \examples{
@@ -22,5 +22,5 @@ hakedatawd()
 
 }
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }

@@ -8,25 +8,31 @@ pulldatabase(
   database = c("NORPAC", "PacFIN"),
   startyear = list(NORPAC = 2008, PacFIN = c(1980, 2008)),
   endyear = hakedata_year(),
-  passwordfile = "password.txt"
+  passwordfile = "password.txt",
+  savedir = hakedatawd(),
+  verbose = FALSE
 )
 }
 \arguments{
-\item{database}{A vector of character values indicating
+\item{database}{A vector of character strings indicating
 which databases you want to pull information from.
-Options include \code{c("NORPAC", "PacFIN")}, one or both
-can be specified. The default is to pull from both data bases.}
+Options include \code{c("NORPAC", "PacFIN")},
+one or both (the default) can be specified.
+Note that case matters here.}
 
 \item{startyear}{An ordered list the same length as \code{database} with
-at least one element per list entry specifying the start year for
-each database. If only a single value per database is provided, then
-then the number will be recycled for catches and ages. Otherwise,
-the first entry is the start year for catches and the second is the
-start year for the biological data.}
+at least one integer entry per list item specifying the
+first year that you want data for.
+If only a single value per database is provided, then
+then the year will be recycled for catch and composition information.
+Otherwise,
+the first entry is the start year for catches and
+the second is the start year for the biological data.
+Names of the list must match entries in \code{database} or be \code{NULL}.}
 
 \item{endyear}{An integer value specifying the final year of data
 to include in the extraction. The default uses
-\code{hakedata_year} to determine the terminal year.}
+\code{hakedata_year()} to determine the terminal year.}
 
 \item{passwordfile}{A file path directing R to a file that contains
 a password for each database listed in \code{database}.
@@ -36,6 +42,14 @@ second line would be your PacFIN password without quotes.
 If this argument is \code{NULL}, users will be prompted
 for their passwords.
 Passwords are needed because the databases store confidential data.}
+
+\item{savedir}{A full path to a directory where you want files saved.
+The default is to save them in a folder found using \code{\link[=hakedatawd]{hakedatawd()}},
+which returns a path specific to the personal preferences of JTC members.}
+
+\item{verbose}{A logical specifying whether or not to print
+information to the screen.
+The default is \code{FALSE}.}
 }
 \value{
 An environment or \code{list} with several objects pulled from the
@@ -51,17 +65,20 @@ Extraction of
 \item length measurements,
 \item age reads, and
 \item management quantities
-from databases for the Pacific Hake assessment.
-Current databases that are queried include the NORPAC and PacFIN databases,
-though other databases may be added in the future through the
+from NORPAC and PacFIN databases for the Pacific Hake assessment.
+Other, additional, databases may be added in the future through the
 \verb{database =} argument.
 }
 }
 \details{
-There are many detailed parts to this function that lead to files
-being saved to the disk. The steps are outlined below:
+\code{pulldatabase()} includes several steps, outlined below,
+and leads to many files being saved to your computer.
+Originally, files were \strong{NOT} overwritten. In 2022, Kelli F. Johnson
+changed the code to not save previous downloads to
+save on disk space, reduce the storing of redunant information, and
+simplify the code base that needed maintenance.
 \itemize{
-\item \code{\link[=hakedatawd]{hakedatawd()}} finds the folder where the data should be saved.
+\item Find the folder where the data should be saved with \code{\link[=hakedatawd]{hakedatawd()}}.
 \item Extract data from NORPAC.
 \itemize{
 \item Catch data
@@ -86,13 +103,19 @@ Pacific Fisheries Management Council, i.e., U.S. quantities of interest.
 \dontrun{
 # An environment with objects is returned
 dataenv <- pulldatabase()
-# Access individual objects using get
+# Access individual objects using `get()`
 head(get("ncatch", envir = dataenv))
 # Access individual objects pretending the environment is a list
 dataenv[["ncatch"]][1:5, ]
 }
 
 }
+\seealso{
+\itemize{
+\item \code{\link[=hakedata_year]{hakedata_year()}}
+\item \code{\link[=hakedatawd]{hakedatawd()}}
+}
+}
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }

@@ -4,7 +4,7 @@
 \alias{get_confidential}
 \title{Get number of unique values per grouping}
 \usage{
-get_confidential(data, xvar, yvar = "VESSEL", verbose = FALSE)
+get_confidential(data, xvar, yvar = "VESSEL")
 }
 \arguments{
 \item{data}{A data frame.}

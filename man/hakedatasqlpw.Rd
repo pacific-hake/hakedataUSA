@@ -2,32 +2,54 @@
 % Please edit documentation in R/hakedata_globals.R
 \name{hakedatasqlpw}
 \alias{hakedatasqlpw}
-\title{Find username for hake-data sql accounts
-Find the username specific to the computer for
-accessing the NORPAC or PacFIN data repository.}
+\title{Find username and passwords for databases}
 \usage{
-hakedatasqlpw(database = c("NORPAC", "PacFIN"), file = NULL)
+hakedatasqlpw(database = c("NORPAC", "PacFIN"), file)
 }
 \arguments{
 \item{database}{A vector of character values specifying which databases you
 want login information for.}
 
 \item{file}{A file path specifying where to find the passwords.
-The path must be of a text file with two lines, where the first line
-is the NORPAC password and the second line is the PacFIN password.
+The path can be full or relative to your current working directory.
+If a path is provided, the file that it leads to
+must be for a text file with one password per line for each database
+in the \code{database} argument and in that order.
+The default for \code{database} means that the file would have two lines,
+where the first line is the NORPAC password and
+the second line is the PacFIN password.
 These passwords should not be surrounded with quotes.
-User will be prompted for passwords if a file is not specified, i.e.,
-\code{file = NULL} or if the file that is specified cannot be found.}
+If a file name is not provided, which is the default behaviour, then
+the user will be prompted for their passwords. This also happens if
+the file cannot be found given the path provided.}
 }
 \value{
-A list with two entries, usernames and passwords, for the
-databases you specified in the argument \code{database}.
+A list with two entries, \code{usernames} and \code{passwords}.
+Each element will have the same number of entries as the
+input argument \code{database} and be named using the elements of \code{database}.
+The list is invisibly returned to ensure that the passwords are not printed
+to the screen. Thus, the function call should be assigned to an object.
 }
 \description{
-Find username for hake-data sql accounts
-Find the username specific to the computer for
-accessing the NORPAC or PacFIN data repository.
+Find the username and passwords specific given the username of the computer
+and stored or entered passwords for accessing databases that store
+confidential information about landings of Pacific Hake.
+}
+\examples{
+\dontrun{
+# Prompted for passwords for each database
+test <- hakedatasqlpw()
+# Prompted for passwords for each database because file is not found
+test <- hakedatasqlpw(file = "doesnotwork.txt")
+# On Kelli Johnson's machine, the following will work
+test <- hakedatasqlpw(file = "password.txt")
+# Doesn't work because entry for database is not in the list
+# of allowed databases, i.e., the default for `database`.
+test <- hakedatasqlpw(database = "onedatabase")
+# Only look for one password
+test <- hakedatasqlpw(database = "NORPAC")
+}
 }
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }

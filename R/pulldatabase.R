@@ -6,15 +6,18 @@
 #' * length measurements,
 #' * age reads, and
 #' * management quantities
-#' from databases for the Pacific Hake assessment.
-#' Current databases that are queried include the NORPAC and PacFIN databases,
-#' though other databases may be added in the future through the
+#' from NORPAC and PacFIN databases for the Pacific Hake assessment.
+#' Other, additional, databases may be added in the future through the
 #' `database =` argument.
 #'
 #' @details
-#' There are many detailed parts to this function that lead to files
-#' being saved to the disk. The steps are outlined below:
-#' * [hakedatawd()] finds the folder where the data should be saved.
+#' `pulldatabase()` includes several steps, outlined below,
+#' and leads to many files being saved to your computer.
+#' Originally, files were **NOT** overwritten. In 2022, Kelli F. Johnson
+#' changed the code to not save previous downloads to
+#' save on disk space, reduce the storing of redunant information, and
+#' simplify the code base that needed maintenance.
+#' * Find the folder where the data should be saved with [hakedatawd()].
 #' * Extract data from NORPAC.
 #'   * Catch data
 #'   * Weight and age data
@@ -30,30 +33,39 @@
 #' * Save each object to the disk in the "extractedData" directory in
 #'   [hakedatawd()].
 #'
-#' @param database A vector of character values indicating
-#' which databases you want to pull information from.
-#' Options include `c("NORPAC", "PacFIN")`, one or both
-#' can be specified. The default is to pull from both data bases.
+#' @param database A vector of character strings indicating
+#'   which databases you want to pull information from.
+#'   Options include `c("NORPAC", "PacFIN")`,
+#'   one or both (the default) can be specified.
+#'   Note that case matters here.
 #' @param startyear An ordered list the same length as `database` with
-#' at least one element per list entry specifying the start year for
-#' each database. If only a single value per database is provided, then
-#' then the number will be recycled for catches and ages. Otherwise,
-#' the first entry is the start year for catches and the second is the
-#' start year for the biological data.
+#'   at least one integer entry per list item specifying the
+#'   first year that you want data for.
+#'   If only a single value per database is provided, then
+#'   then the year will be recycled for catch and composition information.
+#'   Otherwise,
+#'   the first entry is the start year for catches and
+#'   the second is the start year for the biological data.
+#'   Names of the list must match entries in `database` or be `NULL`.
 #' @param endyear An integer value specifying the final year of data
-#' to include in the extraction. The default uses
-#' `hakedata_year` to determine the terminal year.
+#'   to include in the extraction. The default uses
+#'   `hakedata_year()` to determine the terminal year.
 #' @param passwordfile A file path directing R to a file that contains
-#' a password for each database listed in `database`.
-#' Each password should be on its own line. The default case would place
-#' your NORPAC password on the first line and the
-#' second line would be your PacFIN password without quotes.
-#' If this argument is `NULL`, users will be prompted
-#' for their passwords.
-#' Passwords are needed because the databases store confidential data.
+#'   a password for each database listed in `database`.
+#'   Each password should be on its own line. The default case would place
+#'   your NORPAC password on the first line and the
+#'   second line would be your PacFIN password without quotes.
+#'   If this argument is `NULL`, users will be prompted
+#'   for their passwords.
+#'   Passwords are needed because the databases store confidential data.
+#' @template savedir
+#' @template verbose
 #'
+#' @seealso
+#' * [hakedata_year()]
+#' * [hakedatawd()]
 #' @export
-#' @author Kelli Faye Johnson
+#' @author Kelli F. Johnson
 #' @return An environment or `list` with several objects pulled from the
 #' NORPAC and PacFIN databases. Several `Rdat` files are
 #' saved to the disk in the extractedData folder,
@@ -63,24 +75,39 @@
 #' \dontrun{
 #' # An environment with objects is returned
 #' dataenv <- pulldatabase()
-#' # Access individual objects using get
+#' # Access individual objects using `get()`
 #' head(get("ncatch", envir = dataenv))
 #' # Access individual objects pretending the environment is a list
 #' dataenv[["ncatch"]][1:5, ]
 #' }
 #'
 pulldatabase <- function(database = c("NORPAC", "PacFIN"),
-                         startyear = list("NORPAC" = 2008, "PacFIN" = c(1980, 2008)),
+                         startyear = list(
+                           "NORPAC" = 2008,
+                           "PacFIN" = c(1980, 2008)
+                         ),
                          endyear = hakedata_year(),
-                         passwordfile = "password.txt") {
-  mydir <- hakedatawd()
+                         passwordfile = "password.txt",
+                         savedir = hakedatawd(),
+                         verbose = FALSE) {
+  # File management
   sqldir <- system.file("extdata", "sql", package = "hakedataUSA")
-  if (!is.list(startyear)) {
-    stop("startyear must be a list.")
+  info <- hakedatasqlpw(file = passwordfile)
+  fs::dir_create(
+    path = file.path(savedir, "extractedData"),
+    recurse = TRUE
+  )
+  if (verbose) {
+    message(glue::glue("
+      The directory {savedir}
+      was created, if it did not already exist.
+      "
+    ))
   }
-  if (length(startyear) != length(database)) {
-    stop("At least one start year per database must be provided.")
-  }
+
+  # Checks regarding startyear
+  stopifnot(is.list(startyear))
+  stopifnot(length(startyear) == length(database))
   for (ii in seq_along(startyear)) {
     if (length(startyear[[ii]]) == 1) {
       startyear[[ii]][2] <- startyear[[ii]][1]
@@ -89,27 +116,16 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
   if (is.null(names(startyear))) {
     names(startyear) <- database
   } else {
-    if (!all(names(startyear) == database)) {
-      stop("Names of startyear do not match database entries.")
-    }
+    stopifnot(all(names(startyear) == database))
   }
 
-  info <- hakedatasqlpw(file = passwordfile)
-  NORPAC.uid <- info[[1]][1]
-  PacFIN.uid <- info[[1]][2]
-  NORPAC.pw <- info[[2]][1]
-  PacFIN.pw <- info[[2]][2]
-
+  # Set digits so that the full haul join number is displayed
   oldoptions <- options()
   on.exit(options(oldoptions), add = TRUE)
-  # set this so that the full haul join number is displayed
   options(digits = 19)
-  dir.create(file.path(mydir, "extractedData", "copies"),
-    recursive = TRUE,
-    showWarnings = FALSE
-  )
 
-  localsave <- function(data, trailingname, dir = hakedatawd()) {
+  # Creat local function
+  localsave <- function(data, trailingname, dir) {
     x <- deparse(substitute(data))
     assign(x, data)
     end <- paste0(trailingname, ".Rdat")
@@ -117,53 +133,59 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
       list = x,
       file = file.path(dir, "extractedData", end)
     )
-    ignore <- file.copy(
-      from = file.path(dir, "extractedData", end),
-      to = file.path(
-        dir, "extractedData", "copies",
-        gsub("\\.", paste0("_", format(Sys.time(), "%Y.%m.%d"), "."), end)
-      ),
-      overwrite = TRUE
-    )
-    if (!ignore) stop("Something went wrong copying the file to copies")
   }
 
   # NORPAC
-  if ("norpac" %in% tolower(database)) {
+  if ("NORPAC" %in% database) {
     # Catches
     ncatch <- queryDB(
       queryFilename = dir(sqldir, "NORPACdomesticCatch", full.names = TRUE),
-      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw,
+      db = "NORPAC",
+      uid = info[["username"]][["NORPAC"]],
+      pw = info[["password"]][["NORPAC"]],
       start = startyear$NORPAC[1], end = endyear
     )
-    localsave(ncatch, "NORPACdomesticCatch")
+    localsave(ncatch, "NORPACdomesticCatch", savedir)
     # Age and weight data
     atsea.ageWt <- queryDB(
       queryFilename = dir(sqldir, "atseaAgeWeight", full.names = TRUE),
-      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw,
+      db = "NORPAC",
+      uid = info[["username"]][["NORPAC"]],
+      pw = info[["password"]][["NORPAC"]],
       sp = "206", start = startyear$NORPAC[2], end = endyear
     )
-    localsave(atsea.ageWt, "atsea.ageWt")
+    localsave(atsea.ageWt, "atsea.ageWt", savedir)
     # Age and weight data from squash table
     atsea.ages <- queryDB(
       queryFilename = dir(sqldir, "atSeaSquashTableAges", full.names = TRUE),
-      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw,
-      sp = "206", start = startyear$NORPAC[2], end = endyear
+      db = "NORPAC",
+      uid = info[["username"]][["NORPAC"]],
+      pw = info[["password"]][["NORPAC"]],
+      sp = "206",
+      start = startyear$NORPAC[2],
+      end = endyear
     )
-    localsave(atsea.ages, "atsea.ages")
+    localsave(atsea.ages, "atsea.ages", savedir)
     atsea.foreign <- queryDB(
       queryFilename = dir(sqldir, "atsea_foreign_ages", full.names = TRUE),
-      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw,
-      sp = "206", start = startyear$NORPAC[2], end = endyear
+      db = "NORPAC",
+      uid = info[["username"]][["NORPAC"]],
+      pw = info[["password"]][["NORPAC"]],
+      sp = "206",
+      start = startyear$NORPAC[2],
+      end = endyear
     )
-    localsave(atsea.foreign, "atsea.foreign")
+    localsave(atsea.foreign, "atsea.foreign", savedir)
     # Get species list
     nspecies <- queryDB(
       queryFilename = file.path(sqldir, "NORPACspecies.query"),
-      db = "NORPAC", uid = NORPAC.uid, pw = NORPAC.pw,
-      start = startyear$NORPAC[2], end = endyear
+      db = "NORPAC",
+      uid = info[["username"]][["NORPAC"]],
+      pw = info[["password"]][["NORPAC"]],
+      start = startyear$NORPAC[2],
+      end = endyear
     )
-    localsave(nspecies, "NORPACspecies")
+    localsave(nspecies, "NORPACspecies", savedir)
   }
 
   if ("pacfin" %in% tolower(database)) {
@@ -171,21 +193,44 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     # Remove XXX fleet (foreign catch?)
     pcatch <- queryDB(
       queryFilename = dir(sqldir, "comp_ft_taylor_aliased", full.names = TRUE),
-      db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
-      sp = "PWHT", start = startyear$PacFIN[1], end = endyear
-    )
-    localsave(pcatch, "Pacfincomp_ft_taylorCatch")
+      db = "PACFIN",
+      uid = info[["username"]][["PacFIN"]],
+      pw = info[["password"]][["PacFIN"]],
+      sp = "PWHT",
+      start = startyear$PacFIN[1],
+      end = endyear
+    ) %>%
+      dplyr::mutate(
+        Date = as.Date(TDATE),
+        month = get_date(Date, "%m"),
+        year = YEAR,
+        sector = ifelse(grepl("^R", FLEET), "USresearch", "USshore")
+      ) %>%
+      dplyr::arrange(Date)
+    localsave(pcatch, "Pacfincomp_ft_taylorCatch", savedir)
     # bds data
     pcatchatsea <- queryDB(
       queryFilename = dir(sqldir, "pacfin.atseabysector", full.names = TRUE),
-      db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
-      sp = 206, start = startyear$PacFIN[2], end = endyear
+      db = "PACFIN",
+      uid = info[["username"]][["PacFIN"]],
+      pw = info[["password"]][["PacFIN"]],
+      sp = 206,
+      start = startyear$PacFIN[2],
+      end = endyear
     )
-    localsave(pcatchatsea, "pcatchatsea")
+    localsave(pcatchatsea, "pcatchatsea", savedir)
     page <- queryDB(
-      queryFilename = dir(sqldir, "pacfin_comprehensive_bds", full.names = TRUE),
-      db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
-      sp = "PWHT", start = startyear$PacFIN[2], end = endyear
+      queryFilename = dir(
+        path = sqldir,
+        pattern = "pacfin_comprehensive_bds",
+        full.names = TRUE
+      ),
+      db = "PACFIN",
+      uid = info[["username"]][["PacFIN"]],
+      pw = info[["password"]][["PacFIN"]],
+      sp = "PWHT",
+      start = startyear$PacFIN[2],
+      end = endyear
     )
     # Fix weights to be in grams and lengths to be in mm
     page$FISH_WEIGHT <- ifelse(page$FISH_WEIGHT_UNITS %in% c("LBS", "P"),
@@ -196,11 +241,15 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
       measurements::conv_unit(page$FISH_LENGTH, from = "cm", to = "mm"),
       page$FISH_LENGTH
     )
-    localsave(page, "page")
+    localsave(page, "page", savedir)
     pspec <- queryDB(
       queryFilename = dir(sqldir, "pacfin_spec", full.names = TRUE),
-      db = "PACFIN", uid = PacFIN.uid, pw = PacFIN.pw,
-      sp = "PWHT", start = startyear$PacFIN[1], end = endyear
+      db = "PACFIN",
+      uid = info[["username"]][["PacFIN"]],
+      pw = info[["password"]][["PacFIN"]],
+      sp = "PWHT",
+      start = startyear$PacFIN[1],
+      end = endyear
     )
     if (NCOL(pspec) != 1) {
       pspec <- pspec[!duplicated(pspec[, "YEAR"]), ]

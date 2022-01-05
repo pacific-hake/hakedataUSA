@@ -1,23 +1,28 @@
 # hakedataUSA
-Code to extract and workup the US data for the Pacific hake assessment.
+
+Code to extract and workup the U.S. data for the
+assessment of Pacific Hake.
 
 # Current assessment
-To extract code for this year's assessment open a new R session and run the following:
+
+To extract code for this year's assessment open a new R session and run
 ```
+# The following two lines will need to be altered for each user
 local.assess <- file.path("c:", "stockAssessment", "hake-assessment")
 local.model <- "2020.01.03_data"
 
-library(devtools)
+# Install the package hakedataUSA
 devtools::install_github("pacific-hake/hakedataUSA")
-hakedata <- pulldatabase()
-norpaccatches(hakedata$ncatch, nyears = 5)
-# todo: remove the added catches for 2020 in 2021
-catch_pacfin <- pacfincatches(hakedata$pcatch,
-  addtribal = 133.19)
-hake_catchPlots(doPNG = TRUE, nyears = 5)
+# or load_all() if you are in the hakedataUSA directory
 
+# Pull data, manipulate columns, and write csvs and figures
+hakedata <- pulldatabase()
+norpaccatches(hakedata$ncatch)
+pacfincatches(hakedata$pcatch)
+
+# Make composition data
 age_norpac <- atseacomps(hakedata$atsea.ages, hakedata$ncatch)
-age_shore <- shorecomps(verbose = TRUE)
+age_shore <- shorecomps(hakedata$page, verbose = TRUE)
 age_yearlyweights <- mappingagesamples(hakedata$atsea.ages, hakedata$ncatch, savepng = TRUE)
 jtcdecotoliths <- agedotoliths(hakedata$atsea.ages)
 plot_rawmeasure(hakedata$atsea.ages, years = 2020:(2020-4))
@@ -40,4 +45,6 @@ render("inst/extdata/beamer/hake_jtc_data_us.Rmd")
 ```
 
 # Issues
-Please contact kelli.johnson@noaa.gov if there are any issues in running the code, though the databases will only be accessible to members of the US JTC.
+
+Please contact kelli.johnson@noaa.gov if there are issues with the code.
+Note that the databases will only be accessible to members of the U.S. JTC.

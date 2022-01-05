@@ -1,3 +1,3 @@
-#' @param pcatch An R object with PacFIN catches. The default value is
-#' \code{NULL}, where the object will be read from a saved object within
-#' a directory called extractedData.
+#' @param pcatch An R object of PacFIN catches.
+#'   The default value is loaded from the disk using [loadlocal()].
+#'   Otherwise, the R object is typically stored in the `hakedata` environment.

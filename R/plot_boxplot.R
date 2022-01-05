@@ -99,7 +99,7 @@ plot_boxplot <- function(data,
     cols2keep <- unique(c(xvar, incolor))
   }
   p.temp <- plyr::ddply(data, cols2keep,
-    numcolwise(quantile, probs = probabilities, na.rm = TRUE))
+    plyr::numcolwise(quantile, probs = probabilities, na.rm = TRUE))
   p.dist <- transform(p.temp[, c(cols2keep, yvar)],
     probs = probabilities)
   p.formula <- stats::as.formula(
