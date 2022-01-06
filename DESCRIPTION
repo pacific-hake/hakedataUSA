@@ -41,6 +41,7 @@ Imports:
     plyr,
     RColorBrewer,
     r4ss,
+    readxl,
     reshape2,
     RODBC,
     stats,
