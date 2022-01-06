@@ -38,54 +38,81 @@ wtatage_collate <- function(year = hakedata_year()) {
   if (length(dir(acdir, pattern = as.character(year))) > 0) {
     Ac_survYear <- TRUE
     #Shimada
-    datUS <- utils::read.csv(
-      file = dir(acdir, pattern = paste0(year, ".*S_biodata_specimen_AGES.csv"),
-        full.names = TRUE))
-    datUS$Sex2 <- "U"
-    datUS$Sex2[datUS$Sex == 1] <- "M"
-    datUS$Sex2[datUS$Sex == 2] <- "F"
-    haul <- utils::read.csv(
-      file = dir(acdir, pattern = paste0(year, ".*S_biodata_haul.csv"),
-        full.names = TRUE),
-      stringsAsFactors = FALSE)
+    datUS <- readxl::read_excel(
+      path = dir(
+        acdir,
+        pattern = glue::glue("{year}.+specimen_{{0,1}}[AGES]{{0,4}}\\."),
+        full.names = TRUE
+      )
+    ) %>%
+      dplyr::mutate(
+        Sex2 = dplyr::case_when(
+          sex == 1 ~ "M",
+          sex == 2 ~ "F",
+          sex == 3 ~ "U"
+        )
+      ) %>%
+      data.frame
+    haul <- readxl::read_excel(
+      path = dir(
+        acdir,
+        pattern = glue::glue("{year}.+haul\\."),
+        full.names = TRUE
+      )
+    ) %>%
+      data.frame
     datUS <- merge(
       datUS,
-      haul[, c("Haul", "EQ_Date_Time", "EQ_Latitude", "EQ_Longitude")],
-      by = "Haul", all.x = TRUE)
-    datUS <- data.frame(Source="Acoustic U.S.", Weight_kg=datUS$Weight, 
-      Sex = datUS$Sex2, Age_yrs = datUS$Age,
-      Length_cm = datUS$Length, 
-      Month = as.numeric(format(as.Date(datUS$EQ_Date_Time, "%m/%d/%y"), "%m")),
-      Year = as.numeric(format(as.Date(datUS$EQ_Date_Time, "%m/%d/%y"), "%Y")))
+      haul[, c("haul", "eq_date_time", "eq_latitude", "eq_longitude")],
+      by = "haul", all.x = TRUE)
+    datUS <- data.frame(Source="Acoustic U.S.", Weight_kg=datUS$weight, 
+      Sex = datUS$Sex2, Age_yrs = datUS$age,
+      Length_cm = datUS$length, 
+      Month = as.numeric(format(as.Date(datUS$eq_date_time, "%m/%d/%y"), "%m")),
+      Year = as.numeric(format(as.Date(datUS$eq_date_time, "%m/%d/%y"), "%Y"))
+    )
 
-    datCAN <- utils::read.csv(
-      file.path(acdir, paste0(year, "_biodata_specimen_CAN.csv")))
-    datCAN$Sex2 <- "U"
-    datCAN$Sex2[datCAN$Sex == 1] <- "M"
-    datCAN$Sex2[datCAN$Sex == 2] <- "F"
-    haul <- utils::read.csv(
-      file.path(acdir, paste0(year, "_biodata_haul_CAN.csv")),
-      stringsAsFactors = FALSE)
-    if (!"EQ_Date_Time" %in% colnames(haul) | all(is.na(haul$EQ_Date_Time))) {
-      haul$EQ_Date_Time <- haul$HB_Date_Time
+    datCAN <- readxl::read_excel(
+      path = dir(
+        acdir,
+        pattern = glue::glue("{year}.+_specimen_CAN[_AGES]{{0,5}}\\."),
+        full.names = TRUE
+      )
+    ) %>%
+      dplyr::mutate(
+        Sex2 = dplyr::case_when(
+          sex == 1 ~ "M",
+          sex == 2 ~ "F",
+          sex == 3 ~ "U"
+        )
+      )
+    haul <- readxl::read_excel(
+      path = dir(
+        acdir,
+        pattern = glue::glue("{year}.+biodata_haul_CAN\\."),
+        full.names = TRUE
+      )
+    )
+    if (!"eq_date_time" %in% colnames(haul) | all(is.na(haul$eq_date_time))) {
+      haul$eq_date_time <- haul$hb_date_time
     }
     datCAN <- merge(
       datCAN,
-      haul[, c("Haul", "EQ_Date_Time", "EQ_Latitude", "EQ_Longitude")],
-      by = "Haul", all.x = TRUE)
-    if (grepl("^[0-9]{4}-", datCAN$EQ_Date_Time[1])) {
-      datCAN$EQ_Date_Time <- as.Date(datCAN$EQ_Date_Time, "%Y-%m-%d")
+      haul[, c("haul", "eq_date_time", "eq_latitude", "eq_longitude")],
+      by = "haul", all.x = TRUE)
+    if (grepl("^[0-9]{4}-", datCAN$eq_date_time[1])) {
+      datCAN$eq_date_time <- as.Date(datCAN$eq_date_time, f = "%Y-%m-%d")
     } else {
-      datCAN$EQ_Date_Time <- as.Date(datCAN$EQ_Date_Time, "%m/%d/%y")
+      datCAN$eq_date_time <- as.Date(datCAN$eq_date_time, f = "%m/%d/%y")
     }
-    datCAN <- data.frame(Source = "Acoustic Canada", Weight_kg = datCAN$Weight, 
-      Sex = datCAN$Sex2, Age_yrs = datCAN$Age,
-      Length_cm = datCAN$Length, 
-      Month = as.numeric(format(datCAN$EQ_Date_Time, "%m")),
-      Year = as.numeric(format(datCAN$EQ_Date_Time, "%Y")))
+    datCAN <- data.frame(Source = "Acoustic Canada", Weight_kg = datCAN$weight, 
+      Sex = datCAN$Sex2, Age_yrs = datCAN$age,
+      Length_cm = datCAN$length, 
+      Month = as.numeric(format(datCAN$eq_date_time, "%m")),
+      Year = as.numeric(format(datCAN$eq_date_time, "%Y")))
 
     dat <- rbind(datUS, datCAN)
-    dat <- dat[!(is.na(dat$Age_yrs) | is.na(dat$Weight_kg)), ] 
+    dat <- dat[!(is.na(dat$Age_yrs) | is.na(dat$Weight_kg)), ]
 
     info$acousticmean <- tapply(dat$Weight_kg, list(dat$Age_yrs), mean)
   } else { 
@@ -98,13 +125,14 @@ wtatage_collate <- function(year = hakedata_year()) {
   tmp <- atsea.ages[
     !is.na(atsea.ages$AGE) &
     !is.na(atsea.ages$WEIGHT) &
-    atsea.ages$YEAR %in% year, ]
+    atsea.ages$Year %in% year, ]
   info$usatseamean <- tapply(tmp$WEIGHT, list(tmp$AGE), mean)
   tmp <- data.frame(Source = "ATSEA", Weight_kg = tmp$WEIGHT, 
-    Sex = tmp$SEX, Age_yrs = tmp$AGE, 
-    Length_cm = tmp$LENGTH, 
-    Month = as.numeric(format(tmp$HAUL_OFFLOAD_DATE, "%m")), 
-    Year = tmp$YEAR)
+    Sex = tmp$SEX, Age_yrs = tmp$AGE,
+    Length_cm = tmp$LENGTH,
+    Month = tmp$Month,
+    Year = tmp$Year
+  )
 
   if (Ac_survYear) {
     dat <- rbind(dat, tmp)

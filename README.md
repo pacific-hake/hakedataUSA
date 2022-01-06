@@ -9,7 +9,7 @@ To extract code for this year's assessment open a new R session and run
 ```
 # The following two lines will need to be altered for each user
 local.assess <- file.path("c:", "stockAssessment", "hake-assessment")
-local.model <- "2020.01.03_data"
+local.model <- "test"
 
 # Install the package hakedataUSA
 devtools::install_github("pacific-hake/hakedataUSA")
@@ -23,7 +23,7 @@ pacfincatches(hakedata$pcatch)
 # Make composition data
 age_norpac <- atseacomps(hakedata$atsea.ages, hakedata$ncatch)
 age_shore <- shorecomps(hakedata$page, verbose = TRUE)
-plot_rawmeasure(hakedata$atsea.ages, years = 2020:(2020-4))
+plot_rawmeasure(hakedata$atsea.ages, hakedata$page, years = 2020:(2020-4))
 
 # Send catches to hake-assessment/data
 datatoassessment_catch(file.path(local.assess, "data"))
