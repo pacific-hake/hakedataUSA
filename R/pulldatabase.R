@@ -164,7 +164,11 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
       sp = "206",
       start = startyear$NORPAC[2],
       end = endyear
-    )
+    ) %>%
+      dplyr::mutate(
+        Month = format(HAUL_OFFLOAD_DATE, "%m"),
+        Year = format(HAUL_OFFLOAD_DATE, "%Y")
+      )
     localsave(atsea.ages, "atsea.ages", savedir)
     atsea.foreign <- queryDB(
       queryFilename = dir(sqldir, "atsea_foreign_ages", full.names = TRUE),

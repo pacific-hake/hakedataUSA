@@ -24,7 +24,6 @@ pacfincatches(hakedata$pcatch)
 age_norpac <- atseacomps(hakedata$atsea.ages, hakedata$ncatch)
 age_shore <- shorecomps(hakedata$page, verbose = TRUE)
 age_yearlyweights <- mappingagesamples(hakedata$atsea.ages, hakedata$ncatch, savepng = TRUE)
-jtcdecotoliths <- agedotoliths(hakedata$atsea.ages)
 plot_rawmeasure(hakedata$atsea.ages, years = 2020:(2020-4))
 
 # Send catches to hake-assessment/data

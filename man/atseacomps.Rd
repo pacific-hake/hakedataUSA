@@ -5,10 +5,11 @@
 \title{Workup At-Sea Composition Data for Pacific Hake}
 \usage{
 atseacomps(
-  atsea.ages = NULL,
-  ncatch = NULL,
+  atsea.ages = loadlocal(file = "atsea.ages.Rdat"),
+  ncatch = loadlocal(file = "NORPACdomesticCatch.Rdat"),
   endyear = hakedata_year(),
-  ages = 1:15
+  ages = 1:15,
+  savedir = hakedatawd()
 )
 }
 \arguments{
@@ -25,6 +26,10 @@ in 2008.}
 
 \item{ages}{A vector of ages to be included in the composition data.
 The default is to include ages from one to fifteen.}
+
+\item{savedir}{A full path to a directory where you want files saved.
+The default is to save them in a folder found using \code{\link[=hakedatawd]{hakedatawd()}},
+which returns a path specific to the personal preferences of JTC members.}
 }
 \value{
 A list object with summary information regrading the composition
@@ -35,5 +40,5 @@ include summary information in ...report.txt files and comps.csv files.
 todo: add more information about this function here.
 }
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }
