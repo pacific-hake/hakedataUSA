@@ -82,6 +82,7 @@ datatocomps <- function(dirdata, dirmod, cohorts) {
 
   wtatage <- r4ss::SS_readwtatage(file = file.path(dirmod, "wtatage.ss"),
     verbose = FALSE)
+  stopifnot(!is.null(wtatage))
   colnames(wtatage) <- gsub("^([0-9])", "wtAtAge\\1", colnames(wtatage))
   colnames(wtatage) <- gsub("^Yr", "Year", colnames(wtatage))
   all <- merge(all,
