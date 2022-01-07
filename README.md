@@ -37,7 +37,17 @@ compdata <- datatocomps(dirdata = file.path(local.assess, "data"),
   cohorts = c(7, 11))
 
 # Weight-at-age
-wtatage_collate()
+wtatageinfo <- wtatage_collate()
+# Move the wt-at-age for this year to the hake-assessment directory
+file.copy(
+  from = wtatageinfo$file,
+  to = file.path(
+    local.assess,
+    "data", "LengthWeightAge",
+    basename(wtatageinfo$file)
+  ),
+  overwrite = TRUE
+)
 data_wtatage(dir = file.path(local.assess, "data", "LengthWeightAge"))
 render("inst/extdata/beamer/hake_jtc_data_us.Rmd")
 ```

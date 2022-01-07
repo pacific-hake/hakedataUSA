@@ -27,10 +27,10 @@
 #'   \item file: The file path used to save the \code{dat}.
 #' }
 #' 
-wtatage_collate <- function(year = hakedata_year()) {
+wtatage_collate <- function(year = hakedata_year(),
+                            savedir = hakedatawd()) {
   info <- list()
-  mydir <- hakedatawd()
-  acdir <- file.path(mydir, "AcousticSurvey", "BioData", "csvFiles")
+  acdir <- file.path(savedir, "AcousticSurvey", "BioData", "csvFiles")
   
   lb2kg <- 0.453592
 
@@ -52,26 +52,25 @@ wtatage_collate <- function(year = hakedata_year()) {
           sex == 3 ~ "U"
         )
       ) %>%
-      data.frame
-    haul <- readxl::read_excel(
-      path = dir(
-        acdir,
-        pattern = glue::glue("{year}.+haul\\."),
-        full.names = TRUE
+      dplyr::left_join(
+        readxl::read_excel(
+          path = dir(
+            acdir,
+            pattern = glue::glue("{year}.+haul\\."),
+            full.names = TRUE
+          )
+        ) %>% dplyr::select(haul, hb_date_time),
+        by = "haul"
+      ) %>%
+      dplyr::transmute(
+        Source = "Acoustic U.S.",
+        Weight_kg = weight,
+        Sex = Sex2,
+        Age_yrs = age,
+        Length_cm = length, 
+        Month = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%m")),
+        Year = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%Y"))
       )
-    ) %>%
-      data.frame
-    datUS <- merge(
-      datUS,
-      haul[, c("haul", "eq_date_time", "eq_latitude", "eq_longitude")],
-      by = "haul", all.x = TRUE)
-    datUS <- data.frame(Source="Acoustic U.S.", Weight_kg=datUS$weight, 
-      Sex = datUS$Sex2, Age_yrs = datUS$age,
-      Length_cm = datUS$length, 
-      Month = as.numeric(format(as.Date(datUS$eq_date_time, "%m/%d/%y"), "%m")),
-      Year = as.numeric(format(as.Date(datUS$eq_date_time, "%m/%d/%y"), "%Y"))
-    )
-
     datCAN <- readxl::read_excel(
       path = dir(
         acdir,
@@ -85,35 +84,28 @@ wtatage_collate <- function(year = hakedata_year()) {
           sex == 2 ~ "F",
           sex == 3 ~ "U"
         )
+      ) %>%
+      dplyr::left_join(
+        readxl::read_excel(
+          path = dir(
+            acdir,
+            pattern = glue::glue("{year}.+biodata_haul_CAN\\."),
+            full.names = TRUE
+          )
+        ) %>% dplyr::select(haul, eq_date_time),
+        by = "haul"
+      ) %>%
+      dplyr::transmute(
+        Source = "Acoustic U.S.",
+        Weight_kg = weight,
+        Sex = Sex2,
+        Age_yrs = age,
+        Length_cm = length, 
+        Month = as.numeric(format(as.Date(eq_date_time, f = "%m/%d/%Y"), "%m")),
+        Year = as.numeric(format(as.Date(eq_date_time, f = "%m/%d/%Y"), "%Y"))
       )
-    haul <- readxl::read_excel(
-      path = dir(
-        acdir,
-        pattern = glue::glue("{year}.+biodata_haul_CAN\\."),
-        full.names = TRUE
-      )
-    )
-    if (!"eq_date_time" %in% colnames(haul) | all(is.na(haul$eq_date_time))) {
-      haul$eq_date_time <- haul$hb_date_time
-    }
-    datCAN <- merge(
-      datCAN,
-      haul[, c("haul", "eq_date_time", "eq_latitude", "eq_longitude")],
-      by = "haul", all.x = TRUE)
-    if (grepl("^[0-9]{4}-", datCAN$eq_date_time[1])) {
-      datCAN$eq_date_time <- as.Date(datCAN$eq_date_time, f = "%Y-%m-%d")
-    } else {
-      datCAN$eq_date_time <- as.Date(datCAN$eq_date_time, f = "%m/%d/%y")
-    }
-    datCAN <- data.frame(Source = "Acoustic Canada", Weight_kg = datCAN$weight, 
-      Sex = datCAN$Sex2, Age_yrs = datCAN$age,
-      Length_cm = datCAN$length, 
-      Month = as.numeric(format(datCAN$eq_date_time, "%m")),
-      Year = as.numeric(format(datCAN$eq_date_time, "%Y")))
-
-    dat <- rbind(datUS, datCAN)
-    dat <- dat[!(is.na(dat$Age_yrs) | is.na(dat$Weight_kg)), ]
-
+    dat <- rbind(datUS, datCAN) %>%
+      dplyr::filter(!is.na(Age_yrs) & !is.na(Weight_kg))
     info$acousticmean <- tapply(dat$Weight_kg, list(dat$Age_yrs), mean)
   } else { 
     Ac_survYear <- FALSE
@@ -121,7 +113,7 @@ wtatage_collate <- function(year = hakedata_year()) {
   }
   
   #US at sea fishery
-  base::load(file.path(mydir, "extractedData", "atsea.ages.Rdat")) #atsea.ages
+  base::load(file.path(savedir, "extractedData", "atsea.ages.Rdat")) #atsea.ages
   tmp <- atsea.ages[
     !is.na(atsea.ages$AGE) &
     !is.na(atsea.ages$WEIGHT) &
@@ -142,7 +134,7 @@ wtatage_collate <- function(year = hakedata_year()) {
   rm(tmp)
 
   #US Shore-based fishery
-  base::load(file.path(mydir, "extractedData", "page.Rdat"))
+  base::load(file.path(savedir, "extractedData", "page.Rdat"))
   page.worked <- page[
     !is.na(page$FISH_AGE_YEARS_FINAL) &
     !is.na(page$FISH_WEIGHT) &
@@ -156,11 +148,10 @@ wtatage_collate <- function(year = hakedata_year()) {
     Length_cm = page.worked$FISH_LENGTH / 10, 
     Month = page.worked$SAMPLE_MONTH, 
     Year = page.worked$SAMPLE_YEAR)
-
   dat <- rbind(dat, tmp)
   rm(tmp)
 
-  fileout <- file.path(mydir, "LengthWeightAge", 
+  fileout <- file.path(savedir, "LengthWeightAge", 
     paste0("LWAdata_", year, ".csv"))
   bad <- dat[dat$Weight_kg > 10, ]
   info$outliers <- NULL
@@ -178,7 +169,3 @@ wtatage_collate <- function(year = hakedata_year()) {
   info$file <- fileout
   invisible(info)
 }
-
-
-
-

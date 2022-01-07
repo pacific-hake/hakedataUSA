@@ -48,7 +48,7 @@ data_wtatage <- function(
   ) {
 
   if (length(navgyears) == 1) navgyears <- rep(navgyears, 2)
-  dir.create(file.path(dir, "plots"))
+  fs::dir_create(path = file.path(dir, "plots"))
 
   # Data provided by CG on 2021-01-09 in google drive #703
   # filtered by area rather than month and provided as rds rather
@@ -86,12 +86,12 @@ data_wtatage <- function(
       " probably Canadian Acoustic Data.")
   }
   utils::write.csv(dat,
-    file = file.path(dir, paste0("LWAdata_1975to", max(yrs), ".csv")))
+    file = file.path(dir, paste0("LWAdata_1975to", max(yrs), ".csv"))
+  )
 
   ### calculating average weight for early or late period for 2018 SRG request
   early <- min(dat$Year):(min(dat$Year) + navgyears[1] - 1)
   late <- (max(yrs) - navgyears[2] + 1):(max(yrs))
-
   # separate data into acoustic (ac) and fishery (fs) subsets
   dat$cat <- ifelse(grepl("acoustic", dat$Source, ignore.case = TRUE),
       "Survey", "Fishery")
@@ -184,6 +184,8 @@ data_wtatage <- function(
     round(wtage_extended[, -grep("^[^a]|Note", colnames(wtage_extended))], 4)
   colnames(wtage_extended)[grep("^a", colnames(wtage_extended))] <-
     paste0("a", seq_along(maturity) - 1)
+
+browser()
 
   ## Add forecast average
   withforecast <- rbind(wtage_extended,
