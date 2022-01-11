@@ -1,11 +1,14 @@
-datatocomps <- function(dirdata, dirmod) {
-
-  # todo:
-  # 1. change to feeding data rather than raw files so it is clear what is being used
-  # 2. weight-at-age file needs to be updated prior to creating catch-at-age because
-  #    the average of the last five years that was in the file for the previous year
-  #    is being used rather than this years data b/c it is already in the file
-  # 3. Weight-at-age is summed over all ages 0-20 but ages are not available for 16+?
+# todo:
+# 1. change to feeding data rather than raw files so it is clear what is being used
+# 2. weight-at-age file needs to be updated prior to creating catch-at-age because
+#    the average of the last five years that was in the file for the previous year
+#    is being used rather than this years data b/c it is already in the file
+# 3. Weight-at-age is summed over all ages 0-20 but ages are not available for 16+?
+#' @param cohorts Integers describing the cohorts that have decreased
+#' ageing error because their size. This is the bin not the mean age.
+#' For example, in 2019 the values were `c(5, 9, 20)` and
+#' in 2020 they were `c(6, 10)` because the age-21 fish are not modelled.
+datatocomps <- function(dirdata, dirmod, cohorts) {
 
   options(default.stringsAsFactors = FALSE)
   options(stringsAsFactors = FALSE)

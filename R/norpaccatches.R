@@ -127,8 +127,11 @@ norpaccatches <- function(ncatch = loadlocal(file = "NORPACdomesticCatch.Rdat"),
   # Find monthly rate for un-sampled tows and multiply times OFFICIAL_CATCH
   # to get the amount of hake in the tow based on average bycatch rate
   # bycatch rates are VESSEL_TYPE specific as of 2019 assessment
-  catchout <- stats::aggregate(catch ~ Sector + vesseltype + month + year,
-    data = outncatch[outncatch$SPECIES == species, ], get_sum)
+  catchout <- outncatch %>%
+    dplyr::filter(SPECIES == species) %>%
+    dplyr::group_by(Sector, vesseltype, month, year) %>%
+    dplyr::summarize(catch = sum(catch, na.rm = TRUE)) %>%
+    dplyr::ungroup()
 
   utils::write.table(
     x = stats::aggregate(month ~ sampled + vesseltype + year,

@@ -4,7 +4,7 @@
 \alias{wtatage_collate}
 \title{Collate some of the age-weight data for the most recent year}
 \usage{
-wtatage_collate(year = hakedata_year())
+wtatage_collate(year = hakedata_year(), savedir = hakedatawd())
 }
 \arguments{
 \item{year}{An integer value specifying the year of data you would like to summarize.}
