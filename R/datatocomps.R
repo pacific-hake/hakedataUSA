@@ -1,128 +1,106 @@
-datatocomps <- function(dirdata, dirmod, cohorts) {
+datatocomps <- function(dirdata, dirmod) {
+
+  # todo:
+  # 1. change to feeding data rather than raw files so it is clear what is being used
+  # 2. weight-at-age file needs to be updated prior to creating catch-at-age because
+  #    the average of the last five years that was in the file for the previous year
+  #    is being used rather than this years data b/c it is already in the file
+  # 3. Weight-at-age is summed over all ages 0-20 but ages are not available for 16+?
 
   options(default.stringsAsFactors = FALSE)
   options(stringsAsFactors = FALSE)
 
-  canfile <- file.path(dirdata, "can-age-data.csv")
-  if (file.exists(canfile)) {
-    can <- readLines(canfile)
-    cansplit <- strsplit(can, ",")
-    cansplit <- lapply(cansplit, function(x){c(x[1],x[-1][!x[-1] == ""])})
-    canlabel <- cansplit[which(sapply(cansplit, length) == 1)]
-    canlabel <- gsub(".+Trawler.+", "CAN FreezerTrawl", canlabel)
-    canlabel <- gsub(".+side.+", "CAN Shoreside", canlabel)
-    canlabel <- gsub(".+Venture.+", "CAN JV", canlabel)
-    temp <- which(sapply(cansplit, length) == 2)
-    ncan <- data.frame(rep(canlabel[4:6], 
-      diff(c(0, 
-        which(!diff(temp) == 1), length(temp)))), 
-        do.call("rbind", cansplit[temp]))
-    colnames(ncan) <- c("Sector", "Year", "Nsamples")
-    temp <- which(sapply(cansplit, length) > 2)
-    cancomp <- data.frame(rep(canlabel[1:3], 
-      diff(c(1, 
-        which(!diff(temp) == 1), length(temp)))), 
-        do.call("rbind", cansplit[temp[-1]]))
-    colnames(cancomp) <- c("Sector", "Year", paste0("a", 3:ncol(cancomp) - 2))
-    can.l <- merge(cancomp, ncan, all.x = TRUE)
-  } else {
-    can.l <- lapply(
-      dir(dirdata, "can[ada]*.*-age", full.names = TRUE),
-      function(x) {
-        out <- read.csv(x, header = TRUE, check.names = FALSE)
-        out$Sector <- gsub(".*canada-([-a-z]*)-age.*", "\\1", x)
-        out$Sector[out$Sector == "freezer-trawler"] <- "CAN_FreezeTrawl"
-        out$Sector[out$Sector == "joint-venture"] <- "CAN_JV"
-        out$Sector[out$Sector == "shoreside"] <- "CAN_Shoreside"
-        colnames(out) <- gsub("^([1-9]{1})", "a\\1", colnames(out))
-        colnames(out) <- gsub("^N$", "Nsamples", colnames(out))
-        colnames(out)[1] <- "Year"
-        out <- out[, c("Sector", "Year", 
-          grep("a[0-9]", colnames(out), value = TRUE), "Nsamples")]
-        return(out)
-      })
-    can.l <- do.call(rbind, can.l)
-  }
-  can.l[, "Sector"] <- gsub("CAN ([A-Z])", "CAN_\\1", can.l$Sector)
-  can.l[, "Sector"] <- gsub("FreezerTrawl", "FreezeTrawl", can.l$Sector)
-
-  usc <- utils::read.csv(file = file.path(dirdata, "us-cp-age-data.csv"),
-    stringsAsFactors = FALSE)
-  usm <- utils::read.csv(file = file.path(dirdata, "us-ms-age-data.csv"),
-    stringsAsFactors = FALSE)
-  uss <- utils::read.csv(file = file.path(dirdata, "us-shore-age-data.csv"),
-    stringsAsFactors = FALSE)
-  colnames(uss)[which(colnames(uss) == "n.trips")] <- "n.hauls"
-  uscomp <- merge(merge(
-    data.frame("Sector" = "U.S. at-sea CP", usc), 
-    data.frame("Sector" = "U.S. at-sea MS", usm), all = TRUE), 
-    data.frame("Sector" = "U.S. Shoreside", uss), all = TRUE)
-  colnames(uscomp)[which(colnames(uscomp) == "n.hauls")] <- "Nsamples"
-  colnames(uscomp)[which(colnames(uscomp) == "year")] <- "Year"
-  comps <- merge(can.l, uscomp, all = TRUE)
-  
-  catch <- utils::read.csv(file.path(dirdata, "landings-tac-history.csv"))
-  temp <- c(
-    "atSea_US_MS", "atSea_US_CP", "US_shore", 
-    "CAN_JV", "CAN_Shoreside", "CAN_FreezeTrawl")
-  catches <- reshape(catch[, c("Year", temp)], direction = "long", 
-    v.names = "Catch", varying = temp,
-    timevar = "Sector", times = temp)
-  catches$Sector <- factor(catches$Sector, 
-    levels = temp, 
-    labels = c("U.S. at-sea MS", "U.S. at-sea CP", "U.S. Shoreside",
-      "CAN_JV", "CAN_Shoreside", "CAN_FreezeTrawl"))
-  all <- merge(comps, catches, all.x = TRUE)
-  cw <- apply(all[, grepl("^a", colnames(all))], 2, as.numeric) * 
-    as.numeric(all$Catch)
-  colnames(cw) <- gsub("^a", "cw", colnames(cw))
-  sw <- apply(all[, grepl("^a", colnames(all))], 2, as.numeric) * 
-    as.numeric(all$Nsamples)
-  colnames(sw) <- gsub("^a", "sw", colnames(sw))
-
   wtatage <- r4ss::SS_readwtatage(file = file.path(dirmod, "wtatage.ss"),
-    verbose = FALSE)
-  stopifnot(!is.null(wtatage))
-  colnames(wtatage) <- gsub("^([0-9])", "wtAtAge\\1", colnames(wtatage))
-  colnames(wtatage) <- gsub("^Yr", "Year", colnames(wtatage))
-  all <- merge(all,
-    wtatage[wtatage$Fleet == 1, c("Year", paste0("wtAtAge", 1:ncol(cw)))],
-    all.x = TRUE)
-  all <- all[order(all$Sector, all$Year), ]
-  samplesize <- tapply(all$Nsamples, all$Year, function(x) sum(as.numeric(x)))
-  
-  nwy <- apply(all[, grepl("^a", colnames(all))], 2, as.numeric) * 
-    as.numeric(all$Catch) / sapply(1:nrow(all), 
-    function(x) sum(as.numeric(all[x, grep("a\\d+", colnames(all))]) * 
-      as.numeric(all[x, grep("wtAtAge\\d", colnames(all))])))
-  final <- cbind(all[, c("Year", "Sector")], nwy)
-  final <- reshape(final, direction = "long", 
-    varying = colnames(nwy), times = colnames(nwy),
-    v.names = "aa")
-  final <- tapply(final$aa, list(final$Year, final$time), sum)
-  final <- final[, match(gsub("cw", "a", colnames(cw)), colnames(final))]
-  final <- t(apply(final, 1, function(x) 100 * x / sum(x)))
-  final <- data.frame(
-    "#year" = rownames(final),
-    "Month" = 7, "Fleet" = 1, "Sex" = 0, "Partition" = 0,
-    "AgeErr" = as.numeric(rownames(final)) - 1972,
-    "LbinLo" = -1, "LbinHi" = -1,
-    "nTrips" = samplesize[match(names(samplesize), rownames(final))],
-    final)
-  write.table(final, file.path(dirdata, "ForSS_marginalages.csv"),
-    sep = ",", row.names = FALSE)
-  if (!file.exists(file.path(dirmod, "hake_data.ss"))) {
-    warning("ss dat file doesn't exist in ", dirmod)
-  }
-  ssdat <- r4ss::SS_readdat(file.path(dirmod, "hake_data.ss"),
-    verbose = FALSE, echoall = FALSE)
-  ind <- !(ssdat$agecomp$Yr >= 2008 & ssdat$agecomp$FltSvy == 1)
-  new <- setNames(final[final[, 1] >= 2008, ], colnames(ssdat$agecomp))
-  ssdat$agecomp <- rbind(ssdat$agecomp[ind, ], new)
+    verbose = FALSE) %>%
+    dplyr::filter(Fleet == 1) %>%
+    dplyr::rename(Year = "Yr") %>%
+    dplyr::select(Year, dplyr::matches("^[0-9]+$")) %>%
+    tidyr::pivot_longer(names_to = "age", values_to = "weight", -Year)
+
+  final <- get_catchatage(dirdata) %>%
+    tidyr::pivot_longer(
+      names_prefix = "a",
+      names_to = "age",
+      values_to = "numbers",
+      cols = dplyr::matches("^a[0-9]+$")
+    ) %>%
+    dplyr::left_join(wtatage, by = c("age", "Year")) %>%
+    dplyr::group_by(Year, Sector) %>%
+    dplyr::mutate(
+      prop = (catch * numbers) / sum(numbers * weight)
+    ) %>%
+    dplyr::group_by(Year, age) %>%
+    dplyr::summarize(
+      nTrips = sum(Nsamples, na.rm = TRUE),
+      prop = sum(prop, na.rm = TRUE)
+    ) %>%
+    dplyr::group_by(Year) %>%
+    dplyr::mutate(prop = prop.table(prop) * 100) %>%
+    dplyr::filter(!is.na(prop)) %>%
+    dplyr::arrange(age = as.numeric(age)) %>%
+    tidyr::pivot_wider(names_from = age, values_from = prop) %>%
+    dplyr::mutate(
+      Month = 7,
+      Fleet = 1,
+      Sex = 0,
+      Partition = 0,
+      AgeErr = max(Year) - 1972,
+      LbinLo = -1,
+      LbinHi = -1,
+      .after = Year
+    )
+
+  ssdat <- r4ss::SS_readdat(
+    file.path(dirmod, "hake_data.ss"),
+    verbose = FALSE
+  )
+  new <- setNames(final[final[, "Year"] >= 2008, ], colnames(ssdat$agecomp))
+  ssdat$agecomp <- rbind(
+    ssdat$agecomp[!(ssdat$agecomp$Yr >= 2008 & ssdat$agecomp$FltSvy == 1), ],
+    new
+  )
+
   # Increment ageing error matrix
-  ssdat$N_ageerror_definitions <- ssdat$N_ageerror_definitions + 1
-  ssdat$ageerror <- rbind(ssdat$ageerror, ageerror_new(cohorts))
+  while (ssdat$N_ageerror_definitions != max(final$AgeErr)) {
+    ssdat$N_ageerror_definitions <- ssdat$N_ageerror_definitions + 1
+    bias <- ssdat$ageerror[seq(2, NROW(ssdat$ageerror), by = 2), ]
+    ssdat$ageerror <- rbind(
+      ssdat$ageerror,
+      ageerror_new(which(bias[NROW(bias)-1, ] / bias[NROW(bias), ] == 0.55) + 1)
+    )
+  }
   r4ss::SS_writedat(ssdat, file.path(dirmod, "hake_data.ss"),
     overwrite = TRUE, verbose = FALSE)
   return(final)
+}
+
+get_catchatage <- function(datapath) {
+  source("https://raw.githubusercontent.com/pacific-hake/hake-assessment/master/R/load-data.R")
+
+  candata <- load.can.age.data(file.path(datapath, "can-age-data.csv"))
+  can <- mapply(function(x,y) cbind(x, Nsamples = y),
+    setNames(candata[1:3], c("CAN_Shoreside", "CAN_FreezeTrawl", "CAN_JV")),
+    lapply(candata[4:6], as.numeric)
+  ) %>%
+    lapply(tibble::as_tibble, rownames = "Year", .name_repair = "minimal") %>%
+    dplyr::bind_rows(.id = "Sector") %>%
+    dplyr::mutate(Year = as.numeric(Year)) %>%
+    dplyr::rename_with(~ gsub("^([0-9]+)$", "a\\1", .))
+
+  usa <- list(
+    "atSea_US_CP" = read.csv(file.path(datapath, "us-cp-age-data.csv")),
+    "atSea_US_MS" = read.csv(file.path(datapath, "us-ms-age-data.csv")),
+    "US_shore" = read.csv(file.path(datapath, "us-shore-age-data.csv"))
+  ) %>%
+    dplyr::bind_rows(.id = "Sector") %>%
+    dplyr::mutate(Year = year, .keep = "unused") %>%
+    dplyr::mutate(Nsamples = ifelse(is.na(n.trips), n.hauls, n.trips)) %>%
+    dplyr::select(-n.trips, -n.hauls)
+
+  catch <- utils::read.csv(file.path(datapath, "landings-tac-history.csv")) %>%
+    dplyr::select(-dplyr::matches("total|TAC", ignore.case = TRUE)) %>%
+    tidyr::pivot_longer(names_to = "Sector", values_to = "catch", -Year)
+
+  dplyr::full_join(can, usa, by = colnames(can)) %>%
+    dplyr::right_join(catch)
 }
