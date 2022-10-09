@@ -93,16 +93,10 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
   # File management
   sqldir <- system.file("extdata", "sql", package = "hakedataUSA")
   info <- hakedatasqlpw(file = passwordfile)
-  fs::dir_create(
-    path = file.path(savedir, "extractedData"),
-    recurse = TRUE
-  )
+  final_dir <- file.path(savedir, "extractedData")
+  fs::dir_create(path = final_dir, recurse = TRUE)
   if (verbose) {
-    message(glue::glue("
-      The directory {savedir}
-      was created, if it did not already exist.
-      "
-    ))
+    message(final_dir, "\nwas created if it did not already exist.")
   }
 
   # Checks regarding startyear
