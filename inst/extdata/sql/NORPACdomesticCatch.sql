@@ -1,16 +1,7 @@
 REM ***********************************************************************
 REM
-REM  Queries obsint tables for calculating domestic catch.  From Vanessa
-REM  Tuttle, modified by Andi Stephens, used by Allan Hicks in 2011
-REM
-REM Additional columns added for location
-REM
-REM ***********************************************************************
-REM
-REM  Removed these lines, which do not work as intended.
-REM
-REM  obsint.DEBRIEFED_HAUL.HAUL > 0 and
-REM  obsint.DEBRIEFED_SPCOMP.SPECIES = &sp;
+REM  Queries obsint tables for calculating domestic catch.
+REM  From Vanessa Tuttle
 REM
 REM ***********************************************************************
 
