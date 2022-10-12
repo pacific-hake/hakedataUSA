@@ -6,7 +6,7 @@ REM
 REM ***********************************************************************
 
 SELECT
-  to_char(obsint.DEBRIEFED_HAUL.HAUL_JOIN),
+  obsint.DEBRIEFED_HAUL.HAUL_JOIN,
   obsint.DEBRIEFED_HAUL.CRUISE,
   obsint.DEBRIEFED_HAUL.PERMIT,
   obsint.DEBRIEFED_HAUL.VESSEL,
