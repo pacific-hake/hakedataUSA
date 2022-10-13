@@ -9,7 +9,7 @@
 #' and weight distributions for the at-sea and shoreside sectors.
 #' @export
 #' @import ggplot2
-#' @author Kelli Faye Johnson
+#' @author Kelli F. Johnson
 #'
 plot_rawmeasure <- function(
   atsea.ages = NULL,

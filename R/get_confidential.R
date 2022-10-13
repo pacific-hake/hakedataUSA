@@ -25,7 +25,7 @@
 #' @template xvar
 #' @template yvar
 #'
-#' @author Kelli Faye Johnson
+#' @author Kelli F. Johnson
 #' @return A new column is added to the input data frame
 #' called `ngroups` that provides the number of unique yvar entries
 #' for each grouping.

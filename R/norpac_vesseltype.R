@@ -17,7 +17,7 @@
 #' }
 #' 
 #' @param x A vector of integers between one and six.
-#' @author Kelli Faye Johnson
+#' @author Kelli F. Johnson
 #' @return A vector of combined integer values and character strings.
 #' 
 norpac_vesseltype <- function(x) {

@@ -4,7 +4,7 @@
 #' data directory.
 #' 
 #' @template dirout
-#' @author Kelli Faye Johnson
+#' @author Kelli F. Johnson
 datatoassessment_catch <- function(dirout) {
   mydir <- hakedatawd()
   catchdir <- file.path(mydir, "Catches")

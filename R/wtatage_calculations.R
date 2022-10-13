@@ -875,7 +875,7 @@ write_wtatage_file <- function(
 #' fleet as \code{ID0}.
 #' 
 #' @export
-#' @author Kelli Faye Johnson
+#' @author Kelli F. Johnson
 #' @return A data frame with data-specific fleet names and fleet names
 #' that are standardized for plotting purposes. The fishery is typically identified
 #' as 1 and the survey is identified as 2, but all data can be identified as 0 if desired.

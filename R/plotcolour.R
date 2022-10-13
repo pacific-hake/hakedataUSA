@@ -10,7 +10,7 @@
 #' 
 #' @importFrom RColorBrewer brewer.pal
 #' @export
-#' @author Kelli Faye Johnson
+#' @author Kelli F. Johnson
 #' 
 #' @return A vector of colours
 #' 

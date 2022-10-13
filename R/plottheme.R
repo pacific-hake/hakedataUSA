@@ -3,7 +3,7 @@
 #' Create a special theme for hake plots when plotting using the 
 #' \code{\link[ggplot2]{ggplot}} functions.
 #'  
-#' @author Kelli Faye Johnson
+#' @author Kelli F. Johnson
 #' @return A \code{\link[ggplot2]{theme}} object with specific
 #' instructions on how to create plots for this repository.
 #' 

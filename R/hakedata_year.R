@@ -6,7 +6,7 @@
 #' year of data should be the previous year. Else, one would want the
 #' most recent data in the current year as the last year of data included
 #' in the extraction.
-#' @author Kelli Faye Johnson
+#' @author Kelli F. Johnson
 #' @return The last year of data you want as an integer.
 #' @export
 #' 

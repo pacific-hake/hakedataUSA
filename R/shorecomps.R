@@ -9,7 +9,7 @@
 #' @template verbose
 #' 
 #' @export
-#' @author Kelli Faye Johnson
+#' @author Kelli F. Johnson
 #' @return todo: document the return
 #' 
 shorecomps <- function(

@@ -20,7 +20,7 @@
 #' in metric tons rounded to the nearest whole number.
 #'
 #' @return todo: document what this function returns.
-#' @author Kelli Faye Johnson
+#' @author Kelli F. Johnson
 #' @export
 #' @import r4ss utils
 #' @importFrom stats aggregate
