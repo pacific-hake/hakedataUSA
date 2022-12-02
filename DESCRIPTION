@@ -48,6 +48,6 @@ Imports:
     tools
 Remotes:
   github::r4ss/r4ss,
-  github::nwfsc-assess/PacFIN.Utilities
+  github::pfmc-assessments/PacFIN.Utilities
 RoxygenNote: 7.1.2
 Roxygen: list(markdown = TRUE)
