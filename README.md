@@ -1,58 +1,85 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
 # hakedataUSA
 
-Code to extract and workup the U.S. data for the
-assessment of Pacific Hake.
+<!-- badges: start -->
+<!-- badges: end -->
 
-# Current assessment
+The goal of {hakedataUSA} is to provide code to extract and workup the
+U.S. data for the assessment of Pacific Hake.
 
-To extract code for this year's assessment open a new R session and run
+## Installation
+
+You can install the development version of {hakedataUSA} from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("pacific-hake/hakedataUSA")
+# or if getwd() is a clone of this repository
+# pak::local_install()
+library(hakedataUSA)
 ```
-# The following two lines will need to be altered for each user
+
+## Instructions
+
+``` r
+# Customize the next two lines
 local.assess <- file.path("c:", "stockAssessment", "hake-assessment")
 local.model <- "test"
 
-# Install the package hakedataUSA
-devtools::install_github("pacific-hake/hakedataUSA")
-# or load_all() if you are in the hakedataUSA directory
+current_year <- as.numeric(format(Sys.Date(), "%Y"))
 
-# Pull data, manipulate columns, and write csvs and figures
 hakedata <- pulldatabase()
-norpaccatches(hakedata$ncatch)
-pacfincatches(hakedata$pcatch)
 
-# Make composition data
-age_norpac <- atseacomps(hakedata$atsea.ages, hakedata$ncatch)
-age_shore <- shorecomps(hakedata$page, verbose = TRUE)
-plot_rawmeasure(hakedata$atsea.ages, hakedata$page, years = 2020:(2020-4))
+norpaccatches(hakedata[["ncatch"]])
+pacfincatches(hakedata[["pcatch"]])
+
+age_norpac <- atseacomps(hakedata[["atsea.ages"]], hakedata[["ncatch"]])
+age_shore <- shorecomps(hakedata[["page"]], verbose = TRUE)
+
+plot_rawmeasure(
+  hakedata[["atsea.ages"]],
+  hakedata[["page"]],
+  years = current_year:(current_year - 4)
+)
 
 # Send catches to hake-assessment/data
 datatoassessment_catch(file.path(local.assess, "data"))
 # fix end year and catches
-new_catch(dirout = file.path(local.assess, "data"), year = hakedata_year(),
-  filedat = file.path(local.assess, "models", local.model, "hake_data.ss"))
+new_catch(
+  dirout = file.path(local.assess, "data"), year = hakedata_year(),
+  filedat = file.path(local.assess, "models", local.model, "hake_data.ss")
+)
 # Send compositions to hake-assessment/data
 datatoassessment_comp(file.path(local.assess, "data"))
-compdata <- datatocomps(dirdata = file.path(local.assess, "data"),
+compdata <- datatocomps(
+  dirdata = file.path(local.assess, "data"),
   dirmod = file.path(local.assess, "models", local.model),
-  cohorts = c(7, 11))
+  cohorts = current_year - c(2014, 2010)
+)
 
-# Weight-at-age
 wtatageinfo <- wtatage_collate()
 # Move the wt-at-age for this year to the hake-assessment directory
 file.copy(
-  from = wtatageinfo$file,
+  from = wtatageinfo[["file"]],
   to = file.path(
     local.assess,
     "data", "LengthWeightAge",
-    basename(wtatageinfo$file)
+    basename(wtatageinfo[["file"]])
   ),
   overwrite = TRUE
 )
 data_wtatage(dir = file.path(local.assess, "data", "LengthWeightAge"))
+```
+
+``` r
 render("inst/extdata/beamer/hake_jtc_data_us.Rmd")
 ```
 
-# Issues
+## Issues
 
-Please contact kelli.johnson@noaa.gov if there are issues with the code.
-Note that the databases will only be accessible to members of the U.S. JTC.
+Please contact <kelli.johnson@noaa.gov> if there are issues with the
+code. Note that the databases will only be accessible to members of the
+U.S. JTC.
