@@ -36,7 +36,6 @@ Imports:
     grDevices,
     mapdata,
     maps,
-    measurements,
     PacFIN.Utilities,
     plyr,
     RColorBrewer,
@@ -51,3 +50,5 @@ Remotes:
   github::pfmc-assessments/PacFIN.Utilities
 RoxygenNote: 7.1.2
 Roxygen: list(markdown = TRUE)
+Depends: 
+    R (>= 2.10)

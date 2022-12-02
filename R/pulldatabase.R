@@ -231,13 +231,15 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
       end = endyear
     )
     # Fix weights to be in grams and lengths to be in mm
-    page$FISH_WEIGHT <- ifelse(page$FISH_WEIGHT_UNITS %in% c("LBS", "P"),
-      measurements::conv_unit(page$FISH_WEIGHT, from = "lbs", to = "g"),
-      page$FISH_WEIGHT
+    page$FISH_WEIGHT <- page$FISH_WEIGHT * ifelse(
+      test = page$FISH_WEIGHT_UNITS %in% c("LBS", "P"),
+      yes = pound_to_gram,
+      no = 1
     )
-    page$FISH_LENGTH <- ifelse(page$FISH_LENGTH_UNITS %in% c("CM"),
-      measurements::conv_unit(page$FISH_LENGTH, from = "cm", to = "mm"),
-      page$FISH_LENGTH
+    page$FISH_LENGTH <- page$FISH_LENGTH * ifelse(
+      test = page$FISH_LENGTH_UNITS %in% c("CM"),
+      yes = 10,
+      no = 1
     )
     localsave(page, "page", savedir)
     pspec <- queryDB(
