@@ -59,13 +59,13 @@ lines.bymonth <- function(x, y,
 #' @param divisor todo: document
 #'
 plot_catchvmonthbyyear <- function(data,
-                                  file,
-                                  title,
-                                  Yrs,
-                                  quotas = NULL,
-                                  cols,
-                                  leg.cex = 1.2,
-                                  divisor = 1000) {
+                                   file,
+                                   title,
+                                   Yrs,
+                                   quotas = NULL,
+                                   cols,
+                                   leg.cex = 1.2,
+                                   divisor = 1000) {
   data <- as.data.frame(data)
   lineWds <- c(rep(2, length(Yrs) - 1), 3)
   lineTypes <- rep(1,length(Yrs))
