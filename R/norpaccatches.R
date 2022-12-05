@@ -62,7 +62,7 @@
 #'   * depth-us-atsea-bottom.csv
 #'   * depth-us-atsea-fishing.csv
 #'
-norpaccatches <- function(ncatch = loadlocal(file = "NORPACdomesticCatch.Rdat"),
+norpaccatches <- function(ncatch = loadlocal(file = "norpac_catch.Rdat"),
                           nyears = 5,
                           species = 206,
                           savedir = hakedatawd()) {
@@ -97,8 +97,7 @@ norpaccatches <- function(ncatch = loadlocal(file = "NORPACdomesticCatch.Rdat"),
       month = get_date(RETRIEVAL_DATE, "%m"),
       Month = droplevels(factor(format(Date, format = "%b"), month.abb)),
       year = get_date(RETRIEVAL_DATE, "%Y"),
-      hrs = DURATION_IN_MIN / 60,
-      crate = EXTRAPOLATED_WEIGHT / 1000 / hrs,
+      crate = EXTRAPOLATED_WEIGHT / 1000 / HRS,
       FISHING_DEPTH_M = FISHING_DEPTH_FATHOMS * fathom_to_meter,
       BOTTOM_DEPTH_M = BOTTOM_DEPTH_FATHOMS * fathom_to_meter,
       vesseltype = norpac_vesseltype(VESSEL_TYPE),

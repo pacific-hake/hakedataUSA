@@ -1,0 +1,45 @@
+REM ----
+REM
+REM Title: Query obsint tables for calculating domestic catch
+REM Description: This sql code queries obsint tables for real-time catches
+REM   that may have not been debriefed yet.
+REM Author: Vanessa Tuttle
+REM
+REM Details:
+REM   WEIGHT was renamed to EXTRAPOLATED_WEIGHT to match debriefed table
+REM ----
+
+SELECT
+  
+  obsint.CURRENT_HAUL.HAUL_JOIN,
+  obsint.CURRENT_HAUL.CRUISE,
+  obsint.CURRENT_HAUL.PERMIT,
+  obsint.CURRENT_HAUL.VESSEL,
+  obsint.CURRENT_HAUL.VESSEL_TYPE,
+  obsint.CURRENT_HAUL.HAUL_DATE,
+  obsint.CURRENT_HAUL.HAUL,
+  obsint.CURRENT_HAUL.DEPLOYMENT_DATE,
+  obsint.CURRENT_HAUL.RETRIEVAL_DATE,
+  ((obsint.CURRENT_HAUL.RETRIEVAL_DATE - obsint.CURRENT_HAUL.DEPLOYMENT_DATE) * 24 * 60) DURATION_IN_MIN,
+  obsint.CURRENT_HAUL.CDQ_CODE,
+  obsint.CURRENT_HAUL.OFFICIAL_TOTAL_CATCH,
+  obsint.CURRENT_HAUL.HAUL_SAMPLED_BY,
+  obsint.CURRENT_SPCOMP.SPECIES,
+  obsint.CURRENT_SPCOMP.WEIGHT EXTRAPOLATED_WEIGHT,
+  obsint.CURRENT_HAUL.LATDD_START,
+  obsint.CURRENT_HAUL.LONDD_START,
+  obsint.CURRENT_HAUL.LATDD_END,
+  obsint.CURRENT_HAUL.LONDD_END,
+  obsint.CURRENT_HAUL.FISHING_DEPTH_FATHOMS,
+  obsint.CURRENT_HAUL.BOTTOM_DEPTH_FATHOMS,
+  obsint.CURRENT_HAUL.CATCHER_BOAT_ADFG
+
+FROM
+  obsint.CURRENT_HAUL INNER JOIN obsint.CURRENT_SPCOMP
+
+ON
+  obsint.CURRENT_HAUL.HAUL_JOIN = obsint.CURRENT_SPCOMP.HAUL_JOIN
+
+WHERE
+  obsint.CURRENT_HAUL.LATITUDE < 4900
+  ;

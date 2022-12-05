@@ -118,7 +118,7 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
   on.exit(options(oldoptions), add = TRUE)
   options(digits = 19)
 
-  # Creat local function
+  # Create local function
   localsave <- function(data, trailingname, dir) {
     x <- deparse(substitute(data))
     assign(x, data)
@@ -133,13 +133,13 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
   if ("NORPAC" %in% database) {
     # Catches
     ncatch <- queryDB(
-      queryFilename = dir(sqldir, "NORPACdomesticCatch", full.names = TRUE),
+      queryFilename = dir(sqldir, "norpac_catch.sql", full.names = TRUE),
       db = "NORPAC",
       uid = info[["username"]][["NORPAC"]],
       pw = info[["password"]][["NORPAC"]],
       start = startyear$NORPAC[1], end = endyear
     )
-    localsave(ncatch, "NORPACdomesticCatch", savedir)
+    localsave(ncatch, "norpac_catch", savedir)
     # Age and weight data
     atsea.ageWt <- queryDB(
       queryFilename = dir(sqldir, "atseaAgeWeight", full.names = TRUE),
