@@ -17,10 +17,7 @@ pacfincatches <- function(pcatch = loadlocal(file = "Pacfincomp_ft_taylorCatch.R
                           nyears = 5,
                           savedir = hakedatawd()) {
   # File management
-  quotas <- utils::read.csv(
-    file = file.path(savedir, "Catches", "quotas.csv"),
-    sep = ",", header = TRUE, check.names = FALSE
-  )
+  data("quotas")
 
   utils::write.table(
     x = tapply(pcatch$MT, list(pcatch$YEAR, pcatch$FLEET), sum),
@@ -49,7 +46,8 @@ pacfincatches <- function(pcatch = loadlocal(file = "Pacfincomp_ft_taylorCatch.R
   )
   plot_catchvmonthbyyear(
     data = pcatch.yr.per %>%
-      dplyr::filter(sector == "USshore"),
+      dplyr::filter(sector == "USshore") %>%
+      dplyr::select(-sector),
     Yrs = as.character(
       (max(pcatch.yr.per$year) - nyears + 1):max(pcatch.yr.per$year)
     ),

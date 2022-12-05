@@ -75,17 +75,13 @@ norpaccatches <- function(ncatch = loadlocal(file = "norpac_catch.Rdat"),
 
   # File management
   fs::dir_create(
-    path = file.path(savedir, "Figures", "CONFIDENTIAL"),
+    path = file.path(savedir, c(
+      file.path("Figures", "CONFIDENTIAL"),
+      "Catches"
+    )),
     recurse = TRUE
   )
-  fs::dir_create(
-    path = file.path(savedir, "Catches"),
-    recurse = TRUE
-  )
-  quotas <- utils::read.csv(
-    file = file.path(savedir, "Catches", "quotas.csv"),
-    sep = ",", header = TRUE, check.names = FALSE
-  )
+  data("quotas")
 
   outncatch <- ncatch %>%
     dplyr::rename_at(
