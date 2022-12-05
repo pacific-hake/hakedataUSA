@@ -85,6 +85,7 @@ plot_catchvmonthbyyear <- function(data,
     units = "in", pointsize = 10, res = 300,
     file = file
   )
+  on.exit(dev.off(), add = TRUE)
   cex.title <- c(3, 1.3)[1]
   par(mfrow = c(2, 2),
     mar = c(0.5, 3.1, 0.5, 0.1),
@@ -157,5 +158,4 @@ plot_catchvmonthbyyear <- function(data,
     text = title,
     line = -0.1, cex = cex.title
   )
-  dev.off()
 }
