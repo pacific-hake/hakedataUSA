@@ -59,7 +59,6 @@
 #'   for their passwords.
 #'   Passwords are needed because the databases store confidential data.
 #' @template savedir
-#' @template verbose
 #'
 #' @seealso
 #' * [hakedata_year()]
@@ -88,16 +87,12 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
                          ),
                          endyear = hakedata_year(),
                          passwordfile = "password.txt",
-                         savedir = hakedatawd(),
-                         verbose = FALSE) {
+                         savedir = hakedatawd()) {
   # File management
   sqldir <- system.file("extdata", "sql", package = "hakedataUSA")
   info <- hakedatasqlpw(file = passwordfile)
   final_dir <- file.path(savedir, "extractedData")
   fs::dir_create(path = final_dir, recurse = TRUE)
-  if (verbose) {
-    message(final_dir, "\nwas created if it did not already exist.")
-  }
 
   # Checks regarding startyear
   stopifnot(is.list(startyear))

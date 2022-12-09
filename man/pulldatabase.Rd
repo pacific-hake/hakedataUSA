@@ -9,8 +9,7 @@ pulldatabase(
   startyear = list(NORPAC = 2008, PacFIN = c(1980, 2008)),
   endyear = hakedata_year(),
   passwordfile = "password.txt",
-  savedir = hakedatawd(),
-  verbose = FALSE
+  savedir = hakedatawd()
 )
 }
 \arguments{
@@ -46,10 +45,6 @@ Passwords are needed because the databases store confidential data.}
 \item{savedir}{A full path to a directory where you want files saved.
 The default is to save them in a folder found using \code{\link[=hakedatawd]{hakedatawd()}},
 which returns a path specific to the personal preferences of JTC members.}
-
-\item{verbose}{A logical specifying whether or not to print
-information to the screen.
-The default is \code{FALSE}.}
 }
 \value{
 An environment or \code{list} with several objects pulled from the
