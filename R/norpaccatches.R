@@ -84,9 +84,6 @@ norpaccatches <- function(ncatch = loadlocal(file = "norpac_catch.Rdat"),
   data("quotas")
 
   outncatch <- ncatch %>%
-    dplyr::rename_at(
-      ggplot2::vars(dplyr::matches("HAUL.+JOIN")), ~ "HAULJOIN"
-    ) %>%
     dplyr::mutate(
       SPECIFICHAUL = paste(format(HAULJOIN, digits = 19), sep = "_"),
       Date = as.Date(RETRIEVAL_DATE, f = "%Y-%m-%d"),
@@ -108,12 +105,14 @@ norpaccatches <- function(ncatch = loadlocal(file = "norpac_catch.Rdat"),
     dplyr::mutate(
       bycatchrate = sum(ifelse(sampled == 1, ByCatch, 0), na.rm = TRUE) / 
         sum(ifelse(sampled == 1, OFFICIAL_TOTAL_CATCHkg, 0), na.rm = TRUE),
-      Catch.MT = ifelse(sampled == 0,
-        OFFICIAL_TOTAL_CATCHkg * (1 - bycatchrate),
-        EXTRAPOLATED_WEIGHT) / 1000,
-      ByCatch = ifelse(sampled == 0,
-        OFFICIAL_TOTAL_CATCHkg - Catch.MT / 1000,
-        ByCatch
+      Catch.MT = ifelse(
+        test = sampled == 0,
+        yes = OFFICIAL_TOTAL_CATCHkg * (1 - bycatchrate),
+        no = EXTRAPOLATED_WEIGHT) / 1000,
+      ByCatch = ifelse(
+        test = sampled == 0,
+        yes = OFFICIAL_TOTAL_CATCHkg - Catch.MT / 1000,
+        no = ByCatch
       ),
       catch = round(Catch.MT, digits = 5)
     ) %>%
@@ -169,7 +168,7 @@ norpaccatches <- function(ncatch = loadlocal(file = "norpac_catch.Rdat"),
     quotas = quotas[1, -1],
     file = file.path(savedir, "Figures", "CpCatchMonthYear.png")
   )
-  utils::write.table(cp,
+  utils::write.table(cp %>% dplyr::arrange(year, month),
     file = file.path(
       savedir, "Catches",
        "us-cp-catch-by-month.csv"
@@ -186,7 +185,8 @@ norpaccatches <- function(ncatch = loadlocal(file = "norpac_catch.Rdat"),
       ifelse(hakedata_prelim(), "(preliminary)", "")),
     quotas = quotas[2, -1]
   )
-  utils::write.table(ms,
+  browser()
+  utils::write.table(ms %>% dplyr::arrange(year, month),
     file = file.path(
       savedir, "Catches",
        "us-ms-catch-by-month.csv"

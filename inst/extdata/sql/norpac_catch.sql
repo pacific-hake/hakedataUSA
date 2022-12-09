@@ -7,7 +7,7 @@ REM ***********************************************************************
 
 (
   SELECT
-    obsint.DEBRIEFED_HAUL.HAUL_JOIN,
+    obsint.DEBRIEFED_HAUL.HAUL_JOIN HAULJOIN,
     obsint.DEBRIEFED_HAUL.CRUISE,
     obsint.DEBRIEFED_HAUL.PERMIT,
     obsint.DEBRIEFED_HAUL.VESSEL,
@@ -46,8 +46,7 @@ SELECT
   CUR_NOTIN_DEB.*,
   CUR_SP.SPECIES,
   CUR_SP.EXTRAPOLATED_WEIGHT
-  FROM
-  (
+  FROM (
     SELECT
     obsint.CURRENT_HAUL.HAUL_JOIN,
     obsint.CURRENT_HAUL.CRUISE,
