@@ -1,8 +1,7 @@
-# Run devtools::document()
 on:
   workflow_dispatch:
   push:
-    branches: [main, master]
+    branches: [main]
 name: call-update-docs
 jobs:
   call-workflow:
