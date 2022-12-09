@@ -5,7 +5,7 @@
 \title{Print summaries and figures for catches from PacFIN}
 \usage{
 pacfincatches(
-  pcatch = loadlocal(file = "Pacfincomp_ft_taylorCatch.Rdat"),
+  pcatch = loadlocal(file = "pacfin_catch.Rdat"),
   nyears = 5,
   savedir = hakedatawd()
 )

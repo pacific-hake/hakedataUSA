@@ -13,7 +13,7 @@
 #' * us-shore-startdate-by-dahl.csv
 #' * us-ti-catch-by-month.csv
 #'
-pacfincatches <- function(pcatch = loadlocal(file = "Pacfincomp_ft_taylorCatch.Rdat"),
+pacfincatches <- function(pcatch = loadlocal(file = "pacfin_catch.Rdat"),
                           nyears = 5,
                           savedir = hakedatawd()) {
   # File management

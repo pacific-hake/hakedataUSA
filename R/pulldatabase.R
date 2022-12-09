@@ -180,7 +180,7 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
     # Catches
     # Remove XXX fleet (foreign catch?)
     pcatch <- queryDB(
-      queryFilename = dir(sqldir, "comp_ft_taylor_aliased", full.names = TRUE),
+      queryFilename = dir(sqldir, "pacfin_catch", full.names = TRUE),
       db = "PACFIN",
       uid = info[["username"]][["PacFIN"]],
       pw = info[["password"]][["PacFIN"]],
@@ -195,7 +195,7 @@ pulldatabase <- function(database = c("NORPAC", "PacFIN"),
         sector = ifelse(grepl("^R", FLEET), "USresearch", "USshore")
       ) %>%
       dplyr::arrange(Date)
-    localsave(pcatch, "Pacfincomp_ft_taylorCatch", savedir)
+    localsave(pcatch, "pacfin_catch", savedir)
     # bds data
     pcatchatsea <- queryDB(
       queryFilename = dir(sqldir, "pacfin.atseabysector", full.names = TRUE),
