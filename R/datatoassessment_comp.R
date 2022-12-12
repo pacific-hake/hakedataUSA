@@ -8,12 +8,16 @@
 #'       hake-assessment are overwritten.
 #' TODO: Make a message that encourages a commit in hake-assessment to update
 #'       the data.
-#' TODO: Ensure NO scientific notation.
 #'
 #' @template dirout
 #' @export
 datatoassessment_comp <- function(dirout) {
-  dircomp = file.path(hakedatawd(), "Catches", "Comps")
+  # Deal with not wanting scientific notation in output
+  oldoptions <- options()
+  options(scipen = 999)
+  on.exit(options(sciepen = oldoptions[["scipen"]]), add = TRUE)
+
+  dircomp <- file.path(hakedatawd(), "Catches", "Comps")
   aa <- utils::read.csv(file.path(dircomp, "CP.Age.Only", "comps.csv"))
   colnames(aa)[1:3] <- c("year", "n.fish", "n.hauls")
   colnames(aa) <- gsub("Age", "a", colnames(aa))
@@ -25,7 +29,7 @@ datatoassessment_comp <- function(dirout) {
   colnames(aa)[1:3] <- c("year", "n.fish", "n.hauls")
   colnames(aa) <- gsub("Age", "a", colnames(aa))
   aa[is.na(aa)] <- 0
-  utils::write.table(x = aa, 
+  utils::write.table(x = aa,
     file = file.path(dirout, "us-ms-age-data.csv"), sep = ",",
     row.names = FALSE)
   aa <- utils::read.csv(file.path(dircomp, "Shoreside.Age.Only", "shoresideAgeComps.csv"))
