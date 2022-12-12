@@ -6,7 +6,10 @@
 #'
 #' The resulting compiled data for the most recent year are written to a file
 #' with a name like /LengthWeightAge/LWAdata_2017.csv.
-#' 
+#'
+#' @details
+#' TODO: Ensure that this is done from 2008 to present every year to
+#'       because there may be changes to previous weight-at-age data.
 #' @param year An integer value specifying the year of data you would like to summarize.
 #'
 #' @export
@@ -151,6 +154,7 @@ wtatage_collate <- function(year = hakedata_year(),
   dat <- rbind(dat, tmp)
   rm(tmp)
 
+  fs::dir_create(file.path(savedir, "LengthWeightAge"))
   fileout <- file.path(savedir, "LengthWeightAge", 
     paste0("LWAdata_", year, ".csv"))
   bad <- dat[dat$Weight_kg > 10, ]

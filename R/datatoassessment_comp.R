@@ -1,4 +1,14 @@
-#' Copy composition data in the assessment data directory
+#' Copy U.S. composition data to the hake-assessment data directory
+#'
+#' @details
+#' TODO: Write these files out directly to hake-assessment rather than writing
+#'       to a temporary file. Make sure that no code depends on the temporary
+#'       files before doing this. Eliminate this function. Write documentation
+#'       in the function that makes these files that the original files in
+#'       hake-assessment are overwritten.
+#' TODO: Make a message that encourages a commit in hake-assessment to update
+#'       the data.
+#' TODO: Ensure NO scientific notation.
 #'
 #' @template dirout
 #' @export
@@ -8,7 +18,7 @@ datatoassessment_comp <- function(dirout) {
   colnames(aa)[1:3] <- c("year", "n.fish", "n.hauls")
   colnames(aa) <- gsub("Age", "a", colnames(aa))
   aa[is.na(aa)] <- 0
-  utils::write.table(x = aa, 
+  utils::write.table(x = aa,
     file = file.path(dirout, "us-cp-age-data.csv"), sep = ",",
     row.names = FALSE)
   aa <- utils::read.csv(file.path(dircomp, "MS.Age.Only", "comps.csv"))
