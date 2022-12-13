@@ -57,26 +57,21 @@ new_catch <- function(dirout, year, filedat = NULL,
     1, sum, na.rm = TRUE)
 
   # update CAN catch
-  can.l <- lapply(
-    dir(dirout, pattern = "can.*catch-by-month.csv", full.names = TRUE),
-    function(x) {
-      out <- read.csv(x, header = TRUE, check.names = FALSE)
-      if (all(out[, 1] == 1:NROW(out))) out <- out[, -1]
-      out$sector <- gsub(".*can-([a-z]{2})-.*", "\\1", x)
-      out$sector[out$sector == "ft"] <- "CAN_FreezeTrawl"
-      out$sector[out$sector == "jv"] <- "CAN_JV"
-      out$sector[out$sector == "ss"] <- "CAN_Shoreside"
-      colnames(out) <- gsub("^([1-9]{1})", "catch_\\1", colnames(out))
-      return(out)
-    })
-  can.l <- reshape(do.call(rbind, can.l), direction = "long",
-    idvar = c("year", "sector"), sep = "_", timevar = "month",
-    varying = grep("[0-9]", colnames(can.l[[1]])))
-  can.l <- aggregate(catch ~ year + sector, data = can.l, sum)
-  can.l <- reshape(can.l, direction = "wide", idvar = c("year"), timevar = "sector")
-  colnames(can.l) <- gsub("catch\\.", "", colnames(can.l))
-  can.l[is.na(can.l)] <- 0
-  inc[match(can.l$year, inc$Year),
+  can.l <- dplyr::bind_rows(can.l) %>%
+    tidyr::pivot_longer(
+      cols = dplyr::starts_with("catch"),
+      names_to = "month",
+      names_prefix = "catch_"
+    ) %>%
+    dplyr::group_by(Year, sector) %>%
+    dplyr::summarize(catch = sum(value)) %>%
+    tidyr::pivot_wider(names_from = sector, values_from = catch) %>%
+    dplyr::mutate(dplyr::across(
+      dplyr::starts_with("CAN"),
+      tidyr::replace_na,
+      0
+    ))
+  inc[match(can.l$Year, inc$Year),
     c("CAN_FreezeTrawl", "CAN_JV", "CAN_Shoreside")] <- can.l[,
     c("CAN_FreezeTrawl", "CAN_JV", "CAN_Shoreside")]
   inc[, "CANtotal"] <- apply(inc[, grepl("^CAN_", colnames(inc), ignore.case = FALSE)],
@@ -127,7 +122,7 @@ new_catch <- function(dirout, year, filedat = NULL,
 
   # Dat file
   if (!is.null(filedat)) {
-    dat <- r4ss::SS_readdat(filedat, version = 3.3, verbose = FALSE)
+    dat <- r4ss::SS_readdat(filedat, verbose = FALSE)
     ind <- !(dat$catch$year > 0)
     dat$catch <- rbind(dat$catch[ind, ],
       data.frame("year" = inc$Year, "seas" = 1, "fleet" = 1,
