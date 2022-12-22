@@ -41,9 +41,9 @@ Imports:
     RColorBrewer,
     r4ss,
     readxl,
-    reshape2,
     RODBC,
     stats,
+    tidyr,
     tools
 Remotes:
   github::r4ss/r4ss

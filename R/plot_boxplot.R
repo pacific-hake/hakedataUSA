@@ -105,7 +105,9 @@ plot_boxplot <- function(data,
   p.formula <- stats::as.formula(
     paste(paste(cols2keep, collapse = " + "), "~", "probabilities")
     )
-  p.dist <- reshape2::dcast(p.dist, p.formula, value.var = yvar)
+  p.dist <- tidyr::pivot_wider(
+    p.dist, names_from = probs, values_from = yvar
+  )
   colnames(p.dist) <- c(cols2keep, label)
   p.dist[, "inter"] <- interaction(p.dist[, xvar], drop = FALSE)
   if (!missing(incolor)) {
