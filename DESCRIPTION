@@ -28,6 +28,7 @@ Suggests:
     rmarkdown,
     testthat
 Imports:
+    magrittr,
     dplyr,
     fs,
     ggplot2,
