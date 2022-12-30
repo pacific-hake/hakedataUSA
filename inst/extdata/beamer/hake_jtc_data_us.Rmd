@@ -70,16 +70,22 @@ names(tacs) <- tacsraw[, 1]
 ```
 
 ```{r calc-numread, echo = FALSE}
-ntable <- read.table(file.path(mydir, "Catches", "Comps", "NORPACOtolithSum.csv"),
-  sep = ",", header = TRUE)
+ntable <- dplyr::group_by(
+  atsea.ages,
+  Year, read = !is.na(AGE)
+) %>%
+  dplyr::count() %>%
+  dplyr::filter(read, Year %in% 2008:year) %>%
+  dplyr::pull(n)
 ptable <- table(
   page[!is.na(page[, "AGE_YEARS"]), c("SAMPLE_YEAR")],
   useNA = "ifany")
 
 final <- data.frame(
   "Year" = names(ptable),
-  "At-Sea" = ntable[ntable[,1] %in% 2008:year, "Total"],
-  "Shoreside" = c(ptable), check.names = FALSE)
+  "At-Sea" = ntable,
+  "Shoreside" = c(ptable), check.names = FALSE) %>%
+  dplyr::filter(Year %in% (as.numeric(year) - 10:0))
 final[, "Total"] <- rowSums(final[, -1])
 ```
 
