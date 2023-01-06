@@ -26,6 +26,7 @@ LazyData: true
 Suggests:
     knitr,
     rmarkdown,
+    RODBC,
     testthat
 Imports:
     dplyr,
@@ -42,7 +43,6 @@ Imports:
     r4ss,
     readxl,
     reshape2,
-    RODBC,
     stats,
     tools
 Remotes:

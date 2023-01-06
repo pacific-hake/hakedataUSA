@@ -1,24 +1,22 @@
 #' Wrapper to make a query from a sql file and get the data from a database using RODBC
 #'
-#' @details Calls \code{RODBC} functions.
-#' The function first opens an ODBC connection and, using sql, extracts
-#' data from the \code{db}.
+#' @details Calls \code{RODBC} functions. The function first opens an ODBC
+#' connection and, using sql, extracts data from the \code{db}.
 #'
-#' @author Andi Stephens
+#' @author Kelli F. Johnson
 #'
 #' @param queryFilename The filename of the sql query to read in.
 #' @param db The name of your database connection.
 #' @param uid Your user ID.
-#' @param pw The password for the database connection. If omitted,
-#' RODBC will prompt you for a password and will mask it.
-#' If entered, it will be visible and unsecure.
+#' @param pw The password for the database connection. If omitted, RODBC will
+#'   prompt you for a password and will mask it. If entered, it will be visible
+#'   and unsecure.
 #' @param sp The species scientific name to extract from the database.
 #' @param start The start year.
 #' @param end   The end year.
-#' @param ais A logical, specifying whether or not to convert columns,
-#' as in \code{\link[utils]{read.table}}.
+#' @param ais A logical, specifying whether or not to convert columns, as in
+#'   \code{\link[utils]{read.table}}.
 #'
-#' @import RODBC 
 #' @seealso \code{\link[RODBC]{sqlQuery}}
 #'
 #' @export
@@ -33,7 +31,7 @@ queryDB <- function(queryFilename, db, uid, pw = "", sp = " ",
     return(x)
   }
 
-  #make the query as a character string from the file in the sql directory
+  # make the query as a character string from the file in the sql directory
   qq <- readLines(queryFilename)
   # Remove comment lines
   if (length(grep("REM",qq)) > 0) {
@@ -49,8 +47,8 @@ queryDB <- function(queryFilename, db, uid, pw = "", sp = " ",
   qq <- gsub("&endyr", end, qq)
   query <- paste(qq, collapse = " ")
 
-  #get data from the database
-  
+  # get data from the database
+  stopifnot(require("RODBC", quietly = TRUE))
   database <- RODBC::odbcConnect(dsn = db, uid = uid, pw = pw)
   on.exit(RODBC::odbcClose(database))
   out <- RODBC::sqlQuery(database, query, as.is = asis)
