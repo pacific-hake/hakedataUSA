@@ -24,5 +24,5 @@ hake fishery. Written by Allan Hicks in 2016 and
 revised in 2017 by Ian Taylor.
 }
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }

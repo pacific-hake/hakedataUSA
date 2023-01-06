@@ -18,5 +18,5 @@ most recent data in the current year as the last year of data included
 in the extraction.
 }
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }

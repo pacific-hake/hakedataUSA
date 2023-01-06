@@ -20,24 +20,27 @@
 #' @seealso \code{\link[RODBC]{sqlQuery}}
 #'
 #' @export
-#' 
-queryDB <- function(queryFilename, db, uid, pw = "", sp = " ", 
-  start = " ", end = " ", asis = FALSE) {
-  
+#'
+queryDB <- function(queryFilename, db, uid, pw = "", sp = " ",
+                    start = " ", end = " ", asis = FALSE) {
   removeComments <- function(x, comment) {
-    lines <- grep(comment,x)
-    x[lines] <- unlist(lapply(strsplit(x[lines], comment),
-      function(xx){xx[1]}))
+    lines <- grep(comment, x)
+    x[lines] <- unlist(lapply(
+      strsplit(x[lines], comment),
+      function(xx) {
+        xx[1]
+      }
+    ))
     return(x)
   }
 
   # make the query as a character string from the file in the sql directory
   qq <- readLines(queryFilename)
   # Remove comment lines
-  if (length(grep("REM",qq)) > 0) {
+  if (length(grep("REM", qq)) > 0) {
     qq <- removeComments(qq, "REM")
   }
-  if (length(grep("--",qq)) > 0) {
+  if (length(grep("--", qq)) > 0) {
     qq <- removeComments(qq, "--")
   }
   # Make appropriate substitutions

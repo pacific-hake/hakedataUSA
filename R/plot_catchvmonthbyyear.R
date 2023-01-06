@@ -15,12 +15,11 @@
 #' is added to the current figure.
 #'
 lines.bymonth <- function(x, y,
-  plotType = c("default", "proportion", "cumulative"),
-  ...) {
-
+                          plotType = c("default", "proportion", "cumulative"),
+                          ...) {
   plotType <- match.arg(plotType, several.ok = FALSE)
   if (plotType[1] == "proportion") {
-    y <- cumsum(y)/sum(y)
+    y <- cumsum(y) / sum(y)
   }
   if (plotType[1] == "cumulative") {
     y <- cumsum(y)
@@ -28,7 +27,7 @@ lines.bymonth <- function(x, y,
   xx <- 1:12
   yy <- rep(NA, 12)
   for (i in xx) {
-    if (any(x == i)) { #is the month present in the data
+    if (any(x == i)) { # is the month present in the data
       yy[i] <- y[which(x == i)]
     } else {
       if (i == 1) {
@@ -68,28 +67,32 @@ plot_catchvmonthbyyear <- function(data,
                                    divisor = 1000) {
   data <- as.data.frame(data)
   lineWds <- c(rep(2, length(Yrs) - 1), 3)
-  lineTypes <- rep(1,length(Yrs))
+  lineTypes <- rep(1, length(Yrs))
   cols <- plotcolour(length(Yrs))
- # Take hake dataframe of Fleet, Month, Year, MT and
- # plots year specific catches by month
- # Does not discriminate by fleet
- # Assumes that there is one observation of Month in each year
+  # Take hake dataframe of Fleet, Month, Year, MT and
+  # plots year specific catches by month
+  # Does not discriminate by fleet
+  # Assumes that there is one observation of Month in each year
 
   plot.base <- function(ylim = c(0, 1.05), ylab) {
-    plot(1, 1, xlim = c(1, 12), ylim = ylim,
+    plot(1, 1,
+      xlim = c(1, 12), ylim = ylim,
       type = "n", xaxt = "n",
-      xlab = "", ylab = ylab, yaxs = "i")
+      xlab = "", ylab = ylab, yaxs = "i"
+    )
   }
 
-  png(height = 5, width = 10,
+  png(
+    height = 5, width = 10,
     units = "in", pointsize = 10, res = 300,
     file = file
   )
   on.exit(dev.off(), add = TRUE)
   cex.title <- c(3, 1.3)[1]
-  par(mfrow = c(2, 2),
+  par(
+    mfrow = c(2, 2),
     mar = c(0.5, 3.1, 0.5, 0.1),
-    oma = c(4,0.1, ceiling(cex.title), 0.1),
+    oma = c(4, 0.1, ceiling(cex.title), 0.1),
     mgp = c(2.1, 0.75, 0),
     las = 1
   )
@@ -98,30 +101,40 @@ plot_catchvmonthbyyear <- function(data,
     data[data[, "year"] %in% Yrs, ],
     data$year[data[, "year"] %in% Yrs]
   )
-  plot.base(ylab = paste("Catch", units),
-    ylim=c(0,max(data[data[, "year"] %in% Yrs, "catch"]) / divisor)
-    )
+  plot.base(
+    ylab = paste("Catch", units),
+    ylim = c(0, max(data[data[, "year"] %in% Yrs, "catch"]) / divisor)
+  )
   for (i in 1:length(Yrs)) {
     lines.bymonth(
       dat.yr[[Yrs[i]]]$month,
-      dat.yr[[Yrs[i]]]$catch/divisor,
-      col = cols[i], lwd = lineWds[i], lty = lineTypes[i])
+      dat.yr[[Yrs[i]]]$catch / divisor,
+      col = cols[i], lwd = lineWds[i], lty = lineTypes[i]
+    )
   }
   axis(side = 1, mgp = c(1.0, 0, 0), labels = NA)
 
-  plot.base(ylab = paste0("Cumulative Catch", units),
-    ylim=c(0, max(unlist(lapply(dat.yr,function(x){sum(x$catch)}))[Yrs],
-      na.rm = TRUE) / divisor)
-    )
-  for(i in 1:length(Yrs)) {
+  plot.base(
+    ylab = paste0("Cumulative Catch", units),
+    ylim = c(0, max(
+      unlist(lapply(dat.yr, function(x) {
+        sum(x$catch)
+      }))[Yrs],
+      na.rm = TRUE
+    ) / divisor)
+  )
+  for (i in 1:length(Yrs)) {
     lines.bymonth(
       dat.yr[[Yrs[i]]]$month,
-      dat.yr[[Yrs[i]]]$catch/divisor,
+      dat.yr[[Yrs[i]]]$catch / divisor,
       plotType = "cumulative",
-      col = cols[i], lwd = lineWds[i], lty = lineTypes[i])
+      col = cols[i], lwd = lineWds[i], lty = lineTypes[i]
+    )
   }
-  legend("topleft", legend = Yrs, col = cols,
-    lty = lineTypes, lwd = lineWds, cex = leg.cex, bty = "n")
+  legend("topleft",
+    legend = Yrs, col = cols,
+    lty = lineTypes, lwd = lineWds, cex = leg.cex, bty = "n"
+  )
   axis(side = 1, mgp = c(1.0, 0, 0), labels = NA)
 
   plot.base(ylab = "Proportion of Total Catch")
@@ -131,30 +144,38 @@ plot_catchvmonthbyyear <- function(data,
       dat.yr[[Yrs[i]]]$month,
       dat.yr[[Yrs[i]]]$catch / divisor,
       plotType = "proportion",
-      col = cols[i], lwd = lineWds[i], lty = lineTypes[i])
+      col = cols[i], lwd = lineWds[i], lty = lineTypes[i]
+    )
   }
   axis(side = 1)
 
   plot.base(ylab = "Proportion of Sector Quota")
   abline(h = 1, col = gray(0.5))
-  for(i in 1:length(Yrs)) {
+  for (i in 1:length(Yrs)) {
     if (is.null(dim(dat.yr[[Yrs[i]]])[1])) next
-    dat.yr[[Yrs[i]]] <- rbind(dat.yr[[Yrs[i]]],
-      c(13,
+    dat.yr[[Yrs[i]]] <- rbind(
+      dat.yr[[Yrs[i]]],
+      c(
+        13,
         as.numeric(Yrs[i]),
-        quotas[[Yrs[i]]] - sum(dat.yr[[Yrs[i]]][,"catch"])))
+        quotas[[Yrs[i]]] - sum(dat.yr[[Yrs[i]]][, "catch"])
+      )
+    )
     lines.bymonth(
       dat.yr[[Yrs[i]]]$month,
-      dat.yr[[Yrs[i]]]$catch/divisor,
+      dat.yr[[Yrs[i]]]$catch / divisor,
       plotType = "proportion",
-      col = cols[i], lwd = lineWds[i], lty = lineTypes[i])
+      col = cols[i], lwd = lineWds[i], lty = lineTypes[i]
+    )
   }
   axis(side = 1)
-  mtext(side = 1, outer = TRUE,
+  mtext(
+    side = 1, outer = TRUE,
     text = "Month",
     line = 1.5
   )
-  mtext(side = 3, outer = TRUE,
+  mtext(
+    side = 3, outer = TRUE,
     text = title,
     line = -0.1, cex = cex.title
   )

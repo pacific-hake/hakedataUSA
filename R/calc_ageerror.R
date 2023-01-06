@@ -16,7 +16,7 @@
 #' the second row is the standard deviation based on a normal distribution.
 #' Mean age will be different from 0.5 + age if there is bias.
 #' Standard deviation will be different than zero if there imprecision.
-#' 
+#'
 #' @param ages The ages that have strong cohorts and decreased ageing error.
 #' Note that this should be the age-bin not the mean age in the first row of
 #' the returned matrix.
@@ -30,9 +30,10 @@
 #' # 2019 ageing error was
 #' error <- calc_ageerror(ages = c(5, 9, 20))
 #' \dontshow{
-#'   test_that("2019 ageing error", {
+#' test_that("2019 ageing error", {
 #'   expect_equal(error[2, 6], c("age5" = 0.2354495),
-#'     label = "2019 ageing error for age 5")
+#'     label = "2019 ageing error for age 5"
+#'   )
 #' })
 #' }
 #' \dontrun{
@@ -44,11 +45,13 @@
 #' }
 #'
 calc_ageerror <- function(ages,
-  x = c(0.329242, 0.329242, 0.346917, 0.368632, 0.395312, 
-        0.42809, 0.468362, 0.517841, 0.57863, 0.653316, 
-        0.745076, 0.857813, 0.996322, 1.1665, 1.37557, 
-        1.63244, 1.858, 2.172, 2.53, 2.934, 3.388),
-  multiplier = 0.55) {
+                          x = c(
+                            0.329242, 0.329242, 0.346917, 0.368632, 0.395312,
+                            0.42809, 0.468362, 0.517841, 0.57863, 0.653316,
+                            0.745076, 0.857813, 0.996322, 1.1665, 1.37557,
+                            1.63244, 1.858, 2.172, 2.53, 2.934, 3.388
+                          ),
+                          multiplier = 0.55) {
   names <- 0:20
   names(x) <- names
   x[names(x) %in% ages] <- x[names(x) %in% ages] * multiplier

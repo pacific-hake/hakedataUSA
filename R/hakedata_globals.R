@@ -17,14 +17,16 @@ hakedatawd <- function() {
   user <- Sys.info()["user"]
   wd <- switch(user,
     "Kelli.Johnson" = {
-        file.path("c:", "stockAssessment", "hake-data")
+      file.path("c:", "stockAssessment", "hake-data")
     },
     "Aaron.Berger" = {
-        file.path("C:", "Users", "Aaron.Berger", "Documents", 
-            "GitHub", "hake-data")
+      file.path(
+        "C:", "Users", "Aaron.Berger", "Documents",
+        "GitHub", "hake-data"
+      )
     },
     "Ian.Taylor" = {
-        file.path("C:", "github", "hake-data")
+      file.path("C:", "github", "hake-data")
     },
     file.path("c:", "stockassessment", "hake-data")
   )
@@ -52,7 +54,7 @@ hakedatawd <- function() {
 #'   If a file name is not provided, which is the default behaviour, then
 #'   the user will be prompted for their passwords. This also happens if
 #'   the file cannot be found given the path provided.
-#' 
+#'
 #' @return A list with two entries, `usernames` and `passwords`.
 #' Each element will have the same number of entries as the
 #' input argument `database` and be named using the elements of `database`.
@@ -86,7 +88,8 @@ hakedatasqlpw <- function(database = c("NORPAC", "PacFIN"), file) {
     },
     "Ian.Taylor" = {
       c("NORPAC" = "TAYLORI", "PacFIN" = "itaylor")[database]
-    })
+    }
+  )
   stopifnot(!is.null(name))
 
   if (missing(file)) {
@@ -103,8 +106,7 @@ hakedatasqlpw <- function(database = c("NORPAC", "PacFIN"), file) {
           Enter password for {database[ii]} database without quotes and \\
           hit Enter.
 
-          "
-        )
+          ")
       )
     }
   } else {

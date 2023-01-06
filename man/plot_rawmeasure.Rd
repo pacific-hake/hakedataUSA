@@ -32,5 +32,5 @@ and weight distributions for the at-sea and shoreside sectors.
 Workup At-Sea and PacFIN lengths and weights
 }
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }

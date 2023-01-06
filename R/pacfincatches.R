@@ -30,12 +30,12 @@ pacfincatches <- function(pcatch = loadlocal(file = "pacfin_catch.Rdat"),
   # database  1986 3431.9436
   # assesment 1986 3465.00
 
-  utils::write.table(tapply(pcatch$MT, list(pcatch$year, pcatch$sector), sum), 
+  utils::write.table(tapply(pcatch$MT, list(pcatch$year, pcatch$sector), sum),
     file = file.path(savedir, "Catches", "PacFIN_Sector.csv"),
     sep = ",", quote = FALSE, row.names = TRUE, col.names = NA
   )
   pcatch.yr.per <- stats::aggregate(list("catch" = pcatch$MT),
-    list("sector" = pcatch$sector, "month" = pcatch$month, "year" = pcatch$year), 
+    list("sector" = pcatch$sector, "month" = pcatch$month, "year" = pcatch$year),
     FUN = sum
   )
   pcatch.yr.per <- pcatch.yr.per[order(pcatch.yr.per$sector), ]
@@ -54,7 +54,8 @@ pacfincatches <- function(pcatch = loadlocal(file = "pacfin_catch.Rdat"),
     quotas = quotas[3, ],
     title = paste(
       "U.S. Shoreside Catches",
-      ifelse(hakedata_prelim(), "(preliminary)", "")),
+      ifelse(hakedata_prelim(), "(preliminary)", "")
+    ),
     file = file.path(savedir, "Figures", "shoresideCatchMonthYear.png")
   )
 
@@ -64,7 +65,7 @@ pacfincatches <- function(pcatch = loadlocal(file = "pacfin_catch.Rdat"),
   )
   research <- pcatch[pcatch$sector == "USresearch", ]
   research <- stats::aggregate(list("catch" = research$MT),
-    list("month" = research$month, "year" = research$year), 
+    list("month" = research$month, "year" = research$year),
     FUN = sum
   )
   research$catch <- sprintf("%.9f", research$catch)
@@ -89,5 +90,4 @@ pacfincatches <- function(pcatch = loadlocal(file = "pacfin_catch.Rdat"),
     file = file.path(savedir, "Catches", "us-ti-catch-by-month.csv"),
     sep = ",", quote = FALSE, row.names = FALSE
   )
-
 }

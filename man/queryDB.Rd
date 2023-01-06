@@ -22,9 +22,9 @@ queryDB(
 
 \item{uid}{Your user ID.}
 
-\item{pw}{The password for the database connection. If omitted,
-RODBC will prompt you for a password and will mask it.
-If entered, it will be visible and unsecure.}
+\item{pw}{The password for the database connection. If omitted, RODBC will
+prompt you for a password and will mask it. If entered, it will be visible
+and unsecure.}
 
 \item{sp}{The species scientific name to extract from the database.}
 
@@ -32,20 +32,19 @@ If entered, it will be visible and unsecure.}
 
 \item{end}{The end year.}
 
-\item{ais}{A logical, specifying whether or not to convert columns,
-as in \code{\link[utils]{read.table}}.}
+\item{ais}{A logical, specifying whether or not to convert columns, as in
+\code{\link[utils]{read.table}}.}
 }
 \description{
 Wrapper to make a query from a sql file and get the data from a database using RODBC
 }
 \details{
-Calls \code{RODBC} functions.
-The function first opens an ODBC connection and, using sql, extracts
-data from the \code{db}.
+Calls \code{RODBC} functions. The function first opens an ODBC
+connection and, using sql, extracts data from the \code{db}.
 }
 \seealso{
 \code{\link[RODBC]{sqlQuery}}
 }
 \author{
-Andi Stephens
+Kelli F. Johnson
 }

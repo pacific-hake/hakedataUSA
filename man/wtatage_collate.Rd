@@ -33,6 +33,9 @@ and the U.S. shoreside fishery. Canadian fishery data does not appear to be incl
 \details{
 The resulting compiled data for the most recent year are written to a file
 with a name like /LengthWeightAge/LWAdata_2017.csv.
+
+TODO: Ensure that this is done from 2008 to present every year to
+because there may be changes to previous weight-at-age data.
 }
 \author{
 Ian Taylor

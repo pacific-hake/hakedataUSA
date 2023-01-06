@@ -6,7 +6,7 @@
 #' @param formatout A character value specifying the format you want
 #' the output to be in. See [base::strptime] for options.
 #' @return A vector of numeric objects, such as months.
-#' 
+#'
 get_date <- function(data, formatout = c("%m", "%Y")) {
   stopifnot(any(c("POSIXct", "POSIXt", "Date") %in% class(data)))
   out <- format(data, formatout)

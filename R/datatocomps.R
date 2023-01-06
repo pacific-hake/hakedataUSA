@@ -9,12 +9,13 @@
 #' For example, in 2019 the values were `c(5, 9, 20)` and
 #' in 2020 they were `c(6, 10)` because the age-21 fish are not modelled.
 datatocomps <- function(dirdata, dirmod, cohorts) {
-
   options(default.stringsAsFactors = FALSE)
   options(stringsAsFactors = FALSE)
 
-  wtatage <- r4ss::SS_readwtatage(file = file.path(dirmod, "wtatage.ss"),
-    verbose = FALSE) %>%
+  wtatage <- r4ss::SS_readwtatage(
+    file = file.path(dirmod, "wtatage.ss"),
+    verbose = FALSE
+  ) %>%
     dplyr::filter(Fleet == 1) %>%
     dplyr::rename(Year = "Yr") %>%
     dplyr::select(Year, dplyr::matches("^[0-9]+$")) %>%
@@ -69,11 +70,12 @@ datatocomps <- function(dirdata, dirmod, cohorts) {
     bias <- ssdat$ageerror[seq(2, NROW(ssdat$ageerror), by = 2), ]
     ssdat$ageerror <- rbind(
       ssdat$ageerror,
-      ageerror_new(which(bias[NROW(bias)-1, ] / bias[NROW(bias), ] == 0.55) + 1)
+      ageerror_new(which(bias[NROW(bias) - 1, ] / bias[NROW(bias), ] == 0.55) + 1)
     )
   }
   r4ss::SS_writedat(ssdat, file.path(dirmod, "hake_data.ss"),
-    overwrite = TRUE, verbose = FALSE)
+    overwrite = TRUE, verbose = FALSE
+  )
   return(final)
 }
 
@@ -81,7 +83,8 @@ get_catchatage <- function(datapath) {
   source("https://raw.githubusercontent.com/pacific-hake/hake-assessment/master/R/load-data.R")
 
   candata <- load.can.age.data(file.path(datapath, "can-age-data.csv"))
-  can <- mapply(function(x,y) cbind(x, Nsamples = y),
+  can <- mapply(
+    function(x, y) cbind(x, Nsamples = y),
     setNames(candata[1:3], c("CAN_Shoreside", "CAN_FreezeTrawl", "CAN_JV")),
     lapply(candata[4:6], as.numeric)
   ) %>%

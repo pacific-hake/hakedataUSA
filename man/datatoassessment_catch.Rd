@@ -15,5 +15,5 @@ Copy the catch files from the US Catches directory to the assessment
 data directory.
 }
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }

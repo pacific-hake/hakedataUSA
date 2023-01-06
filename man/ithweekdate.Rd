@@ -36,6 +36,7 @@ stock assessment.
 ithweekdate()
 # Find third Wednesday in December of current year
 ithweekdate(3)
+
 }
 \author{
 Kelli F. Johnson

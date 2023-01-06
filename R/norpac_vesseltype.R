@@ -1,12 +1,12 @@
 #' Change \code{VESSEL_TYPE} from numeric to character
-#' 
+#'
 #' \code{VESSEL_TYPE} in the NORPAC data base are integers and this function
 #' changes these integer values to character strings that provide meaning.
-#' The following integers are the available options in NORPAC to indicate 
+#' The following integers are the available options in NORPAC to indicate
 #' whether the vessel processes fish or delivers it to a processing plant:
 #' \enumerate{
 #' \item a catcher processor (CP) vessel,
-#' \item a mothership (MS) or ship that receives unsorted codends from 
+#' \item a mothership (MS) or ship that receives unsorted codends from
 #'   other vessels,
 #' \item a catcher only vessel that delivers unprocessed fish to shoreside,
 #'   floating plant, or vessel,
@@ -15,11 +15,11 @@
 #'   fishing vessels who will utilize the fish for bait, and
 #' \item vessels that discard all catch from a haul.
 #' }
-#' 
+#'
 #' @param x A vector of integers between one and six.
 #' @author Kelli F. Johnson
 #' @return A vector of combined integer values and character strings.
-#' 
+#'
 norpac_vesseltype <- function(x) {
   if (!any(x %in% 1:6)) {
     stop("All values in x must be between one and six.")
@@ -27,7 +27,7 @@ norpac_vesseltype <- function(x) {
   x[x == 1] <- "CP"
   x[x == 2] <- "MS"
   # A catcher vessel named the Stormy C (A709) that did minimal processing at sea
-  # and had to have an observer on board. 
+  # and had to have an observer on board.
   # x[x == 3] <- "StormyC"
   return(x)
 }

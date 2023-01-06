@@ -27,12 +27,12 @@
 #' @examples
 #' \dontrun{
 #' new_catch(file.path("hake-assessment", "data"),
-#'   year = 2020, lastassessmentvals = c(1.379, 65.0, 66458))
+#'   year = 2020, lastassessmentvals = c(1.379, 65.0, 66458)
+#' )
 #' }
 new_catch <- function(dirout, year, filedat = NULL,
-  digits = 5,
-  lastassessmentvals = c(NA, NA, NA)) {
-
+                      digits = 5,
+                      lastassessmentvals = c(NA, NA, NA)) {
   file.apc <- file.path(dirout, "us-ap-catch.csv")
   file.lan <- file.path(dirout, "landings-tac-history.csv")
   file.tar <- file.path(dirout, "catch-targets-biomass.csv")
@@ -40,21 +40,30 @@ new_catch <- function(dirout, year, filedat = NULL,
   inc <- utils::read.csv(file.lan)
   sh <- utils::read.csv(file.path(dirout, "PacFIN_Sector.csv"))
   inc$US_shore[match(sh$X, inc$Year)] <- round(
-    x = sh$USshore, digits = digits)
+    x = sh$USshore, digits = digits
+  )
   inc$USresearch[match(sh$X[!is.na(sh$USresearch)], inc$Year)] <- round(
-    sh$USresearch[!is.na(sh$USresearch)], digits = digits)
+    sh$USresearch[!is.na(sh$USresearch)],
+    digits = digits
+  )
   cp <- stats::aggregate(catch ~ year,
-    data = utils::read.csv(file.path(dirout, "us-cp-catch-by-month.csv")), sum)
+    data = utils::read.csv(file.path(dirout, "us-cp-catch-by-month.csv")), sum
+  )
   inc$atSea_US_CP[match(cp$year, inc$Year)] <- cp$catch
   ms <- aggregate(catch ~ year,
-    data = utils::read.csv(file.path(dirout, "us-ms-catch-by-month.csv")), sum)
+    data = utils::read.csv(file.path(dirout, "us-ms-catch-by-month.csv")), sum
+  )
   ti <- aggregate(catch ~ year,
     data = utils::read.csv(file.path(dirout, "us-ti-catch-by-month.csv"),
-      header = TRUE),
-    FUN = sum)
+      header = TRUE
+    ),
+    FUN = sum
+  )
   inc$atSea_US_MS[match(ms$year, inc$Year)] <- ms$catch
   inc[, "Ustotal"] <- apply(inc[, grepl("^US|_US", colnames(inc), ignore.case = FALSE)],
-    1, sum, na.rm = TRUE)
+    1, sum,
+    na.rm = TRUE
+  )
 
   # update CAN catch
   can.l <- lapply(
@@ -68,38 +77,54 @@ new_catch <- function(dirout, year, filedat = NULL,
       out$sector[out$sector == "ss"] <- "CAN_Shoreside"
       colnames(out) <- gsub("^([1-9]{1})", "catch_\\1", colnames(out))
       return(out)
-    })
-  can.l <- reshape(do.call(rbind, can.l), direction = "long",
+    }
+  )
+  can.l <- reshape(do.call(rbind, can.l),
+    direction = "long",
     idvar = c("year", "sector"), sep = "_", timevar = "month",
-    varying = grep("[0-9]", colnames(can.l[[1]])))
+    varying = grep("[0-9]", colnames(can.l[[1]]))
+  )
   can.l <- aggregate(catch ~ year + sector, data = can.l, sum)
   can.l <- reshape(can.l, direction = "wide", idvar = c("year"), timevar = "sector")
   colnames(can.l) <- gsub("catch\\.", "", colnames(can.l))
   can.l[is.na(can.l)] <- 0
-  inc[match(can.l$year, inc$Year),
-    c("CAN_FreezeTrawl", "CAN_JV", "CAN_Shoreside")] <- can.l[,
-    c("CAN_FreezeTrawl", "CAN_JV", "CAN_Shoreside")]
+  inc[
+    match(can.l$year, inc$Year),
+    c("CAN_FreezeTrawl", "CAN_JV", "CAN_Shoreside")
+  ] <- can.l[
+    ,
+    c("CAN_FreezeTrawl", "CAN_JV", "CAN_Shoreside")
+  ]
   inc[, "CANtotal"] <- apply(inc[, grepl("^CAN_", colnames(inc), ignore.case = FALSE)],
-    1, sum, na.rm = TRUE)
+    1, sum,
+    na.rm = TRUE
+  )
   inc[, "TOTAL"] <- apply(inc[, grepl(".total", colnames(inc), ignore.case = TRUE)],
-    1, sum, na.rm = TRUE)
+    1, sum,
+    na.rm = TRUE
+  )
   inc[is.na(inc)] <- ""
 
   tar <- utils::read.csv(file.tar, check.names = FALSE)
   if (!year %in% tar$Year) {
-    tar <- rbind(tar,
-      c(year, rep(NA, NCOL(tar) - 1)))
+    tar <- rbind(
+      tar,
+      c(year, rep(NA, NCOL(tar) - 1))
+    )
   }
   tar[, "Realized catch"] <- sprintf("%.0f", inc[
     match(tar$Year, inc$Year),
-    "TOTAL"])
+    "TOTAL"
+  ])
   tar[, "TAC"] <- inc[
     match(tar[, "Year"], inc[, "Year"]),
-    "TAC"]
+    "TAC"
+  ]
   if (!all(is.na(lastassessmentvals))) {
     tar[
       tar[, "Year"] == year,
-      c("Biomass estimate", "Depletion", "Assessment TAC")] <-
+      c("Biomass estimate", "Depletion", "Assessment TAC")
+    ] <-
       lastassessmentvals
   }
   tar[is.na(tar)] <- ""
@@ -108,43 +133,55 @@ new_catch <- function(dirout, year, filedat = NULL,
   # added together
   apc <- utils::read.csv(file.apc, check.names = FALSE)
   apc[2, grep("shore", x = colnames(apc), ignore.case = TRUE)] <-
-    sprintf("%.0f", inc[inc[, "Year"] == year, "US_shore"] - 
+    sprintf("%.0f", inc[inc[, "Year"] == year, "US_shore"] -
       sum(ti[ti[, "year"] == year, "catch"]))
   apc[2, grep("CP", x = colnames(apc), ignore.case = TRUE)] <-
     sprintf("%.0f", inc[inc[, "Year"] == year, "atSea_US_CP"])
   apc[2, grep("MS", x = colnames(apc), ignore.case = TRUE)] <-
     sprintf("%.0f", inc[inc[, "Year"] == year, "atSea_US_MS"])
   apc[2, grep("TAC", x = colnames(apc), ignore.case = TRUE)] <-
-    sprintf("%.0f", inc[inc[, "Year"] == year,
-      grep("UStotal", colnames(inc), ignore.case = TRUE)])
+    sprintf("%.0f", inc[
+      inc[, "Year"] == year,
+      grep("UStotal", colnames(inc), ignore.case = TRUE)
+    ])
   apc[2, grep("Tribal", x = colnames(apc), ignore.case = TRUE)] <-
     sprintf("%.0f", sum(ti[ti[, "year"] == year, "catch"]))
-  apc[3, -1] <- sprintf("%2.1f%%",
+  apc[3, -1] <- sprintf(
+    "%2.1f%%",
     type.convert(apc[2, -1], as.is = TRUE) /
-    type.convert(apc[1, -1], as.is = TRUE) * 100
-    )
+      type.convert(apc[1, -1], as.is = TRUE) * 100
+  )
   colnames(apc)[1] <- ""
 
   # Dat file
   if (!is.null(filedat)) {
     dat <- r4ss::SS_readdat(filedat, version = 3.3, verbose = FALSE)
     ind <- !(dat$catch$year > 0)
-    dat$catch <- rbind(dat$catch[ind, ],
-      data.frame("year" = inc$Year, "seas" = 1, "fleet" = 1,
-        catch = inc$TOTAL, catch_se = 0.01))
+    dat$catch <- rbind(
+      dat$catch[ind, ],
+      data.frame(
+        "year" = inc$Year, "seas" = 1, "fleet" = 1,
+        catch = inc$TOTAL, catch_se = 0.01
+      )
+    )
     dat$endyr <- max(inc$Year)
     r4ss::SS_writedat(dat, filedat, overwrite = TRUE, verbose = FALSE)
   }
 
   # Write files back to the disk
-  utils::write.table(x = apc,
+  utils::write.table(
+    x = apc,
     file = file.apc,
-    row.names = FALSE, sep = ",", quote = FALSE)
-  utils::write.table(x = inc,
+    row.names = FALSE, sep = ",", quote = FALSE
+  )
+  utils::write.table(
+    x = inc,
     file = file.lan,
-    row.names = FALSE, sep = ",", quote = FALSE)
-  utils::write.table(x = tar,
+    row.names = FALSE, sep = ",", quote = FALSE
+  )
+  utils::write.table(
+    x = tar,
     file = file.tar,
-    row.names = FALSE, sep = ",", quote = FALSE)
-
+    row.names = FALSE, sep = ",", quote = FALSE
+  )
 }

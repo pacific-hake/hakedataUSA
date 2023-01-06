@@ -5,7 +5,7 @@
 \title{Workup NORPAC Catches}
 \usage{
 norpaccatches(
-  ncatch = loadlocal(file = "NORPACdomesticCatch.Rdat"),
+  ncatch = loadlocal(file = "norpac_catch.Rdat"),
   nyears = 5,
   species = 206,
   savedir = hakedatawd()

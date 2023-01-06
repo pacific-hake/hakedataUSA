@@ -22,15 +22,13 @@
 #' ithweekdate()
 #' # Find third Wednesday in December of current year
 #' ithweekdate(3)
-
+#'
 ithweekdate <- function(number = 2,
-                     month = 12,
-                     year = as.numeric(format(Sys.time(),"%Y")),
-                     weekday = "Wednesday"
-) {
-  
+                        month = 12,
+                        year = as.numeric(format(Sys.time(), "%Y")),
+                        weekday = "Wednesday") {
   startdate <- as.Date(
-    glue::glue('{year}-{month}-1'),
+    glue::glue("{year}-{month}-1"),
     "%Y-%m-%d"
   )
   date <- startdate
@@ -49,5 +47,4 @@ ithweekdate <- function(number = 2,
   as.Date(
     allmonth[weekdays(allmonth) == weekday][number]
   )
-
 }

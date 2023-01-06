@@ -22,5 +22,5 @@ Implement consistency in fleet names and IDs for the hake fishery. The
 function returns a data frame that is useful for plotting and table names.
 }
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }

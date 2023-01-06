@@ -113,10 +113,13 @@ more than one \code{xvar} is supplied.
 testdata <- data.frame(
   yvar = rnorm(100),
   xvar1 = rep(c("Good", "Bad", "Bad", "Good"), length.out = 100),
-  xvar2 = rep(c("Apples", "Bananas", "Oranges", "Carrots"), length.out = 100))
-gg <- plot_boxplot(data = testdata, xvar = c("xvar1"), yvar = "yvar",
+  xvar2 = rep(c("Apples", "Bananas", "Oranges", "Carrots"), length.out = 100)
+)
+gg <- plot_boxplot(
+  data = testdata, xvar = c("xvar1"), yvar = "yvar",
   showmedian = TRUE, ylab = "Best fruit", incolor = "xvar2",
-  legend.position = "right")
+  legend.position = "right"
+)
 \dontrun{
 print(gg)
 grDevices::dev.off()

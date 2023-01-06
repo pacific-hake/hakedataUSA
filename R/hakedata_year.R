@@ -1,5 +1,5 @@
 #' Find last year of data for current assessment
-#' 
+#'
 #' Data is extracted the first Friday in January of the year
 #' following the last year of data. Therefore, if data are extracted
 #' from the databases in January, February, or March, then the terminal
@@ -9,9 +9,10 @@
 #' @author Kelli F. Johnson
 #' @return The last year of data you want as an integer.
 #' @export
-#' 
+#'
 hakedata_year <- function() {
-  as.numeric(format(Sys.Date(), "%Y")) - 
+  as.numeric(format(Sys.Date(), "%Y")) -
     ifelse(format(Sys.Date(), "%m") %in% c("01", "02", "03"),
-    1, 0)
+      1, 0
+    )
 }

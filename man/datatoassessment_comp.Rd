@@ -2,7 +2,7 @@
 % Please edit documentation in R/datatoassessment_comp.R
 \name{datatoassessment_comp}
 \alias{datatoassessment_comp}
-\title{Copy composition data in the assessment data directory}
+\title{Copy U.S. composition data to the hake-assessment data directory}
 \usage{
 datatoassessment_comp(dirout)
 }
@@ -11,5 +11,14 @@ datatoassessment_comp(dirout)
 for the stock assessment.}
 }
 \description{
-Copy composition data in the assessment data directory
+Copy U.S. composition data to the hake-assessment data directory
+}
+\details{
+TODO: Write these files out directly to hake-assessment rather than writing
+to a temporary file. Make sure that no code depends on the temporary
+files before doing this. Eliminate this function. Write documentation
+in the function that makes these files that the original files in
+hake-assessment are overwritten.
+TODO: Make a message that encourages a commit in hake-assessment to update
+the data.
 }

@@ -31,10 +31,8 @@
 #' for each grouping.
 #'
 get_confidential <- function(data,
-  xvar,
-  yvar = "VESSEL"
-  ) {
-
+                             xvar,
+                             yvar = "VESSEL") {
   #### Input checks
   stopifnot(length(yvar) == 1)
   stopifnot(all(xvar %in% colnames(data)))
@@ -47,5 +45,4 @@ get_confidential <- function(data,
     dplyr::group_by(year) %>%
     dplyr::mutate(ngroups = dplyr::n_distinct(vcolumn, na.rm = TRUE)) %>%
     dplyr::ungroup()
-
 }

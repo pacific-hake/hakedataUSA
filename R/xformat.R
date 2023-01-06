@@ -1,5 +1,5 @@
 #' Format an object with a comma
-#' 
+#'
 #' Format an object using a comma and rounding
 #' to the nearest integer.
 #' @param x A vector that will be passed to [format()].

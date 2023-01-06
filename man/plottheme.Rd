@@ -15,5 +15,5 @@ Create a special theme for hake plots when plotting using the
 \code{\link[ggplot2]{ggplot}} functions.
 }
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }

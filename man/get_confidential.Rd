@@ -44,5 +44,5 @@ because it might be a catcher-processor vessel that doesn't need a catcher boat.
 So, if \code{is.na(data[, "catcherboat"])} then \code{data[, "mothership"]}.
 }
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }

@@ -54,33 +54,34 @@
 #' testdata <- data.frame(
 #'   yvar = rnorm(100),
 #'   xvar1 = rep(c("Good", "Bad", "Bad", "Good"), length.out = 100),
-#'   xvar2 = rep(c("Apples", "Bananas", "Oranges", "Carrots"), length.out = 100))
-#' gg <- plot_boxplot(data = testdata, xvar = c("xvar1"), yvar = "yvar",
+#'   xvar2 = rep(c("Apples", "Bananas", "Oranges", "Carrots"), length.out = 100)
+#' )
+#' gg <- plot_boxplot(
+#'   data = testdata, xvar = c("xvar1"), yvar = "yvar",
 #'   showmedian = TRUE, ylab = "Best fruit", incolor = "xvar2",
-#'   legend.position = "right")
+#'   legend.position = "right"
+#' )
 #' \dontrun{
 #' print(gg)
 #' grDevices::dev.off()
 #' rm(testdata, gg)
 #' }
 plot_boxplot <- function(data,
-  xvar,
-  yvar,
-  file,
-  probabilities = c(0.025, 0.25, 0.5, 0.75, 0.975),
-  showmedian = FALSE,
-  mlab = "Box plot with 95 percent quantiles",
-  xlab = tools::toTitleCase(xvar[1]),
-  ylab = "",
-  yscale = "identity",
-  incolor,
-  scales = "fixed",
-  nrow = NULL, ncol = NULL,
-  legend.position,
-  legend.direction = "vertical",
-  ...
-  ) {
-
+                         xvar,
+                         yvar,
+                         file,
+                         probabilities = c(0.025, 0.25, 0.5, 0.75, 0.975),
+                         showmedian = FALSE,
+                         mlab = "Box plot with 95 percent quantiles",
+                         xlab = tools::toTitleCase(xvar[1]),
+                         ylab = "",
+                         yscale = "identity",
+                         incolor,
+                         scales = "fixed",
+                         nrow = NULL, ncol = NULL,
+                         legend.position,
+                         legend.direction = "vertical",
+                         ...) {
   #### Set up the variables and perform checks
   stopifnot(length(probabilities) == 5)
   stopifnot(length(yvar) == 1)
@@ -89,8 +90,10 @@ plot_boxplot <- function(data,
   } else {
     fatten <- as.numeric(showmedian)
   }
-  label <- c("lower95", "lowerhinge",
-    "median", "upperhinge", "upper95")
+  label <- c(
+    "lower95", "lowerhinge",
+    "median", "upperhinge", "upper95"
+  )
 
   #### Manipulate the data, calculate probabilities
   if (missing(incolor)) {
@@ -98,13 +101,16 @@ plot_boxplot <- function(data,
   } else {
     cols2keep <- unique(c(xvar, incolor))
   }
-  p.temp <- plyr::ddply(data, cols2keep,
-    plyr::numcolwise(quantile, probs = probabilities, na.rm = TRUE))
+  p.temp <- plyr::ddply(
+    data, cols2keep,
+    plyr::numcolwise(quantile, probs = probabilities, na.rm = TRUE)
+  )
   p.dist <- transform(p.temp[, c(cols2keep, yvar)],
-    probs = probabilities)
+    probs = probabilities
+  )
   p.formula <- stats::as.formula(
     paste(paste(cols2keep, collapse = " + "), "~", "probabilities")
-    )
+  )
   p.dist <- reshape2::dcast(p.dist, p.formula, value.var = yvar)
   colnames(p.dist) <- c(cols2keep, label)
   p.dist[, "inter"] <- interaction(p.dist[, xvar], drop = FALSE)
@@ -113,13 +119,18 @@ plot_boxplot <- function(data,
   }
 
   #### Create the figure
-  gg <- ggplot2::ggplot(p.dist,
-    ggplot2::aes(x = .data[[xvar[1]]], y = .data[[label[1]]],
+  gg <- ggplot2::ggplot(
+    p.dist,
+    ggplot2::aes(
+      x = .data[[xvar[1]]], y = .data[[label[1]]],
       group = .data[["inter"]],
       ymin = .data[[label[1]]], lower = .data[[label[2]]],
       middle = .data[[label[3]]], upper = .data[[label[4]]],
-      ymax = .data[[label[5]]])) +
-    ggplot2::xlab(xlab) + ggplot2::ylab(ylab) +
+      ymax = .data[[label[5]]]
+    )
+  ) +
+    ggplot2::xlab(xlab) +
+    ggplot2::ylab(ylab) +
     ggplot2::ggtitle(mlab) +
     ggplot2::theme_bw() +
     ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5)) +
@@ -128,37 +139,41 @@ plot_boxplot <- function(data,
   if (!missing(incolor)) {
     colors <- plotcolour(length(levels(p.dist$color)))
     border <- ifelse(any(c("black", "#000000") %in% colors),
-      "gray", "black")
+      "gray", "black"
+    )
     gg <- gg +
-      ggplot2::geom_boxplot(stat = "identity", fatten = fatten,
+      ggplot2::geom_boxplot(
+        stat = "identity", fatten = fatten,
         position = position_dodge(preserve = "single"),
         aes(
           fill = .data[["color"]],
           group = interaction(.data[["color"]], .data[["inter"]])
-          ),
+        ),
         colour = border
-        ) +
+      ) +
       ggplot2::scale_fill_manual(values = colors) +
       ggplot2::theme(legend.position = "none")
-      if (!missing(legend.position)) {
-        gg <- gg + 
-          ggplot2::theme(
-            legend.direction = legend.direction,
-            legend.position = legend.position,
-            legend.background = element_rect(fill = "transparent")
-          ) +
-          ggplot2::labs(
-            fill = tools::toTitleCase(paste(collapse = " x ", incolor))
-            )
-      }
+    if (!missing(legend.position)) {
+      gg <- gg +
+        ggplot2::theme(
+          legend.direction = legend.direction,
+          legend.position = legend.position,
+          legend.background = element_rect(fill = "transparent")
+        ) +
+        ggplot2::labs(
+          fill = tools::toTitleCase(paste(collapse = " x ", incolor))
+        )
+    }
   } else {
     gg <- gg +
-      ggplot2::geom_boxplot(stat = "identity", fatten = fatten,
-        position = position_dodge(preserve = "single"))
+      ggplot2::geom_boxplot(
+        stat = "identity", fatten = fatten,
+        position = position_dodge(preserve = "single")
+      )
   }
   if (length(xvar) > 1) {
     gg <- gg +
-     ggplot2::facet_wrap(xvar[-1], scales = scales, nrow = nrow, ncol = ncol)
+      ggplot2::facet_wrap(xvar[-1], scales = scales, nrow = nrow, ncol = ncol)
   }
   if (!missing(file)) {
     suppressMessages(ggplot2::ggsave(plot = gg, filename = file, ...))

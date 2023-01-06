@@ -46,9 +46,10 @@ stock assessment.
 \examples{
 \dontrun{
 new_catch(file.path("hake-assessment", "data"),
-  year = 2020, lastassessmentvals = c(1.379, 65.0, 66458))
+  year = 2020, lastassessmentvals = c(1.379, 65.0, 66458)
+)
 }
 }
 \author{
-Kelli Faye Johnson
+Kelli F. Johnson
 }
