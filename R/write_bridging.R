@@ -37,7 +37,7 @@ write_bridging <- function(dir_input,
   # 01 new executable
   output_01 <- r4ss::SS_write(
     input,
-    dir = fs::path(dir_output, "01_exe"),
+    dir = fs::path(dir_output, "01-updated-ss-exe"),
     overwrite = TRUE
   )
   # 02 catch
@@ -94,7 +94,7 @@ write_bridging_catch <- function(input, dir_output) {
   input[["par"]] <- NULL
   r4ss::SS_write(
     inputlist = input,
-    dir = fs::path(dir_output, "02_catch"),
+    dir = fs::path(dir_output, "02-add-new-catch"),
     overwrite = TRUE,
     verbose = FALSE
   )
@@ -113,7 +113,7 @@ write_bridging_weight_at_age <- function(input, dir_output) {
   input[["par"]] <- NULL
   r4ss::SS_write(
     inputlist = input,
-    dir = fs::path(dir_output, "03_weight_at_age"),
+    dir = fs::path(dir_output, "03-add-new-weight-at-age"),
     overwrite = TRUE,
     verbose = FALSE
   )
@@ -149,8 +149,8 @@ write_bridging_other <- function(input,
         dplyr::filter(!index %in% CPUE[["index"]]),
       CPUE
     )
-    survey <- switch(unique(CPUE[["index"]]) == 1 ~ "04_survey_age_2_plus",
-      unique(CPUE[["index"]]) == 3 ~ "05_survey_age_1",
+    survey <- switch(unique(CPUE[["index"]]) == 1 ~ "04-add-survey-age-2-plus",
+      unique(CPUE[["index"]]) == 3 ~ "05-add-survey-age-1",
       TRUE ~ make_survey(dir_output, "survey")
     )
   }
@@ -162,7 +162,7 @@ write_bridging_other <- function(input,
     )
   }
   if (missing(CPUE) & missing(agecomp) & fishery) {
-    survey <- "06_fishery_age"
+    survey <- "06-add-new-fishery-ages"
     agecomp <- load_age_fishery()
     input[["dat"]][["agecomp"]] <- rbind(
       dplyr::filter(input[["dat"]][["agecomp"]], Yr < 2008 | FltSvy != 1),
