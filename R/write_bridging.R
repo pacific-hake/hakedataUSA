@@ -129,11 +129,11 @@ write_bridging_other <- function(input,
                                  fishery = FALSE) {
   # Local function
   make_survey <- function(dir, suffix) {
-    sprintf(
+  sprintf(
       "%02d_%s",
       as.numeric(
         gsub(
-          "^([0-9]+)_.+$",
+          "^([0-9]+).*$",
           "\\1",
           basename(tail(fs::dir_ls(dir, type = "directory"), 1))
         )
