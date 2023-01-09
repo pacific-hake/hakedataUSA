@@ -73,12 +73,14 @@
 #'   * depth-us-atsea-fishing.csv
 #'
 process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
-                          nyears = 5,
-                          species = 206,
-                          savedir = hakedata_wd()) {
+                                 nyears = 5,
+                                 species = 206,
+                                 savedir = hakedata_wd()) {
   # Setup the environment
-  args <- list(width = 6.5, height = 4.5,
-    pointsize = 10, units = "in", res = 600)
+  args <- list(
+    width = 6.5, height = 4.5,
+    pointsize = 10, units = "in", res = 600
+  )
   oldop <- options()$warn
   options(warn = -1)
   on.exit(options(warn = oldop), add = TRUE)
@@ -110,12 +112,13 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
     ) %>%
     dplyr::group_by(year, month, SPECIES == species, VESSEL_TYPE) %>%
     dplyr::mutate(
-      bycatchrate = sum(ifelse(sampled == 1, ByCatch, 0), na.rm = TRUE) / 
+      bycatchrate = sum(ifelse(sampled == 1, ByCatch, 0), na.rm = TRUE) /
         sum(ifelse(sampled == 1, OFFICIAL_TOTAL_CATCHkg, 0), na.rm = TRUE),
       Catch.MT = ifelse(
         test = sampled == 0,
         yes = OFFICIAL_TOTAL_CATCHkg * (1 - bycatchrate),
-        no = EXTRAPOLATED_WEIGHT) / 1000,
+        no = EXTRAPOLATED_WEIGHT
+      ) / 1000,
       ByCatch = ifelse(
         test = sampled == 0,
         yes = OFFICIAL_TOTAL_CATCHkg - Catch.MT / 1000,
@@ -147,7 +150,7 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
     sep = ",", row.names = FALSE, quote = FALSE
   )
   ms <- catchout[catchout$vesseltype == "MS", -(1:2)]
- plot_catchvmonthbyyear(
+  plot_catchvmonthbyyear(
     data = ms,
     file = file.path(savedir, "Figures", "MsCatchMonthYear.png"),
     Yrs = as.character((max(ms$year) - nyears + 1):max(ms$year)),
@@ -173,20 +176,22 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
   hcatch <- get_confidential(hcatch, yvar = "vcolumn", xvar = c("year"))
   stopifnot(
     "Yearly summaries are not confidential" =
-    all(
-      stats::aggregate(ngroups ~ year, data = hcatch, unique)[, "ngroups"] > 2
-    )
+      all(
+        stats::aggregate(ngroups ~ year, data = hcatch, unique)[, "ngroups"] > 2
+      )
   )
   gg <- plot_boxplot(
     data = stats::reshape(
-      data = dplyr::filter(hcatch,
+      data = dplyr::filter(
+        hcatch,
         year %in% keeptheseyears & ngroups > 2
       ) %>%
-      data.frame,
+        data.frame(),
       direction = "long",
       varying = c("FISHING_DEPTH_FATHOMS", "BOTTOM_DEPTH_FATHOMS"),
       v.names = "fathoms", timevar = "type",
-      times = c("(a) Fishing depth", "(b) Bottom depth")),
+      times = c("(a) Fishing depth", "(b) Bottom depth")
+    ),
     xvar = c("year", "type"), showmedian = TRUE,
     yvar = "fathoms", ylab = "Depth (fathoms)", mlab = "",
     incolor = "year", scales = "free",
@@ -209,9 +214,12 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
     file = file.path(savedir, "depth-us-atsea-fishing.csv"),
     row.names = FALSE
   )
-  hcatch[, "months"] <- droplevels(factor(hcatch$month, levels = 1:12,
+  hcatch[, "months"] <- droplevels(factor(hcatch$month,
+    levels = 1:12,
     labels = rep(paste(seq(1, 11, by = 2), seq(2, 12, by = 2), sep = "-"),
-    each = 2)))
+      each = 2
+    )
+  ))
 
   #### Figure: catch rate
   hcatch <- get_confidential(
@@ -220,16 +228,19 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
     xvar = c("year", "month")
   )
   ylabelexpression <- expression(
-    Unstandardized~catch~rates~ (mt~'*'~hr^{-1})
+    Unstandardized ~ catch ~ rates ~ (mt ~ "*" ~ hr^{
+      -1
+    })
   )
   gg <- mapply(plot_boxplot,
     data = list(
-      dplyr::filter(hcatch, year %in% keeptheseyears & ngroups > 2) %>% data.frame,
-      dplyr::filter(hcatch, year %in% keeptheseyears & ngroups > 2) %>% data.frame
+      dplyr::filter(hcatch, year %in% keeptheseyears & ngroups > 2) %>% data.frame(),
+      dplyr::filter(hcatch, year %in% keeptheseyears & ngroups > 2) %>% data.frame()
     ),
     file = list(
       file.path(savedir, "Figures", "fishCatchRatesUS.png"),
-      file.path(savedir, "Figures", "fishCatchRatesUSnolog.png")),
+      file.path(savedir, "Figures", "fishCatchRatesUSnolog.png")
+    ),
     yscale = list(
       "log10",
       "identity"
@@ -237,7 +248,7 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
     mlab = list(
       "U.S. at-sea unstandardized yearly catch-rates",
       "U.S. at-sea unstandardized yearly catch-rates"
-      ),
+    ),
     MoreArgs = list(
       xvar = c("Month"), showmedian = TRUE,
       incolor = "year",
@@ -270,8 +281,8 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
 #' * us-ti-catch-by-month.csv
 #'
 process_catch_pacfin <- function(pcatch = get_local(file = "pacfin_catch.Rdat"),
-                          nyears = 5,
-                          savedir = hakedata_wd()) {
+                                 nyears = 5,
+                                 savedir = hakedata_wd()) {
   # File management
   data("quotas")
 
@@ -280,7 +291,7 @@ process_catch_pacfin <- function(pcatch = get_local(file = "pacfin_catch.Rdat"),
   # database  1986 3431.9436
   # assesment 1986 3465.00
   pcatch.yr.per <- stats::aggregate(list("catch" = pcatch$MT),
-    list("sector" = pcatch$sector, "month" = pcatch$month, "year" = pcatch$year), 
+    list("sector" = pcatch$sector, "month" = pcatch$month, "year" = pcatch$year),
     FUN = sum
   )
   pcatch.yr.per <- pcatch.yr.per[order(pcatch.yr.per$sector), ]
@@ -303,7 +314,7 @@ process_catch_pacfin <- function(pcatch = get_local(file = "pacfin_catch.Rdat"),
   )
   research <- pcatch[pcatch$sector == "USresearch", ]
   research <- stats::aggregate(list("catch" = research$MT),
-    list("month" = research$month, "year" = research$year), 
+    list("month" = research$month, "year" = research$year),
     FUN = sum
   )
   research$catch <- sprintf("%.9f", research$catch)
@@ -323,11 +334,10 @@ process_catch_pacfin <- function(pcatch = get_local(file = "pacfin_catch.Rdat"),
     file = file.path(savedir, "us-ti-catch-by-month.csv"),
     sep = ",", quote = FALSE, row.names = FALSE
   )
-
 }
 
 #' Change `VESSEL_TYPE` from numeric to character
-#' 
+#'
 #' `VESSEL_TYPE` in the NORPAC data base are integers and this function
 #' changes these integer values to character strings that provide meaning.
 #' The following integers are the available options in NORPAC to indicate
@@ -341,7 +351,7 @@ process_catch_pacfin <- function(pcatch = get_local(file = "pacfin_catch.Rdat"),
 #' * a vessel that sells the majority of their catch over the side to other
 #'   fishing vessels who will utilize the fish for bait, and
 #' * vessels that discard all catch from a haul.
-#' 
+#'
 #' @param x A vector of integers between one and six.
 #' @author Kelli F. Johnson
 #' @return A vector of combined integer values and character strings.
@@ -353,7 +363,7 @@ process_vessel_type <- function(x) {
   x[x == 1] <- "CP"
   x[x == 2] <- "MS"
   # A catcher vessel named the Stormy C (A709) that did minimal processing at sea
-  # and had to have an observer on board. 
+  # and had to have an observer on board.
   # x[x == 3] <- "StormyC"
   return(x)
 }

@@ -28,11 +28,11 @@
 #    rpt.filename  Report file.
 #' @import stats
 process_atsea_year <- function(dat,
-                        ncatch,
-                        minAge = 1,
-                        maxAge = 15,
-                        vesselType = c(1, 2),
-                        in.pctl = 0.95){
+                               ncatch,
+                               minAge = 1,
+                               maxAge = 15,
+                               vesselType = c(1, 2),
+                               in.pctl = 0.95) {
   stopifnot(length(unique(ncatch[["SPECIES"]])) == 1)
   # Create some variables
   # Create trip, haul identifiers; use HAUL_JOIN b/c CRUISE is not unique to a
@@ -56,7 +56,9 @@ process_atsea_year <- function(dat,
       by = c(HAUL_JOIN = colname_haul, HAUL_OFFLOAD = "HAUL")
     ) %>%
     dplyr::filter(VESSEL_TYPE %in% vesselType)
-  if (NROW(dat) == 0) return(NULL)
+  if (NROW(dat) == 0) {
+    return(NULL)
+  }
 
   # calculate sample weight by summing weights first, fill in missing weights
   # with median of weight-at-length or -age do this by month first, if still
@@ -140,5 +142,5 @@ process_atsea_year <- function(dat,
       dplyr::ungroup(),
     by = "Year"
   ) %>%
-  dplyr::rename(year = "Year")
+    dplyr::rename(year = "Year")
 }

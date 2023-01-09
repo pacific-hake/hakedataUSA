@@ -36,6 +36,7 @@ stock assessment.
 calc_calendar_date()
 # Find third Wednesday in December of current year
 calc_calendar_date(3)
+
 }
 \author{
 Kelli F. Johnson

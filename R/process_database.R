@@ -15,5 +15,4 @@ process_database <- function() {
   # Weight at age
   weight_at_age <- process_weight_at_age_US()
   withforecast <- process_weight_at_age()
-
 }

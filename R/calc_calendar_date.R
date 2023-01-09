@@ -22,13 +22,13 @@
 #' calc_calendar_date()
 #' # Find third Wednesday in December of current year
 #' calc_calendar_date(3)
-
+#'
 calc_calendar_date <- function(number = 2,
                                month = 12,
-                               year = as.numeric(format(Sys.time(),"%Y")),
+                               year = as.numeric(format(Sys.time(), "%Y")),
                                weekday = "Wednesday") {
   startdate <- as.Date(
-    glue::glue('{year}-{month}-1'),
+    glue::glue("{year}-{month}-1"),
     "%Y-%m-%d"
   )
   date <- startdate

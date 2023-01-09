@@ -25,13 +25,13 @@ hakedata_wd <- function() {
   if (Sys.info()["sysname"] == "Windows") {
     wd <- switch(user,
       "Kelli.Johnson" = {
-          fs::path("c:", "github", "pacific-hake", "hake-assessment", "data")
+        fs::path("c:", "github", "pacific-hake", "hake-assessment", "data")
       },
       "Aaron.Berger" = {
-          fs::path(
-            "C:", "Users", "Aaron.Berger", "Documents",
-            "GitHub", "hake-assessment", "data"
-          )
+        fs::path(
+          "C:", "Users", "Aaron.Berger", "Documents",
+          "GitHub", "hake-assessment", "data"
+        )
       },
       getwd()
     )
@@ -41,7 +41,7 @@ hakedata_wd <- function() {
 }
 
 #' Find last year of data for current assessment
-#' 
+#'
 #' Data is extracted the first Friday in January of the year
 #' following the last year of data. Therefore, if data are extracted
 #' from the databases in January, February, or March, then the terminal
@@ -53,9 +53,10 @@ hakedata_wd <- function() {
 #' @export
 #'
 hakedata_year <- function() {
-  as.numeric(format(Sys.Date(), "%Y")) - 
+  as.numeric(format(Sys.Date(), "%Y")) -
     ifelse(format(Sys.Date(), "%m") %in% c("01", "02", "03"),
-    1, 0)
+      1, 0
+    )
 }
 
 #' Find username and passwords for databases
@@ -78,7 +79,7 @@ hakedata_year <- function() {
 #'   If a file name is not provided, which is the default behaviour, then
 #'   the user will be prompted for their passwords. This also happens if
 #'   the file cannot be found given the path provided.
-#' 
+#'
 #' @return A list with two entries, `usernames` and `passwords`.
 #' Each element will have the same number of entries as the
 #' input argument `database` and be named using the elements of `database`.
@@ -112,7 +113,8 @@ hakedata_sql_password <- function(database = c("NORPAC", "PacFIN"), file) {
     },
     "Ian.Taylor" = {
       c("NORPAC" = "TAYLORI", "PacFIN" = "itaylor")[database]
-    })
+    }
+  )
   stopifnot(!is.null(name))
 
   if (missing(file)) {
@@ -129,8 +131,7 @@ hakedata_sql_password <- function(database = c("NORPAC", "PacFIN"), file) {
           Enter password for {database[ii]} database without quotes and \\
           hit Enter.
 
-          "
-        )
+          ")
       )
     }
   } else {

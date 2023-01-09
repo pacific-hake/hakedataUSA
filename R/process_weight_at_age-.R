@@ -15,14 +15,14 @@
 #' @export
 #' @author Ian G. Taylor
 #' @import utils
-#' @return A list of weight-at-age information that includes the following items: 
+#' @return A list of weight-at-age information that includes the following items:
 #' \enumerate{
 #'   \item acousticmean: Mean weight-at-age from the survey, if the s
 #' survey operated in that year.
 #'   \item usatseamean: mean weight-at-age from the US-at-sea data.
 #'   \item usshorebasedmean: mean weight-at-age from the US-shore-based data.
 #'   \item outliers: A table of outliers by Agency for the US-shore-based fishery.
-#'   \item largefishtable: A table of large fish (i.e., greater than 10 kg) 
+#'   \item largefishtable: A table of large fish (i.e., greater than 10 kg)
 #' by data source.
 #'   \item dat: The data that was saved to the disk for the given year.
 #'   \item survey: A logical value specifying if it was a survey year.
@@ -31,14 +31,14 @@
 #' }
 #'
 process_weight_at_age_US <- function(year = hakedata_year(),
-                            savedir = hakedata_wd()) {
+                                     savedir = hakedata_wd()) {
   info <- list()
   acdir <- file.path(savedir, "AcousticSurvey", "BioData", "csvFiles")
 
   # Determine if a survey occurred
   if (length(dir(acdir, pattern = as.character(year))) > 0) {
     Ac_survYear <- TRUE
-    #Shimada
+    # Shimada
     datUS <- readxl::read_excel(
       path = dir(
         acdir,
@@ -68,7 +68,7 @@ process_weight_at_age_US <- function(year = hakedata_year(),
         Weight_kg = weight,
         Sex = Sex2,
         Age_yrs = age,
-        Length_cm = length, 
+        Length_cm = length,
         Month = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%m")),
         Year = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%Y"))
       )
@@ -101,26 +101,28 @@ process_weight_at_age_US <- function(year = hakedata_year(),
         Weight_kg = weight,
         Sex = Sex2,
         Age_yrs = age,
-        Length_cm = length, 
+        Length_cm = length,
         Month = as.numeric(format(as.Date(eq_date_time, f = "%m/%d/%Y"), "%m")),
         Year = as.numeric(format(as.Date(eq_date_time, f = "%m/%d/%Y"), "%Y"))
       )
     dat <- rbind(datUS, datCAN) %>%
       dplyr::filter(!is.na(Age_yrs) & !is.na(Weight_kg))
     info$acousticmean <- tapply(dat$Weight_kg, list(dat$Age_yrs), mean)
-  } else { 
+  } else {
     Ac_survYear <- FALSE
     info$acousticmean <- NULL
   }
-  
-  #US at sea fishery
-  base::load(file.path(savedir, "extractedData", "atsea.ages.Rdat")) #atsea.ages
+
+  # US at sea fishery
+  base::load(file.path(savedir, "extractedData", "atsea.ages.Rdat")) # atsea.ages
   tmp <- atsea.ages[
     !is.na(atsea.ages$AGE) &
-    !is.na(atsea.ages$WEIGHT) &
-    atsea.ages$Year %in% year, ]
+      !is.na(atsea.ages$WEIGHT) &
+      atsea.ages$Year %in% year,
+  ]
   info$usatseamean <- tapply(tmp$WEIGHT, list(tmp$AGE), mean)
-  tmp <- data.frame(Source = "ATSEA", Weight_kg = tmp$WEIGHT, 
+  tmp <- data.frame(
+    Source = "ATSEA", Weight_kg = tmp$WEIGHT,
     Sex = tmp$SEX, Age_yrs = tmp$AGE,
     Length_cm = tmp$LENGTH,
     Month = tmp$Month,
@@ -134,27 +136,34 @@ process_weight_at_age_US <- function(year = hakedata_year(),
   }
   rm(tmp)
 
-  #US Shore-based fishery
+  # US Shore-based fishery
   base::load(file.path(savedir, "extractedData", "page.Rdat"))
   page.worked <- page[
     !is.na(page$FISH_AGE_YEARS_FINAL) &
-    !is.na(page$FISH_WEIGHT) &
-    page$SAMPLE_YEAR %in% year, ]
+      !is.na(page$FISH_WEIGHT) &
+      page$SAMPLE_YEAR %in% year,
+  ]
   page.worked$SEX <- factor(page.worked$SEX)
-  info$usshorebasedmean <- tapply(page.worked$FISH_WEIGHT / 1000, 
-    list("AGE" = page.worked$FISH_AGE_YEARS_FINAL), mean)
-  tmp <- data.frame(Source = "SHORE",
+  info$usshorebasedmean <- tapply(
+    page.worked$FISH_WEIGHT / 1000,
+    list("AGE" = page.worked$FISH_AGE_YEARS_FINAL), mean
+  )
+  tmp <- data.frame(
+    Source = "SHORE",
     Weight_kg = page.worked$FISH_WEIGHT / 1000,
     Sex = page.worked$SEX, Age_yrs = page.worked$FISH_AGE_YEARS_FINAL,
-    Length_cm = page.worked$FISH_LENGTH / 10, 
-    Month = page.worked$SAMPLE_MONTH, 
-    Year = page.worked$SAMPLE_YEAR)
+    Length_cm = page.worked$FISH_LENGTH / 10,
+    Month = page.worked$SAMPLE_MONTH,
+    Year = page.worked$SAMPLE_YEAR
+  )
   dat <- rbind(dat, tmp)
   rm(tmp)
 
   fs::dir_create(file.path(savedir, "LengthWeightAge"))
-  fileout <- file.path(savedir, "LengthWeightAge",
-    paste0("LWAdata_", year, ".csv"))
+  fileout <- file.path(
+    savedir, "LengthWeightAge",
+    paste0("LWAdata_", year, ".csv")
+  )
   bad <- dat[dat$Weight_kg > 10, ]
   info$outliers <- NULL
   if (NROW(bad) > 0) {
@@ -163,8 +172,9 @@ process_weight_at_age_US <- function(year = hakedata_year(),
   }
   utils::write.csv(dat, file = fileout, row.names = FALSE)
 
-  info$largefishtable <- aggregate(Weight_kg ~ Source + I(Weight_kg > 10),  
-    data = dat, length)
+  info$largefishtable <- aggregate(Weight_kg ~ Source + I(Weight_kg > 10),
+    data = dat, length
+  )
   info$wtatage <- dat
   info$survey <- Ac_survYear
   info$year <- year
@@ -215,7 +225,6 @@ process_weight_at_age <- function(dir = file.path(hakedata_wd(), "LengthWeightAg
                                   navgyears = 5,
                                   nforecast = 4,
                                   maturity = maturity_at_age) {
-
   fs::dir_create(path = file.path(dir, "plots"))
 
   # LengthWeightAge_data.rds provided by CG on 2021-01-09 in google drive #703
@@ -296,7 +305,8 @@ process_weight_at_age <- function(dir = file.path(hakedata_wd(), "LengthWeightAg
   utils::write.csv(
     setNames(counts_All_wMean, gsub("#", "", colnames(counts_All_wMean))),
     file.path(dirname(normalizePath(dir)), "wtatage_all_samplesize.csv"),
-    row.names = FALSE)
+    row.names = FALSE
+  )
   # new method does only linear interpolation within each age (only works with all data)
   wtageInterp1_All <- dointerpSimple(wtage_All)
 
@@ -305,8 +315,8 @@ process_weight_at_age <- function(dir = file.path(hakedata_wd(), "LengthWeightAg
   wtageInterp2_All$Note <- fill_wtage_matrix(wtage_All)$Note
 
   # write output combining all fleets closer to format used by SS
-  wtage_All_wMean$Note <- c(paste("# Mean from ",min(dat$Year),"-",max(dat$Year),sep=""),wtageInterp2_All$Note)
-  wtageInterp2_All <- rbind(wtage_All_wMean[1,], wtageInterp2_All)
+  wtage_All_wMean$Note <- c(paste("# Mean from ", min(dat$Year), "-", max(dat$Year), sep = ""), wtageInterp2_All$Note)
+  wtageInterp2_All <- rbind(wtage_All_wMean[1, ], wtageInterp2_All)
 
   # matrices for plotting
   make_wtatage_plots(
@@ -321,8 +331,10 @@ process_weight_at_age <- function(dir = file.path(hakedata_wd(), "LengthWeightAg
 
   # adding ages 16-20 as repeats of age 15
   wtage_extended <- wtageInterp2_All[, -grep("Note", colnames(wtageInterp2_All))]
-  wtage_extended <- wtage_extended[, c(1:ncol(wtage_extended),
-    rep(ncol(wtage_extended), times = sum(!(1:length(maturity)-1) %in% 0:maxage)))]
+  wtage_extended <- wtage_extended[, c(
+    1:ncol(wtage_extended),
+    rep(ncol(wtage_extended), times = sum(!(1:length(maturity) - 1) %in% 0:maxage))
+  )]
   wtage_extended[, -grep("^[^a]|Note", colnames(wtage_extended))] <-
     round(wtage_extended[, -grep("^[^a]|Note", colnames(wtage_extended))], 4)
   colnames(wtage_extended)[grep("^a", colnames(wtage_extended))] <-
@@ -353,4 +365,3 @@ process_weight_at_age <- function(dir = file.path(hakedata_wd(), "LengthWeightAg
 
   return(withforecast)
 }
-
