@@ -1,5 +1,5 @@
 ---
-title: Preliminary information on U.S. fishery
+title: U.S. fishery data
 author: Joint Technical Committee (JTC)
 output:  beamer_presentation
 lang: en
@@ -14,7 +14,7 @@ year <- format(Sys.time(), "%Y")
 assessmentyear <- as.numeric(year) - 
   as.numeric(as.numeric(format(Sys.time(), "%m")) < 5)
 
-mydir <- hakedatawd()
+mydir <- hakedata_wd()
 mydirfiles <- dir(
   full.names = TRUE,
   file.path(mydir, "extractedData"),
@@ -26,7 +26,7 @@ for (i in mydirfiles) {
 ```
 
 ---
-date: `r format(ithweekdate(params$wednesdaynumber), "%b. %d, %Y")`
+date: `r format(calc_calendar_date(params$wednesdaynumber), "%b. %d, %Y")`
 ---
 
 ```{r calc-attainment, echo = FALSE}
@@ -39,11 +39,11 @@ atseacatch <- aggregate(
 atseacatchMS <- atseacatch[atseacatch$VESSEL_TYPE == 2 & atseacatch[, 2] == year, 3]
 atseacatchCP <- atseacatch[atseacatch$VESSEL_TYPE == 1 & atseacatch[, 2] == year, 3]
 
-tribalcatchinpacfin <- 3319.9764 - pcatch %>%
+tribalcatchinpacfin <- pcatch %>%
   dplyr::filter(FLEET == "TI", YEAR == year) %>%
   dplyr::summarize(MT = sum(MT)) %>%
   dplyr::pull(MT)
-shorecatch <- tribalcatchinpacfin + pcatch %>%
+shorecatch <- pcatch %>%
   dplyr::filter(
     YEAR == assessmentyear,
     FLEET %in% c("LE", "TI", "OA")
@@ -60,13 +60,12 @@ researchcatch <- pcatch %>%
   dplyr::summarize(MT=sum(MT)) %>%
   dplyr::pull(MT)
 
-allcatch <- atseacatchMS + atseacatchCP + shorecatch + researchcatch
+allcatch <- atseacatchMS + atseacatchCP + shorecatch +
+  ifelse(length(researchcatch) == 0, 0, researchcatch)
 
-tacsraw <- read.csv(
-  file.path(mydir, "Catches", "quotas.csv")
-)
-tacs <- c(tacsraw[, NCOL(tacsraw)])
-names(tacs) <- tacsraw[, 1]
+data("quotas")
+tacs <- c(quotas[, NCOL(quotas)])
+names(tacs) <- quotas[, 1]
 ```
 
 ```{r calc-numread, echo = FALSE}
@@ -89,36 +88,36 @@ final <- data.frame(
 final[, "Total"] <- rowSums(final[, -1])
 ```
 
-# `r year` US Catch (preliminary)
+# `r year` U.S. catch
 ##
 \centering
-Catch = `r xformat(allcatch)` (mt)
+Catch = `r format_big_number(allcatch)` (mt)
 
-TAC = `r xformat(sum(tacs))` (mt)
+TAC = `r format_big_number(sum(tacs))` (mt)
 
 Attainment =  `r format(allcatch/sum(tacs)*100, nsmall = 1, digits = 1)` (\%)
 
 ## Mothership (MS)
 \centering
-Catch = `r xformat(atseacatchMS)` (mt)
+Catch = `r format_big_number(atseacatchMS)` (mt)
 
-TAC =  `r xformat(tacs["MS"])` (mt)
+TAC =  `r format_big_number(tacs["MS"])` (mt)
 
 Attainment =  `r format(atseacatchMS/tacs["MS"]*100, nsmall = 1, digits = 1)` (\%)
 
 ## Catcher/Processor (CP)
 \centering
-Catch =  `r xformat(atseacatchCP)` (mt)
+Catch =  `r format_big_number(atseacatchCP)` (mt)
 
-TAC =  `r xformat(tacs["CP"])` (mt)
+TAC =  `r format_big_number(tacs["CP"])` (mt)
 
 Attainment =  `r format(atseacatchCP/tacs["CP"]*100, nsmall = 1, digits = 1)` (\%)
 
 ## Shoreside
 \centering
-Catch = `r xformat(shorecatch)` (mt; includes `r round(tribalcatchinpacfin, 0)` mt tribal not in PacFIN)
+Catch = `r format_big_number(shorecatch)` (mt)
 
-TAC = `r xformat(tacs["Shore"])` (mt)
+TAC = `r format_big_number(tacs["Shore"])` (mt)
 
 Attainment =  `r format(shorecatch/tacs["Shore"]*100, nsmall = 1, digits = 1)` (\%)
 
@@ -134,7 +133,7 @@ Attainment =  `r format(shorecatch/tacs["Shore"]*100, nsmall = 1, digits = 1)` (
 
 ![](c:/stockAssessment/hake-data/Figures/shoresideCatchMonthYear.png){width=100% height=100% alt="U.S. fishery catch: Shoreside"}
 
-# At-sea fishing depths
+# At-Sea fishing depths
 
 ![](c:/stockAssessment/hake-data/Figures/fishDepthsUS.png){width=100% height=100% alt="U.S. at-sea fishery catch depths (fathoms)"}
 
@@ -157,7 +156,7 @@ Attainment =  `r format(shorecatch/tacs["Shore"]*100, nsmall = 1, digits = 1)` (
 ```{r tableagestructures, asis = TRUE, echo = FALSE}
 knitr::kable(final, row.names = FALSE, label = NULL,
   format = "markdown",
-  caption = "Preliminary number of ages for at-sea and shoreside sectors.")
+  caption = "Number of ages for at-sea and shoreside sectors.")
 ```
 
 # Recent age structures by month
@@ -180,7 +179,8 @@ b <- data.frame(
   )
 )
 knitr::kable(
-  merge(a, b, by = "Var1", all = TRUE) %>% arrange(Var1),
+  merge(a, b, by = "Var1", all = TRUE) %>%
+    dplyr::arrange(as.numeric(as.character(Var1))),
   format = "markdown",
   col.names = c("Month", "At-Sea", "Shoreside"),
   row.names = FALSE,
@@ -189,9 +189,7 @@ knitr::kable(
 )
 ```
 
-# Delays in accessing data
+# Thank you
 
-* Lack of electronic fish tickets by some in shoreside fishery
-* Delayed access to data from at-sea observers because of protocols related to covid-19
-* Lack of access to lab space because of covid-19 protocols
-* Timing of official end of fishery (i.e., December 31, 2021) and data deadline (i.e., January 03, 2022)
+A big thanks to all of those who worked to get data debriefed and available by
+December 01, or shortly thereafter, to the JTC.

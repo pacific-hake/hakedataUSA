@@ -1,8 +1,8 @@
 #' Wrapper to make a query from a sql file and get the data from a database using RODBC
 #'
-#' @details Calls \code{RODBC} functions.
+#' @details Calls `RODBC` functions.
 #' The function first opens an ODBC connection and, using sql, extracts
-#' data from the \code{db}.
+#' data from the `db`.
 #'
 #' @author Andi Stephens
 #'

@@ -69,7 +69,7 @@ plot_catchvmonthbyyear <- function(data,
   data <- as.data.frame(data)
   lineWds <- c(rep(2, length(Yrs) - 1), 3)
   lineTypes <- rep(1,length(Yrs))
-  cols <- plotcolour(length(Yrs))
+  cols <- plot_colour(length(Yrs))
  # Take hake dataframe of Fleet, Month, Year, MT and
  # plots year specific catches by month
  # Does not discriminate by fleet

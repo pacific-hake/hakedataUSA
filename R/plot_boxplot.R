@@ -25,7 +25,7 @@
 #' the boxplots. Otherwise, a vector of column names can be used, which
 #' will lead to [interaction] being called and the resulting factor
 #' will determine the color categories. Colors will be determined
-#' using [plotcolour]; but, note that this internal function can only
+#' using [plot_colour]; but, note that this internal function can only
 #' handle a limited number of categories.
 #' @param scales A character value supplied to [ggplot2::facet_wrap] that
 #' defines how the scales of the axes are determined across facets.
@@ -128,7 +128,7 @@ plot_boxplot <- function(data,
     ggplot2::theme(strip.background = ggplot2::element_rect(fill = "white")) +
     ggplot2::scale_y_continuous(trans = yscale)
   if (!missing(incolor)) {
-    colors <- plotcolour(length(levels(p.dist$color)))
+    colors <- plot_colour(length(levels(p.dist$color)))
     border <- ifelse(any(c("black", "#000000") %in% colors),
       "gray", "black")
     gg <- gg +

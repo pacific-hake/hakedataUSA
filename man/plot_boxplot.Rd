@@ -73,7 +73,7 @@ distance between the labels on the y axis.}
 the boxplots. Otherwise, a vector of column names can be used, which
 will lead to \link{interaction} being called and the resulting factor
 will determine the color categories. Colors will be determined
-using \link{plotcolour}; but, note that this internal function can only
+using \link{plot_colour}; but, note that this internal function can only
 handle a limited number of categories.}
 
 \item{scales}{A character value supplied to \link[ggplot2:facet_wrap]{ggplot2::facet_wrap} that

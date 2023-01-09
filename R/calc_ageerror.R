@@ -23,7 +23,7 @@
 #' @param x A vector of ageing error used for each definition of ageing
 #' error in the stock assessment model.
 #' @param multiplier A single value that is multiplied times certain
-#' entries of \code{x} to account for cohort effects. The default for Pacific
+#' entries of `x` to account for cohort effects. The default for Pacific
 #' Hake is 0.55.
 #'
 #' @examples

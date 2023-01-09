@@ -1,13 +1,17 @@
-#' Find the working directory for `hake-data`
+#' Find the working directory for `hake-assessment`
 #'
-#' Find the working directory called `hake-data` based on your user name.
-#' `hake-data` stores all of the U.S. and Canadian data for the annual
-#' stock assessment of Pacific Hake.
-#' If you user name is not one of the default, pre-specified user names
-#' available within this function, then `hakedata_wd()` will create a directory
-#' on your `c:` drive called `stockassessment` and place `hake-data` in there.
+#' Find the directory called `hake-assessment/data`, which should be a clone of
+#' \url{www.github.com/pacific-hake/hake-assessment}. The location of the
+#' directory is found based on a set of rules for a given system and user name
+#' of the computer you are on. This `data` directory stores non-confidential
+#' data used in the assessment of Pacific Hake and is integral in building the
+#' bridging files to go from one year of data to the next. If the combination
+#' of known system and user names are not found then it will default to using
+#' your current working directory.
 #'
-#' @return A full file path for the `hake-data` directory is returned.
+#' @return A string specifying the full file path for the
+#' `hake-assessment/data` directory. The default is your current working
+#' directory.
 #' @export
 #' @author Kelli F. Johnson
 #' @examples
@@ -29,7 +33,7 @@ hakedata_wd <- function() {
             "GitHub", "hake-assessment", "data"
           )
       },
-      fs::path("c:", "stockassessment", "hake-data")
+      getwd()
     )
   }
   stopifnot(fs::dir_exists(wd))

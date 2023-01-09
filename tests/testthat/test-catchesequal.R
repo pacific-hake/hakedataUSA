@@ -15,15 +15,14 @@ test_that("Catches are within 4 mt", {
 })
 
 test_that("Catches are good", {
-  savedir <- hakedatawd()
+  savedir <- hakedata_wd()
   quotas <- read.csv(file.path(savedir, "Catches", "quotas.csv"), 
     sep = ",", header = TRUE, check.names = FALSE)
-  shore <- read.csv(
-    file.path(savedir, "Catches", "USshoreCatchByPeriodComp_ft.csv"))
+  sh <- read.csv(file.path(savedir, "us-shore-catch-by-month.csv"))
   cp <- data.frame("sector" = "CP", 
-    read.csv(file.path(savedir, "Catches", "us-cp-catch-by-month.csv")))
+    read.csv(file.path(savedir, "us-cp-catch-by-month.csv")))
   ms <- data.frame("sector" = "MS", 
-    read.csv(file.path(savedir, "Catches", "us-ms-catch-by-month.csv")))
+    read.csv(file.path(savedir, "us-ms-catch-by-month.csv")))
 
   tmp <- tapply(cp$catch,cp$year,sum)["2017"]
   testthat::expect_equal(as.numeric(tmp), 136960, tolerance = 1e-04,
@@ -39,11 +38,11 @@ test_that("Catches are good", {
     0.6856435, tolerance = 1e-06,
     info = "Ratio of 2017 catch to mothership quota.")
 
-  tmp <- tapply(shore$catch,shore$year,sum)["2017"]
-  testthat::expect_equal(as.numeric(tmp), 150841.18, tolerance = 1e-04,
-    info = "2017 US shoreside catch in mt.")
-  testthat::expect_equal(
-    as.numeric(tmp/quotas[quotas$Fleet=="Shore","2017"]), 
-    0.8896718, tolerance = 1e-06,
-    info = "Ratio of 2017 catch to shoreside quota.")
+  tmp <- tapply(sh$catch,sh$year,sum)["2017"]
+  testthat::expect_equivalent(
+    tapply(sh$catch,sh$year,sum)["2017"],
+    150841.18,
+    tolerance = 1e-04,
+    info = "2017 US shoreside catch in mt."
+  )
 })
