@@ -20,7 +20,7 @@
 hakedata_wd <- function() {
   user <- Sys.info()["user"]
   if (Sys.info()["sysname"] == "Linux") {
-    wd <- fs::path("/home", user, "github", "pacific-hake", "hake-assessment")
+    wd <- fs::path("/home", user, "github", "pacific-hake", "hake-assessment", "data")
   }
   if (Sys.info()["sysname"] == "Windows") {
     wd <- switch(user,
