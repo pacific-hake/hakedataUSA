@@ -4,32 +4,54 @@
 #' `hake-data` stores all of the U.S. and Canadian data for the annual
 #' stock assessment of Pacific Hake.
 #' If you user name is not one of the default, pre-specified user names
-#' available within this function, then `hakedatawd()` will create a directory
+#' available within this function, then `hakedata_wd()` will create a directory
 #' on your `c:` drive called `stockassessment` and place `hake-data` in there.
 #'
 #' @return A full file path for the `hake-data` directory is returned.
 #' @export
 #' @author Kelli F. Johnson
 #' @examples
-#' hakedatawd()
+#' hakedata_wd()
 #'
-hakedatawd <- function() {
+hakedata_wd <- function() {
   user <- Sys.info()["user"]
-  wd <- switch(user,
-    "Kelli.Johnson" = {
-        file.path("c:", "stockAssessment", "hake-data")
-    },
-    "Aaron.Berger" = {
-        file.path("C:", "Users", "Aaron.Berger", "Documents", 
-            "GitHub", "hake-data")
-    },
-    "Ian.Taylor" = {
-        file.path("C:", "github", "hake-data")
-    },
-    file.path("c:", "stockassessment", "hake-data")
-  )
-  fs::dir_create(wd)
-  wd
+  if (Sys.info()["sysname"] == "Linux") {
+    wd <- fs::path("/home", user, "github", "pacific-hake", "hake-assessment")
+  }
+  if (Sys.info()["sysname"] == "Windows") {
+    wd <- switch(user,
+      "Kelli.Johnson" = {
+          fs::path("c:", "github", "pacific-hake", "hake-assessment", "data")
+      },
+      "Aaron.Berger" = {
+          fs::path(
+            "C:", "Users", "Aaron.Berger", "Documents",
+            "GitHub", "hake-assessment", "data"
+          )
+      },
+      fs::path("c:", "stockassessment", "hake-data")
+    )
+  }
+  stopifnot(fs::dir_exists(wd))
+  return(wd)
+}
+
+#' Find last year of data for current assessment
+#' 
+#' Data is extracted the first Friday in January of the year
+#' following the last year of data. Therefore, if data are extracted
+#' from the databases in January, February, or March, then the terminal
+#' year of data should be the previous year. Else, one would want the
+#' most recent data in the current year as the last year of data included
+#' in the extraction.
+#' @author Kelli F. Johnson
+#' @return The last year of data you want as an integer.
+#' @export
+#'
+hakedata_year <- function() {
+  as.numeric(format(Sys.Date(), "%Y")) - 
+    ifelse(format(Sys.Date(), "%m") %in% c("01", "02", "03"),
+    1, 0)
 }
 
 #' Find username and passwords for databases
@@ -63,18 +85,18 @@ hakedatawd <- function() {
 #' @examples
 #' \dontrun{
 #' # Prompted for passwords for each database
-#' test <- hakedatasqlpw()
+#' test <- hakedata_sql_password()
 #' # Prompted for passwords for each database because file is not found
-#' test <- hakedatasqlpw(file = "doesnotwork.txt")
+#' test <- hakedata_sql_password(file = "doesnotwork.txt")
 #' # On Kelli Johnson's machine, the following will work
-#' test <- hakedatasqlpw(file = "password.txt")
+#' test <- hakedata_sql_password(file = "password.txt")
 #' # Doesn't work because entry for database is not in the list
 #' # of allowed databases, i.e., the default for `database`.
-#' test <- hakedatasqlpw(database = "onedatabase")
+#' test <- hakedata_sql_password(database = "onedatabase")
 #' # Only look for one password
-#' test <- hakedatasqlpw(database = "NORPAC")
+#' test <- hakedata_sql_password(database = "NORPAC")
 #' }
-hakedatasqlpw <- function(database = c("NORPAC", "PacFIN"), file) {
+hakedata_sql_password <- function(database = c("NORPAC", "PacFIN"), file) {
   user <- Sys.info()["user"]
   database <- match.arg(database, several.ok = TRUE)
   name <- switch(user,
