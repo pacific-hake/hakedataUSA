@@ -47,9 +47,10 @@ each year of data since 1975, i.e., the first year of fishery ages.
 # 2019 ageing error was
 error <- calc_ageerror(ages = c(5, 9, 20))
 \dontshow{
-  test_that("2019 ageing error", {
+test_that("2019 ageing error", {
   expect_equal(error[2, 6], c("age5" = 0.2354495),
-    label = "2019 ageing error for age 5")
+    label = "2019 ageing error for age 5"
+  )
 })
 }
 \dontrun{

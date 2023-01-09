@@ -46,7 +46,6 @@ write_bridging(
   dir_input = fs::path(dirname(hakedata_wd()), "models", "2022.01.10_base"),
   dir_output = fs::path(dirname(hakedata_wd()), "models", "2023", "01-version", "02-bridging-models")
 )
-
 ```
 
 ```{r presentation, eval = FALSE}

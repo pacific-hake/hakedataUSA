@@ -24,7 +24,6 @@
 #' glue::glue_collapse(proportions, sep = " ")
 pull_surveyageproportions <- function(year = hakedata_year(),
                                       round = options()$digits) {
-
   # Read file from the network
   ages <- readxl::read_excel(
     skip = 1,
@@ -38,7 +37,7 @@ pull_surveyageproportions <- function(year = hakedata_year(),
     grepl("^[1-9]+", colnames(ages))
   ] %>%
     unlist(., use.names = FALSE) %>%
-    as.numeric
+    as.numeric()
   round(calc_proportions(abundance), digits = round)
 }
 

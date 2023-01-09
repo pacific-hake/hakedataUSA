@@ -20,7 +20,7 @@ For example, the most recent year of data will always be
 black and the second most recent year will always be red.
 }
 \examples{
-n <-15
+n <- 15
 plot_colour(n)
 
 }

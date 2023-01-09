@@ -48,7 +48,7 @@ commit_catch <- function(dir_data = hakedata_wd(),
     dplyr::mutate(
       dplyr::across(
         dplyr::starts_with("US"),
-        ~as.numeric(round(., digits = 5))
+        ~ as.numeric(round(., digits = 5))
       )
     )
   cp <- utils::read.csv(file_cp) %>%
@@ -79,7 +79,7 @@ commit_catch <- function(dir_data = hakedata_wd(),
     dplyr::summarize(catch = sum(value)) %>%
     tidyr::pivot_wider(names_from = sector, values_from = catch) %>%
     dplyr::mutate(
-      dplyr::across( dplyr::starts_with("CAN"), tidyr::replace_na, 0)
+      dplyr::across(dplyr::starts_with("CAN"), tidyr::replace_na, 0)
     ) %>%
     dplyr::rename(year = Year)
   inc <- list(sh, cp, ms, can) %>%
@@ -122,7 +122,7 @@ commit_catch <- function(dir_data = hakedata_wd(),
     dplyr::select(-TOTAL) %>%
     dplyr::relocate(`Realized catch`, TAC, .after = Year) %>%
     dplyr::mutate_all(as.character) %>%
-    dplyr::mutate_all(~tidyr::replace_na(., ""))
+    dplyr::mutate_all(~ tidyr::replace_na(., ""))
 
 
   if (!all(is.na(lastassessmentvals))) {

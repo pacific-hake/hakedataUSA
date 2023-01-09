@@ -5,7 +5,8 @@ load_age <- function(datapath) {
   )
 
   canada <- load.can.age.data(file.path(datapath, "can-age-data.csv"))
-  can <- mapply(function(x,y) cbind(x, Nsamples = y),
+  can <- mapply(
+    function(x, y) cbind(x, Nsamples = y),
     setNames(canada[1:3], c("can_shore", "can_freeze", "can_jv")),
     lapply(canada[4:6], as.numeric)
   ) %>%
@@ -32,7 +33,6 @@ load_age <- function(datapath) {
 # 2. Remove FALSE if statement b/c it was just used to upweight CAN comps
 #' @param dirdata The directory with the data.
 load_age_fishery <- function(dirdata = hakedata_wd()) {
-
   options(default.stringsAsFactors = FALSE)
   options(stringsAsFactors = FALSE)
 
@@ -48,7 +48,8 @@ load_age_fishery <- function(dirdata = hakedata_wd()) {
   catch_repo <- load_catch(file.path(dirdata, "landings-tac-history.csv")) %>%
     dplyr::select(
       -dplyr::matches("tot|TAC|attain|_catch",
-      ignore.case = TRUE)
+        ignore.case = TRUE
+      )
     ) %>%
     tidyr::pivot_longer(
       names_to = c("sector", "x"),

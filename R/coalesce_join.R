@@ -12,13 +12,13 @@
 #'   specified in `join`.
 #'
 #' @author Edward Visel with some changes from Kelli F. Johnson.
-#' @references \url{https://alistaire.rbind.io/blog/coalescing-joins/} 
+#' @references \url{https://alistaire.rbind.io/blog/coalescing-joins/}
 #'
 #' @export
 coalesce_join <- function(x,
-                          y, 
+                          y,
                           by = NULL,
-                          suffix = c(".x", ".y"), 
+                          suffix = c(".x", ".y"),
                           join = dplyr::full_join,
                           ...) {
   joined <- join(x, y, by = by, suffix = suffix, ...)
@@ -36,7 +36,7 @@ coalesce_join <- function(x,
   coalesced <- purrr::map_dfc(
     to_coalesce,
     ~ dplyr::coalesce(
-      joined[[paste0(.x, suffix[2])]], 
+      joined[[paste0(.x, suffix[2])]],
       joined[[paste0(.x, suffix[1])]]
     )
   )

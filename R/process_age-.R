@@ -42,7 +42,7 @@ process_age_sea <- function(atsea.ages = get_local(file = "atsea.ages.Rdat"),
 
   processed <- purrr::map(
     .x = ifelse(test = grepl("ms", file_out), yes = 2, no = 1),
-    .f = ~process_atsea_year(
+    .f = ~ process_atsea_year(
       dat = atsea.ages,
       ncatch = ncatch %>% dplyr::filter(SPECIES == 206),
       minAge = 1,
@@ -51,12 +51,12 @@ process_age_sea <- function(atsea.ages = get_local(file = "atsea.ages.Rdat"),
       in.pctl = 0.95
     ) %>%
       tidyr::pivot_wider(
-      id_cols = year,
-      names_from = AGE,
-      names_prefix = "a",
-      values_from = comp,
-      unused_fn = max
-    ) %>%
+        id_cols = year,
+        names_from = AGE,
+        names_prefix = "a",
+        values_from = comp,
+        unused_fn = max
+      ) %>%
       dplyr::relocate(`n.fish`, `n.hauls`, .after = year)
   )
   purrr::walk2(
@@ -68,14 +68,14 @@ process_age_sea <- function(atsea.ages = get_local(file = "atsea.ages.Rdat"),
 }
 
 #' Workup shoreside composition data
-#' 
+#'
 #' Provide composition data from the U.S. Shoreside
 #' hake fishery. Written by Allan Hicks in 2016 and
 #' revised in 2017 by Ian G. Taylor.
-#' 
+#'
 #' @template page
 #' @param ages Vector of ages to keep.
-#' 
+#'
 #' @export
 #' @author Kelli F. Johnson
 #' @return todo: document the return
@@ -84,41 +84,48 @@ process_age_shore <- function(page = get_local("page.Rdat"),
                               ages = 1:15) {
   page.worked <- page[!is.na(page$AGE_YEARS), ]
   page.worked$SEX <- factor(page.worked$SEX)
-  dat <- SetUpHakeBDS.fn(page.worked, verbose = FALSE,
+  dat <- SetUpHakeBDS.fn(page.worked,
+    verbose = FALSE,
     max.mmLength = 1000, dataTypes = c("C"),
     sampleMethods = c("R"), sampleTypes = c(NA, "", "C", "M"),
-    states = c("CA", "OR", "WA", "PW"))
+    states = c("CA", "OR", "WA", "PW")
+  )
 
-  nFishbygear <- table(dat$SAMPLE_YEAR,dat$gear)
+  nFishbygear <- table(dat$SAMPLE_YEAR, dat$gear)
   nSamp <- apply(
-    table(dat$SAMPLE_YEAR,dat$SAMPLE_NO),
+    table(dat$SAMPLE_YEAR, dat$SAMPLE_NO),
     1,
-    function(x){sum(x>0)})
+    function(x) {
+      sum(x > 0)
+    }
+  )
   nFish <- table(dat$SAMPLE_YEAR, useNA = "ifany")
 
-  dat$state <- "PW"  #so that it doesn't need to expand up states and won't need a catch file
+  dat$state <- "PW" # so that it doesn't need to expand up states and won't need a catch file
   # Relationship assumes FISH_WEIGHT is in grams and FISH_LENGTH is cm
-  out.lm <- lm(log(FISH_WEIGHT)~log(FISH_LENGTH/10), data = dat)
+  out.lm <- lm(log(FISH_WEIGHT) ~ log(FISH_LENGTH / 10), data = dat)
   # Must keep the next line as is, don't try to make it shorter!
-  lw <- data.frame(OR=c(exp(out.lm$coefficients[1]),out.lm$coefficients[2]))
+  lw <- data.frame(OR = c(exp(out.lm$coefficients[1]), out.lm$coefficients[2]))
 
-  LFs <- commLFs.fn(dat,lw,
+  LFs <- commLFs.fn(dat, lw,
     gear = NULL, state = "PW",
     catchFile = NULL,
     maxExpansion = 1e9, verbose = FALSE,
-    loessSpan = 0.3, ageComp = TRUE)
+    loessSpan = 0.3, ageComp = TRUE
+  )
 
   tmp <- LFs$all$PW
   afs <- matrix(NA,
     ncol = length(ages) + 3, nrow = length(tmp),
-    dimnames = list(NULL, c("year", "n.fish", "n.trips", paste0("a", ages))))
-  for(i in 1:length(tmp)) {
+    dimnames = list(NULL, c("year", "n.fish", "n.trips", paste0("a", ages)))
+  )
+  for (i in 1:length(tmp)) {
     tmp2 <- tmp[[i]]
     afs[i, "year"] <- tmp2$year[1]
-    afs[i, paste0("a", min(ages))] <- sum(tmp2[tmp2$age<=min(ages), "lf"])
-    afs[i, paste0("a", max(ages))] <- sum(tmp2[tmp2$age>=max(ages), "lf"])
-    for(j in (min(ages) + 1):(max(ages) - 1)) {
-      if(sum(tmp2$age == j)) {
+    afs[i, paste0("a", min(ages))] <- sum(tmp2[tmp2$age <= min(ages), "lf"])
+    afs[i, paste0("a", max(ages))] <- sum(tmp2[tmp2$age >= max(ages), "lf"])
+    for (j in (min(ages) + 1):(max(ages) - 1)) {
+      if (sum(tmp2$age == j)) {
         afs[i, paste0("a", j)] <- tmp2[tmp2$age == j, "lf"]
       } else {
         afs[i, paste0("a", j)] <- 0

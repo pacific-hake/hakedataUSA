@@ -7,21 +7,21 @@
 #' @export
 plot_weight_at_age <- function(data, maxage) {
   ggplot2::ggplot(
-      data = data %>%
-        dplyr::mutate(
-          cat = ifelse(
-            test = grepl("acoustic", Source, ignore.case = TRUE),
-            "Survey",
-            "Fishery"
-          )
-        ),
-      ggplot2::aes(
-        x = Year,
-        y = Weight_kg,
-        colour = factor(Age_yrs),
-        group = Age_yrs
-      )
-    ) +
+    data = data %>%
+      dplyr::mutate(
+        cat = ifelse(
+          test = grepl("acoustic", Source, ignore.case = TRUE),
+          "Survey",
+          "Fishery"
+        )
+      ),
+    ggplot2::aes(
+      x = Year,
+      y = Weight_kg,
+      colour = factor(Age_yrs),
+      group = Age_yrs
+    )
+  ) +
     ggplot2::stat_summary(fun = mean, geom = "line") +
     ggplot2::stat_summary(fun = mean, geom = "point") +
     ggplot2::ylab("Mean weight-at-age (kg)") +

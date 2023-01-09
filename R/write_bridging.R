@@ -55,7 +55,7 @@ write_bridging <- function(dir_input,
     input = output_03,
     dir_output = dir_output
     # CPUE = ,
-    # agecomp_survey = 
+    # agecomp_survey =
   )
   # 05 survey age-1 fish
   output_05 <- write_bridging_other(
@@ -79,7 +79,7 @@ write_bridging_catch <- function(input, dir_output) {
   repo_catch <- utils::read.csv(
     file = fs::path(hakedata_wd(), "landings-tac-history.csv"),
   )
-  input[["dat"]][["catch"]]<- rbind(
+  input[["dat"]][["catch"]] <- rbind(
     input[["dat"]][["catch"]] %>%
       dplyr::filter(year <= 0),
     data.frame(
@@ -123,23 +123,23 @@ write_bridging_weight_at_age <- function(input, dir_output) {
 #' @describeIn write_bridging Bridge CPUE and/or composition data
 #' @export
 write_bridging_other <- function(input,
-                                  dir_output,
-                                  CPUE,
-                                  agecomp,
-                                  fishery = FALSE) {
+                                 dir_output,
+                                 CPUE,
+                                 agecomp,
+                                 fishery = FALSE) {
   # Local function
   make_survey <- function(dir, suffix) {
     sprintf(
-        "%02d_%s",
-        as.numeric(
-          gsub(
-            "^([0-9]+)_.+$",
-            "\\1",
-            basename(tail(fs::dir_ls(dir, type = "directory"), 1))
-          )
-        ) + 1,
-        suffix
-      )
+      "%02d_%s",
+      as.numeric(
+        gsub(
+          "^([0-9]+)_.+$",
+          "\\1",
+          basename(tail(fs::dir_ls(dir, type = "directory"), 1))
+        )
+      ) + 1,
+      suffix
+    )
   }
 
   # Deal with new data
@@ -147,10 +147,9 @@ write_bridging_other <- function(input,
     input[["dat"]][["CPUE"]] <- rbind(
       input[["dat"]][["CPUE"]] %>%
         dplyr::filter(!index %in% CPUE[["index"]]),
-        CPUE
+      CPUE
     )
-    survey <- switch(
-      unique(CPUE[["index"]]) == 1 ~ "04_survey_age_2_plus",
+    survey <- switch(unique(CPUE[["index"]]) == 1 ~ "04_survey_age_2_plus",
       unique(CPUE[["index"]]) == 3 ~ "05_survey_age_1",
       TRUE ~ make_survey(dir_output, "survey")
     )
@@ -159,7 +158,7 @@ write_bridging_other <- function(input,
     input[["dat"]][["agecomp"]] <- rbind(
       input[["dat"]][["agecomp"]] %>%
         dplyr::filter(!FltSvy %in% agecomp[["FltSvy"]]),
-        agecomp
+      agecomp
     )
   }
   if (missing(CPUE) & missing(agecomp) & fishery) {

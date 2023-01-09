@@ -1,7 +1,7 @@
 update_ss3_ageing_error <- function(input_list) {
   while (
     input_list[["dat"]][["N_ageerror_definitions"]] <
-    max(input_list[["dat"]][["agecomp"]][["Ageerr"]])
+      max(input_list[["dat"]][["agecomp"]][["Ageerr"]])
   ) {
     input_list[["dat"]][["N_ageerror_definitions"]] <-
       input_list[["dat"]][["N_ageerror_definitions"]] + 1
