@@ -26,56 +26,19 @@ library(hakedataUSA)
 
 ``` r
 # Customize the next two lines
-local.assess <- file.path("c:", "stockAssessment", "hake-assessment")
-local.model <- "test"
+local.model <- fs::path("2023", "test")
 
-current_year <- as.numeric(format(Sys.Date(), "%Y"))
+pull_database()
+process_database()
 
-hakedata <- pulldatabase()
-
-norpaccatches(hakedata[["ncatch"]])
-pacfincatches(hakedata[["pcatch"]])
-
-age_norpac <- atseacomps(hakedata[["atsea.ages"]], hakedata[["ncatch"]])
-age_shore <- shorecomps(hakedata[["page"]], verbose = TRUE)
-
-plot_rawmeasure(
-  hakedata[["atsea.ages"]],
-  hakedata[["page"]],
-  years = current_year:(current_year - 4)
+write_bridging(
+  dir_input = fs::path(dirname(hakedata_wd()), "models", "2022.01.10_base"),
+  dir_output = fs::path(dirname(hakedata_wd()), "models", "2023", "01-version", "02-bridging-models")
 )
-
-# Send catches to hake-assessment/data
-datatoassessment_catch(file.path(local.assess, "data"))
-# fix end year and catches
-new_catch(
-  dirout = file.path(local.assess, "data"), year = hakedata_year(),
-  filedat = file.path(local.assess, "models", local.model, "hake_data.ss")
-)
-# Send compositions to hake-assessment/data
-datatoassessment_comp(file.path(local.assess, "data"))
-compdata <- datatocomps(
-  dirdata = file.path(local.assess, "data"),
-  dirmod = file.path(local.assess, "models", local.model),
-  cohorts = current_year - c(2014, 2010)
-)
-
-wtatageinfo <- wtatage_collate()
-# Move the wt-at-age for this year to the hake-assessment directory
-file.copy(
-  from = wtatageinfo[["file"]],
-  to = file.path(
-    local.assess,
-    "data", "LengthWeightAge",
-    basename(wtatageinfo[["file"]])
-  ),
-  overwrite = TRUE
-)
-data_wtatage(dir = file.path(local.assess, "data", "LengthWeightAge"))
 ```
 
 ``` r
-render("inst/extdata/beamer/hake_jtc_data_us.Rmd")
+rmarkdown::render("inst/extdata/beamer/hake_jtc_data_us.Rmd")
 ```
 
 ## Issues
