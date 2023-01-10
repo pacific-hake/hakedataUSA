@@ -6,3 +6,4 @@ inst/extdata/beamer/*.png
 inst/extdata/beamer/*.tex
 inst/extdata/beamer/*.utf8*
 inst/extdata/beamer/*.xmpi
+.history*
