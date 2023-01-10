@@ -106,17 +106,17 @@ process_weight_at_age_US <- function(savedir = hakedata_wd()) {
       ) %>%
       dplyr::select(Weight_kg, Sex, Age_yrs, Length_cm, Month, Year),
     US_shore = page %>%
-    dplyr::rename(
-      Sex = "SEX",
-      Age_yrs = "AGE",
-      Month = "SAMPLE_MONTH",
-      Year = "SAMPLE_YEAR"
-    ) %>%
-    dplyr::mutate(
-      Weight_kg = FISH_WEIGHT / 1000,
-      Length_cm = FISH_LENGTH / 10
-    )  %>%
-    dplyr::select(Weight_kg, Sex, Age_yrs, Length_cm, Month, Year),
+      dplyr::rename(
+        Sex = "SEX",
+        Age_yrs = "AGE",
+        Month = "SAMPLE_MONTH",
+        Year = "SAMPLE_YEAR"
+      ) %>%
+      dplyr::mutate(
+        Weight_kg = FISH_WEIGHT / 1000,
+        Length_cm = FISH_LENGTH / 10
+      ) %>%
+      dplyr::select(Weight_kg, Sex, Age_yrs, Length_cm, Month, Year),
     .id = "Source"
   ) %>%
     dplyr::filter(

@@ -5,7 +5,7 @@
 \title{Create weight-at-age files for hake assessment}
 \usage{
 process_weight_at_age(
-  dir = file.path(hakedata_wd(), "LengthWeightAge"),
+  dir = fs::path(hakedata_wd(), "LengthWeightAge"),
   maxage = 15,
   yrs = 2008:hakedata_year(),
   navgyears = 5,
