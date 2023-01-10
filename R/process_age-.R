@@ -82,7 +82,7 @@ process_age_sea <- function(atsea.ages = get_local(file = "atsea.ages.Rdat"),
 #'
 process_age_shore <- function(page = get_local("page.Rdat"),
                               ages = 1:15) {
-  page.worked <- page[!is.na(page$AGE_YEARS), ]
+  page.worked <- page[!is.na(page$AGE), ]
   page.worked$SEX <- factor(page.worked$SEX)
   dat <- SetUpHakeBDS.fn(page.worked,
     verbose = FALSE,

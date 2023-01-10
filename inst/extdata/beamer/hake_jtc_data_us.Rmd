@@ -77,7 +77,7 @@ ntable <- dplyr::group_by(
   dplyr::filter(read, Year %in% 2008:year) %>%
   dplyr::pull(n)
 ptable <- table(
-  page[!is.na(page[, "AGE_YEARS"]), c("SAMPLE_YEAR")],
+  page[!is.na(page[, "AGE"]), c("SAMPLE_YEAR")],
   useNA = "ifany")
 
 final <- data.frame(
@@ -175,7 +175,7 @@ a <- data.frame(
 b <- data.frame(
   table(subset(
     page,
-    SAMPLE_YEAR == assessmentyear & !is.na(AGE_YEARS))$SAMPLE_MONTH
+    SAMPLE_YEAR == assessmentyear & !is.na(AGE))$SAMPLE_MONTH
   )
 )
 knitr::kable(

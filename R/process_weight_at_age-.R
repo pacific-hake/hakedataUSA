@@ -1,46 +1,19 @@
-#' Collate some of the age-weight data for the most recent year
+#' Collate some of the age-weight data
 #'
-#' This script contains commands to format the data on weight, length, and age
-#' from different sources, including the acoustic survey, the U.S. at-sea fishery,
-#' and the U.S. shoreside fishery. Canadian fishery data does not appear to be included.
-#'
-#' The resulting compiled data for the most recent year are written to a file
-#' with a name like /LengthWeightAge/LWAdata_2017.csv.
-#'
-#' @details
-#' TODO: Ensure that this is done from 2008 to present every year to
-#'       because there may be changes to previous weight-at-age data.
-#' @param year An integer value specifying the year of data you would like to summarize.
+#' @param savedir A string specifying the path of interest.
 #'
 #' @export
 #' @author Ian G. Taylor
-#' @import utils
-#' @return A list of weight-at-age information that includes the following items:
-#' \enumerate{
-#'   \item acousticmean: Mean weight-at-age from the survey, if the s
-#' survey operated in that year.
-#'   \item usatseamean: mean weight-at-age from the US-at-sea data.
-#'   \item usshorebasedmean: mean weight-at-age from the US-shore-based data.
-#'   \item outliers: A table of outliers by Agency for the US-shore-based fishery.
-#'   \item largefishtable: A table of large fish (i.e., greater than 10 kg)
-#' by data source.
-#'   \item dat: The data that was saved to the disk for the given year.
-#'   \item survey: A logical value specifying if it was a survey year.
-#'   \item year: The year for which the data was compiled.
-#'   \item file: The file path used to save the `dat`.
-#' }
 #'
-process_weight_at_age_US <- function(year = hakedata_year(),
-                                     savedir = hakedata_wd()) {
-  info <- list()
+process_weight_at_age_US <- function(savedir = hakedata_wd()) {
   # TODO: move these files to somewhere that is version controlled
-  acdir <- file.path(savedir, "AcousticSurvey", "BioData", "csvFiles")
+  # acdir <- file.path(savedir, "AcousticSurvey", "BioData", "csvFiles")
 
   # Determine if a survey occurred
   survey_year <- utils::read.csv(fs::path(savedir, "survey-history.csv")) %>%
     dplyr::pull(year) %>%
-    max() - year == 0
-  if (year %% 2 == 1 && !survey_year) {
+    max() - hakedata_year() == 0
+  if (hakedata_year() %% 2 == 1 && survey_year) {
     warning("process_weight_at_age_US thinks it is a non-survey year!")
   }
   if (survey_year) {
@@ -115,79 +88,48 @@ process_weight_at_age_US <- function(year = hakedata_year(),
       )
     dat <- rbind(datUS, datCAN) %>%
       dplyr::filter(!is.na(Age_yrs) & !is.na(Weight_kg))
-    info$acousticmean <- tapply(dat$Weight_kg, list(dat$Age_yrs), mean)
-  } else {
-    Ac_survYear <- FALSE
-    info$acousticmean <- NULL
   }
 
-  # US at sea fishery
-  base::load(file.path(savedir, "extractedData", "atsea.ages.Rdat")) # atsea.ages
-  tmp <- atsea.ages[
-    !is.na(atsea.ages$AGE) &
-      !is.na(atsea.ages$WEIGHT) &
-      atsea.ages$Year %in% year,
-  ]
-  info$usatseamean <- tapply(tmp$WEIGHT, list(tmp$AGE), mean)
-  tmp <- data.frame(
-    Source = "ATSEA", Weight_kg = tmp$WEIGHT,
-    Sex = tmp$SEX, Age_yrs = tmp$AGE,
-    Length_cm = tmp$LENGTH,
-    Month = tmp$Month,
-    Year = tmp$Year
-  )
-
-  if (Ac_survYear) {
-    dat <- rbind(dat, tmp)
-  } else {
-    dat <- tmp
-  }
-  rm(tmp)
-
-  # US Shore-based fishery
+  base::load(file.path(savedir, "extractedData", "atsea.ages.Rdat"))
   base::load(file.path(savedir, "extractedData", "page.Rdat"))
-  page.worked <- page[
-    !is.na(page$FISH_AGE_YEARS_FINAL) &
-      !is.na(page$FISH_WEIGHT) &
-      page$SAMPLE_YEAR %in% year,
-  ]
-  page.worked$SEX <- factor(page.worked$SEX)
-  info$usshorebasedmean <- tapply(
-    page.worked$FISH_WEIGHT / 1000,
-    list("AGE" = page.worked$FISH_AGE_YEARS_FINAL), mean
-  )
-  tmp <- data.frame(
-    Source = "SHORE",
-    Weight_kg = page.worked$FISH_WEIGHT / 1000,
-    Sex = page.worked$SEX, Age_yrs = page.worked$FISH_AGE_YEARS_FINAL,
-    Length_cm = page.worked$FISH_LENGTH / 10,
-    Month = page.worked$SAMPLE_MONTH,
-    Year = page.worked$SAMPLE_YEAR
-  )
-  dat <- rbind(dat, tmp)
-  rm(tmp)
+  tmp <- dplyr::bind_rows(
+    US_atsea = atsea.ages %>%
+      dplyr::rename(
+        Weight_kg = "WEIGHT",
+        Sex = "SEX",
+        Age_yrs = "AGE",
+        Length_cm = "LENGTH"
+      ) %>%
+      dplyr::mutate(
+        Year = as.numeric(Year, as.is = TRUE),
+        Month = as.numeric(Month, as.is = TRUE)
+      ) %>%
+      dplyr::select(Weight_kg, Sex, Age_yrs, Length_cm, Month, Year),
+    US_shore = page %>%
+    dplyr::rename(
+      Sex = "SEX",
+      Age_yrs = "AGE",
+      Month = "SAMPLE_MONTH",
+      Year = "SAMPLE_YEAR"
+    ) %>%
+    dplyr::mutate(
+      Weight_kg = FISH_WEIGHT / 1000,
+      Length_cm = FISH_LENGTH / 10
+    )  %>%
+    dplyr::select(Weight_kg, Sex, Age_yrs, Length_cm, Month, Year),
+    .id = "Source"
+  ) %>%
+    dplyr::filter(
+      !is.na(Age_yrs),
+      !is.na(Weight_kg)
+    )
+  fishery <- read.csv(
+    file = fs::path(savedir, "LengthWeightAge", "us-weight.csv")
+  ) %>%
+    dplyr::filter(Year < 2008) %>%
+    dplyr::bind_rows(tmp)
 
-  fs::dir_create(file.path(savedir, "LengthWeightAge"))
-  fileout <- file.path(
-    savedir, "LengthWeightAge",
-    paste0("LWAdata_", year, ".csv")
-  )
-  bad <- dat[dat$Weight_kg > 10, ]
-  info$outliers <- NULL
-  if (NROW(bad) > 0) {
-    info$outliers <- bad
-    dat[dat$Weight_kg < 10, ]
-  }
-  utils::write.csv(dat, file = fileout, row.names = FALSE)
-
-  info$largefishtable <- aggregate(Weight_kg ~ Source + I(Weight_kg > 10),
-    data = dat, length
-  )
-  info$wtatage <- dat
-  info$survey <- Ac_survYear
-  info$year <- year
-  info$file <- fileout
-  invisible(info)
+  stopifnot(NROW(dplyr::filter(tmp, Weight_kg > 10)) == 0)
 }
 
 #' Create weight-at-age files for hake assessment
@@ -227,7 +169,7 @@ process_weight_at_age_US <- function(year = hakedata_year(),
 #' @author Ian G. Taylor
 #' @return todo: document return
 #'
-process_weight_at_age <- function(dir = file.path(hakedata_wd(), "LengthWeightAge"),
+process_weight_at_age <- function(dir = fs::path(hakedata_wd(), "LengthWeightAge"),
                                   maxage = 15,
                                   yrs = 2008:hakedata_year(),
                                   navgyears = 5,
@@ -239,16 +181,12 @@ process_weight_at_age <- function(dir = file.path(hakedata_wd(), "LengthWeightAg
   # filtered by area rather than month and provided as rds rather than csv to
   # save on size, contains all US samples in LWAdata_1975to2007.csv, so
   # eliminated that file.
-  files_weights <- fs::path(
-    dir,
-    c(
-      "LengthWeightAge_data.rds",
-      "can-weight-at-age-and-length.csv",
-      glue::glue("LWAdata_{yrs}.csv")
-    )
+  files_weights <- c(
+    fs::path(ext = "csv", dir, c("survey-weight", "us-weight")),
+    fs::path(dirname(dir), "can-weight-at-age.csv")
   )
   dat <- purrr::map_dfr(
-    files_weights[fs::file_exists(files_weights)],
+    files_weights,
     .f = weight_at_age_read
   ) %>%
     weight_at_age_outlier(filter = FALSE, drop = FALSE)
@@ -277,6 +215,7 @@ process_weight_at_age <- function(dir = file.path(hakedata_wd(), "LengthWeightAg
 
   #### making input files for SS with the holes still present
   # NULL months keeps the Poland data
+  dat <- dplyr::filter(dat, !outlier)
   wtage_All <- weight_at_age_wide(dat)
   wtage_All_wMean <- dplyr::bind_rows(
     weight_at_age_wide(dat %>% dplyr::mutate(Year = -1940)),

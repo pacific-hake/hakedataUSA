@@ -11,7 +11,7 @@ test_that("Files have positive size", {
 
 test_that("Age structures without an age", {
   # todo: find a way to get number of unaged structures from PacFIN
-  # expect_equal(sum(is.na(page$AGE_YEARS)), 0,
+  # expect_equal(sum(is.na(page$AGE)), 0,
   #   label = "Number of PacFIN age structures without an age is")
   # todo(eachyear): add historic info to compare to
   history_badages <- c(
@@ -50,7 +50,7 @@ test_that("", {
   ), "%m")), levels = 1:12)
   temp <- merge(
     all = TRUE,
-    aggregate(list("Ages" = !is.na(page$AGE_YEARS)),
+    aggregate(list("Ages" = !is.na(page$AGE)),
       by = list(
         "Month" = factor(page$SAMPLE_MONTH, levels = 1:12),
         "Year" = page$SAMPLE_YEAR,

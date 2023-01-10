@@ -661,8 +661,7 @@ weight_at_age_read <- function(file) {
     utils::read.csv(file) %>%
       dplyr::select(-dplyr::matches("X"))
   } else {
-    readRDS(file) %>%
-      dplyr::filter(Year <= 2007)
+    stop("Extensions other than csv are not currently supported.")
   }
   out <- data_in %>%
     dplyr::mutate(
@@ -678,11 +677,5 @@ weight_at_age_read <- function(file) {
     ) %>%
     dplyr::select(-dplyr::matches("Sex"))
 
-  if (grepl("can", file)) {
-    out <- dplyr::filter(
-      .data = out,
-      !grepl(grep_CAN_fishery, Source)
-    )
-  }
   invisible(out)
 }

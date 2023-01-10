@@ -13,7 +13,7 @@ test_weight_at_age <- function(data) {
     # "Acoustic Poland" = 2094,
     "Acoustic Poland" = 2092,
     CAN_acoustic = 5719,
-    CAN_JV = 643,
+    CAN_JV = 136,
     CAN_polish = 487,
     CAN_shoreside = 636,
     US_acoustic = 15718,

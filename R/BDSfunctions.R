@@ -365,9 +365,9 @@ commLFs.fn <- function(bds, lw, gear = "TWL", state = NULL, catchFile = NULL,
     # switch age into length.cm to trick the code
     # Do this now so that sex ratio is determined using lengths
     origLength <- bds$length.cm
-    bds$length.cm <- bds$FISH_AGE_YEARS_FINAL
+    bds$length.cm <- bds$AGE
     origLengthSexRatio <- bdsSexRatio$length.cm
-    bdsSexRatio$length.cm <- bdsSexRatio$FISH_AGE_YEARS_FINAL
+    bdsSexRatio$length.cm <- bdsSexRatio$AGE
   }
 
   # get the number of observed lengths for each sample
