@@ -437,6 +437,9 @@ make_wtatage_plots <- function(plots = 1:6, data, counts, lengths = NULL,
 write_wtatage_file <- function(file = paste0("wtatage_", format(Sys.time(), "%Y"), "created_", format(Sys.time(), "%d-%b-%Y_%H.%M"), ".ss"),
                                data,
                                maturity) {
+  # Ensure column name that matters is lowercase
+  colnames(data)[grep("fleet", ignore.case = TRUE, colnames(data))] <- "fleet"
+
   # stuff copied from SS_writedat for printing tables
   on.exit({
     if (sink.number() > 0) sink()
@@ -450,10 +453,12 @@ write_wtatage_file <- function(file = paste0("wtatage_", format(Sys.time(), "%Y"
 
   oldwidth <- options()$width
   oldmax.print <- options()$max.print
-  on.exit(options(width = oldwith), add = TRUE)
-  on.exit(options(max.print = oldmax.print))
+  on.exit(options(width = oldwidth), add = TRUE)
+  on.exit(options(max.print = oldmax.print), add = TRUE)
   options(width = 5000, max.print = 9999999)
 
+  # Remove the file if it exists because you do not want to append it
+  file.remove(file)
   zz <- file(file, open = "at")
   on.exit(close(zz), add = TRUE)
   sink(zz)
