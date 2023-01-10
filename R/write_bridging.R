@@ -33,7 +33,16 @@
 #' @export
 write_bridging <- function(dir_input,
                            dir_output) {
-  input <- r4ss::SS_read(dir_input, ss_new = TRUE, verbose = FALSE)
+  input <- r4ss::SS_read(
+    dir_input,
+    ss_new = fs::file_exists(fs::path(dir_input, "starter.ss_new")),
+    verbose = FALSE
+  )
+
+  unlink(
+    x = fs::dir_ls(path = dir_output, type = "directory"),
+    recursive = TRUE
+  )
   # 01 new executable
   output_01 <- r4ss::SS_write(
     input,
@@ -53,20 +62,23 @@ write_bridging <- function(dir_input,
   # 04 survey age-2+ fish
   output_04 <- write_bridging_other(
     input = output_03,
-    dir_output = dir_output
+    dir_output = dir_output,
+    dir_name = "04-add-survey-age-2-plus"
     # CPUE = ,
     # agecomp_survey =
   )
   # 05 survey age-1 fish
   output_05 <- write_bridging_other(
     input = output_04,
-    dir_output = dir_output
+    dir_output = dir_output,
+    dir_name = "05-add-survey-age-1"
     # CPUE =
   )
   # 06 fishery
   output_06 <- write_bridging_other(
     input = output_05,
     dir_output = dir_output,
+    dir_name = "06-add-fishery-ages",
     fishery = TRUE
   )
 
@@ -108,7 +120,9 @@ write_bridging_weight_at_age <- function(input, dir_output) {
   weight_at_age <- r4ss::SS_readwtatage(
     file = fs::path(hakedata_wd(), "wtatage.ss"),
     verbose = FALSE
-  )
+  ) %>%
+    dplyr::select(-dplyr::matches("comment")) %>%
+    dplyr::arrange(Yr, Fleet)
   input[["wtatage"]] <- weight_at_age
   input[["par"]] <- NULL
   r4ss::SS_write(
@@ -126,32 +140,14 @@ write_bridging_other <- function(input,
                                  dir_output,
                                  CPUE,
                                  agecomp,
+                                 dir_name,
                                  fishery = FALSE) {
-  # Local function
-  make_survey <- function(dir, suffix) {
-  sprintf(
-      "%02d_%s",
-      as.numeric(
-        gsub(
-          "^([0-9]+).*$",
-          "\\1",
-          basename(tail(fs::dir_ls(dir, type = "directory"), 1))
-        )
-      ) + 1,
-      suffix
-    )
-  }
-
   # Deal with new data
   if (!missing(CPUE)) {
     input[["dat"]][["CPUE"]] <- rbind(
       input[["dat"]][["CPUE"]] %>%
         dplyr::filter(!index %in% CPUE[["index"]]),
       CPUE
-    )
-    survey <- switch(unique(CPUE[["index"]]) == 1 ~ "04-add-survey-age-2-plus",
-      unique(CPUE[["index"]]) == 3 ~ "05-add-survey-age-1",
-      TRUE ~ make_survey(dir_output, "survey")
     )
   }
   if (!missing(agecomp)) {
@@ -162,7 +158,6 @@ write_bridging_other <- function(input,
     )
   }
   if (missing(CPUE) & missing(agecomp) & fishery) {
-    survey <- "06-add-new-fishery-ages"
     agecomp <- load_age_fishery()
     input[["dat"]][["agecomp"]] <- rbind(
       dplyr::filter(input[["dat"]][["agecomp"]], Yr < 2008 | FltSvy != 1),
@@ -181,14 +176,10 @@ write_bridging_other <- function(input,
   # Check ageing error matrix
   input[["dat"]] <- update_ss3_ageing_error(input_list = input)
 
-  # Write the files and return the list
-  if (!exists("survey")) {
-    survey <- make_survey(dir_output, "data")
-  }
   input[["par"]] <- NULL
   r4ss::SS_write(
     inputlist = input,
-    dir = fs::path(dir_output, survey),
+    dir = fs::path(dir_output, dir_name),
     overwrite = TRUE,
     verbose = FALSE
   )
