@@ -10,21 +10,26 @@
 #'   updated in [process_catch()].
 #' * Weight-At-Age: The weight-at-age information is stored in data/wtatage.ss,
 #'   which is updated in [process_weight_at_age()].
-#' @param input A list read in using [r4ss::SS_read()] that contains all of the
-#'   information necessary to write a set of output files. The information will
-#'   typically be pulled from the previous year's base model, which represents
-#'   the first model in a bridging set.
-#' @param dir_output A string that specifies the path to a directory that may
-#'   or may not already exist that will be used to save the output.
-#' @param CPUE A data frame of catch-per-unit-effort information with the
-#'   following columns:
+#' * CPUE: Catch-per-unit-effort data for the age-2-plus and age-1 surveys,
+#'   with the following columns:
 #'   * `year`
 #'   * `seas`
 #'   * `index`
 #'   * `obs`
-#'   * `se_log`
-#' @param agecomp_survey A data frame of age-composition information for the
-#'   surveys that is formatted to use in the Stock Synthesis data file.
+#'   * `se_log`.
+#'   TODO: needs to be saved somewhere in the repository, this could be in
+#'         survey-history.csv but the decimal places are not enough right now
+#'         and the age-1 index is not saved. Would also need to add 0's for the
+#'         years without a survey.
+#' * agecomp_survey Age-composition data for the age-2-plus survey.
+#'   TODO: save this information somewhere
+#' @param dir_input A string that specifies the path to a directory that stores
+#'   the input files for a model that you want to use as the basis of the
+#'   bridging. It will be passed to [r4ss::SS_read()]. The path will typically
+#'   be to the previous year's base model, which represents the first model in a
+#'   bridging set.
+#' @param dir_output A string that specifies the path to a directory that may
+#'   or may not already exist that will be used to save the output.
 #'
 #' @author Kelli F. Johnson
 #' @return An invisible list of modified Stock Synthesis input files. A
@@ -85,8 +90,6 @@ write_bridging <- function(dir_input,
   return(invisible(output_06))
 }
 
-#' @describeIn write_bridging Bridge catch data
-#' @export
 write_bridging_catch <- function(input, dir_output) {
   repo_catch <- utils::read.csv(
     file = fs::path(hakedata_wd(), "landings-tac-history.csv"),
@@ -113,8 +116,6 @@ write_bridging_catch <- function(input, dir_output) {
   return(invisible(input))
 }
 
-#' @describeIn write_bridging Bridge weight-at-age data
-#' @export
 write_bridging_weight_at_age <- function(input, dir_output) {
   # Need to add input weight-at-age data
   weight_at_age <- r4ss::SS_readwtatage(
@@ -134,8 +135,6 @@ write_bridging_weight_at_age <- function(input, dir_output) {
   return(invisible(input))
 }
 
-#' @describeIn write_bridging Bridge CPUE and/or composition data
-#' @export
 write_bridging_other <- function(input,
                                  dir_output,
                                  CPUE,

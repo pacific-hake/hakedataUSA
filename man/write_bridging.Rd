@@ -2,40 +2,19 @@
 % Please edit documentation in R/write_bridging.R
 \name{write_bridging}
 \alias{write_bridging}
-\alias{write_bridging_catch}
-\alias{write_bridging_weight_at_age}
-\alias{write_bridging_other}
 \title{Write a set of Stock Synthesis input files to a directory for bridging}
 \usage{
 write_bridging(dir_input, dir_output)
-
-write_bridging_catch(input, dir_output)
-
-write_bridging_weight_at_age(input, dir_output)
-
-write_bridging_other(input, dir_output, CPUE, agecomp, fishery = FALSE)
 }
 \arguments{
+\item{dir_input}{A string that specifies the path to a directory that stores
+the input files for a model that you want to use as the basis of the
+bridging. It will be passed to \code{\link[r4ss:SS_read]{r4ss::SS_read()}}. The path will typically
+be to the previous year's base model, which represents the first model in a
+bridging set.}
+
 \item{dir_output}{A string that specifies the path to a directory that may
 or may not already exist that will be used to save the output.}
-
-\item{input}{A list read in using \code{\link[r4ss:SS_read]{r4ss::SS_read()}} that contains all of the
-information necessary to write a set of output files. The information will
-typically be pulled from the previous year's base model, which represents
-the first model in a bridging set.}
-
-\item{CPUE}{A data frame of catch-per-unit-effort information with the
-following columns:
-\itemize{
-\item \code{year}
-\item \code{seas}
-\item \code{index}
-\item \code{obs}
-\item \code{se_log}
-}}
-
-\item{agecomp_survey}{A data frame of age-composition information for the
-surveys that is formatted to use in the Stock Synthesis data file.}
 }
 \value{
 An invisible list of modified Stock Synthesis input files. A
@@ -54,17 +33,23 @@ are written in the correct order and saved using a standard naming protocol.
 updated in \code{\link[=process_catch]{process_catch()}}.
 \item Weight-At-Age: The weight-at-age information is stored in data/wtatage.ss,
 which is updated in \code{\link[=process_weight_at_age]{process_weight_at_age()}}.
-}
-}
-\section{Functions}{
+\item CPUE: Catch-per-unit-effort data for the age-2-plus and age-1 surveys,
+with the following columns:
 \itemize{
-\item \code{write_bridging_catch()}: Bridge catch data
-
-\item \code{write_bridging_weight_at_age()}: Bridge weight-at-age data
-
-\item \code{write_bridging_other()}: Bridge CPUE and/or composition data
-
-}}
+\item \code{year}
+\item \code{seas}
+\item \code{index}
+\item \code{obs}
+\item \code{se_log}.
+TODO: needs to be saved somewhere in the repository, this could be in
+survey-history.csv but the decimal places are not enough right now
+and the age-1 index is not saved. Would also need to add 0's for the
+years without a survey.
+}
+\item agecomp_survey Age-composition data for the age-2-plus survey.
+TODO: save this information somewhere
+}
+}
 \author{
 Kelli F. Johnson
 }
