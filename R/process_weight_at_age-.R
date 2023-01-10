@@ -33,10 +33,18 @@
 process_weight_at_age_US <- function(year = hakedata_year(),
                                      savedir = hakedata_wd()) {
   info <- list()
+  # TODO: move these files to somewhere that is version controlled
   acdir <- file.path(savedir, "AcousticSurvey", "BioData", "csvFiles")
 
   # Determine if a survey occurred
-  if (length(dir(acdir, pattern = as.character(year))) > 0) {
+  survey_year <- utils::read.csv(fs::path(savedir, "survey-history.csv")) %>%
+    dplyr::pull(year) %>%
+    max() - year == 0
+  if (year %% 2 == 1 && !survey_year) {
+    warning("process_weight_at_age_US thinks it is a non-survey year!")
+  }
+  if (survey_year) {
+    stop("acdir is not version controlled and needs to be dealt with")
     Ac_survYear <- TRUE
     # Shimada
     datUS <- readxl::read_excel(
