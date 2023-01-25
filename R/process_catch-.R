@@ -65,7 +65,7 @@
 #'   * fishBottomDepthByVesselUS.png
 #'   * fishCatchRatesUSByYear.png
 #'   * fishDepthByYearUS.png
-#'   * fishCatchRatesUS.png
+#'   * ../doc/main-figures/fishCatchRatesUS.png
 #'   * fishCatchRatesUSnolog.png
 #'
 #' In the `Catches` directory, the following csv files are saved:
@@ -94,7 +94,6 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
 
   outncatch <- ncatch %>%
     dplyr::mutate(
-      SPECIFICHAUL = paste(format(HAULJOIN, digits = 19), sep = "_"),
       Date = as.Date(RETRIEVAL_DATE, f = "%Y-%m-%d"),
       month = get_date(RETRIEVAL_DATE, "%m"),
       Month = droplevels(factor(format(Date, format = "%b"), month.abb)),
@@ -238,7 +237,7 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
       dplyr::filter(hcatch, year %in% keeptheseyears & ngroups > 2) %>% data.frame()
     ),
     file = list(
-      file.path(savedir, "Figures", "fishCatchRatesUS.png"),
+      file.path(dirname(savedir), "doc", "main-figures", "fishCatchRatesUS.png"),
       file.path(savedir, "Figures", "fishCatchRatesUSnolog.png")
     ),
     yscale = list(
