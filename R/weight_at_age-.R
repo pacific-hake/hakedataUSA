@@ -402,28 +402,7 @@ make_wtatage_plots <- function(plots = 1:6, data, counts, lengths = NULL,
     )
     dev.off()
 
-    fileplot <- file.path(dir, paste0("EWAforDoc_Numbers.eps"))
-    grDevices::cairo_ps(fileplot, width = 7, height = 9, pointsize = 12)
-    makeimage(
-      mat = len.mat, meanvec = len.meanvec, Ntext = TRUE,
-      Nsamp.meanvec = Nsamp.meanvec, Nsamp.mat = Nsamp.mat,
-      main = "Mean length at age (colors) with sample sizes (numbers)",
-      yrvec = (year - ncol(len.mat) + 1):year
-    )
-    dev.off()
   }
-
-  # write image to EPS format for inclusion in document
-  cairo_ps(
-    filename = file.path(dir, "EWAforDoc.eps"),
-    width = 7, height = 9, pointsize = 12
-  )
-  makeimage(
-    mat = mat2, interpmat = mat, dofont = TRUE, dorect = FALSE,
-    meanvec = meanvec, main = "", margins = c(4.2, 4.2, 1, 1) + .1,
-    yrvec = (year - ncol(mat2) + 1):year
-  )
-  dev.off()
 }
 
 #' Write weight-at-age file
