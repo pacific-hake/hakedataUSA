@@ -185,7 +185,7 @@ pull_database <- function(database = c("NORPAC", "PacFIN"),
     ) %>%
       dplyr::mutate(
         Date = as.Date(TDATE),
-        month = get_date(Date, "%m"),
+        month = f_date(Date, "%m"),
         year = YEAR,
         sector = ifelse(grepl("^R", FLEET), "USresearch", "USshore")
       ) %>%

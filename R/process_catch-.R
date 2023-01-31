@@ -94,14 +94,14 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
 
   outncatch <- ncatch %>%
     dplyr::mutate(
-      Date = as.Date(RETRIEVAL_DATE, f = "%Y-%m-%d"),
-      month = get_date(RETRIEVAL_DATE, "%m"),
-      Month = droplevels(factor(format(Date, format = "%b"), month.abb)),
-      year = get_date(RETRIEVAL_DATE, "%Y"),
+      Date = f_date(RETRIEVAL_DATE, format = "%Y-%m-%d"),
+      month = f_date(RETRIEVAL_DATE, format = "%m"),
+      Month = f_date(RETRIEVAL_DATE, format = "%b", factor = TRUE),
+      year = f_date(RETRIEVAL_DATE, "%Y"),
       crate = EXTRAPOLATED_WEIGHT / 1000 / HRS,
       FISHING_DEPTH_M = FISHING_DEPTH_FATHOMS * fathom_to_meter,
       BOTTOM_DEPTH_M = BOTTOM_DEPTH_FATHOMS * fathom_to_meter,
-      vesseltype = process_vessel_type(VESSEL_TYPE),
+      vesseltype = f_vessel_type(VESSEL_TYPE),
       Sector = "DomesticAtSea",
       sampled = ifelse(is.na(HAUL_SAMPLED_BY) | HAUL_SAMPLED_BY == 0, 0, 1),
       # Unsampled hauls will have a SPECIES == NA and EXTRAPOLATED_WEIGHT == NA
@@ -333,36 +333,4 @@ process_catch_pacfin <- function(pcatch = get_local(file = "pacfin_catch.Rdat"),
     file = file.path(savedir, "us-ti-catch-by-month.csv"),
     sep = ",", quote = FALSE, row.names = FALSE
   )
-}
-
-#' Change `VESSEL_TYPE` from numeric to character
-#'
-#' `VESSEL_TYPE` in the NORPAC data base are integers and this function
-#' changes these integer values to character strings that provide meaning.
-#' The following integers are the available options in NORPAC to indicate
-#' whether the vessel processes fish or delivers it to a processing plant:
-#' * a catcher processor (CP) vessel,
-#' * a mothership (MS) or ship that receives unsorted codends from
-#'   other vessels,
-#' * a catcher only vessel that delivers unprocessed fish to shoreside,
-#'   floating plant, or vessel,
-#' * a MS that receives sorted codends,
-#' * a vessel that sells the majority of their catch over the side to other
-#'   fishing vessels who will utilize the fish for bait, and
-#' * vessels that discard all catch from a haul.
-#'
-#' @param x A vector of integers between one and six.
-#' @author Kelli F. Johnson
-#' @return A vector of combined integer values and character strings.
-#'
-process_vessel_type <- function(x) {
-  if (!any(x %in% 1:6)) {
-    stop("All values in x must be between one and six.")
-  }
-  x[x == 1] <- "CP"
-  x[x == 2] <- "MS"
-  # A catcher vessel named the Stormy C (A709) that did minimal processing at sea
-  # and had to have an observer on board.
-  # x[x == 3] <- "StormyC"
-  return(x)
 }
