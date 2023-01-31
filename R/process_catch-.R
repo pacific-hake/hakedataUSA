@@ -8,17 +8,16 @@
 #' by and the last two digits of the the CDQ code of the vessel. The code was
 #' created in 1995 and is used to track tribal catches in the hake fishery. The
 #' following codes exist:
-#' * C51 -- Aleutian Pribolof Island Community Development Association
+#' * C51 -- Aleutian Pribilof Island Community Development Association
 #' * C52 -- Bristol Bay Economic Development Corporation
-#' * C53 -- Central Bering Sea Fishermens Association
+#' * C53 -- Central Bering Sea Fishermen's Association
 #' * C54 -- Coastal Villages Fishing Cooperative
 #' * C55 -- Norton Sound Economic Development Corporation
 #' * C56 -- Yukon Delta Fisheries Development Association
-#' * R10 -- Research Permit - AFSC Catch Estimation
+#' * R10 -- Research Permit - Alaska Fisheries Science Center Catch Estimation
 #' * M01 -- Makah Tribe Whiting Association
 #' * R11 -- Research Permit - WA Sea Grant bird/longline interaction
 #' * R12 -- Research Permit - WA Sea Grant bird/longline interaction
-#' Tribal catches are denoted with an "M" for Makah.
 #'
 #' @details # Raw data
 #' Raw data consists of sampled and unsampled hauls with the total weight
