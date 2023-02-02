@@ -1,7 +1,7 @@
-#' Workup NORPAC Catches
+#' Process NORPAC catches
 #'
-#' Summarize and plot NORPAC catches for the at-sea hake fishery.
-#' Fleet types are assigned to create summaries by fleet and year.
+#' Summarize and plot NORPAC catches for the at-sea hake fishery. Fleet types
+#' are assigned to create summaries by fleet and year.
 #'
 #' @details # Tribal catches
 #' The column `CDQ_CODE` contains strings starting with an upper-case followed
@@ -25,30 +25,31 @@
 #' weight of the catch only. For unsampled hauls that have no knowledge of the
 #' amount of bycatch included in the haul, `OFFICIAL_TOTAL_CATCH` must be used
 #' along with a estimated bycatch rate to calculate `EXTRAPOLATED_WEIGHT`.
-#' Monthly bycatch rates are estimated from the sampled hauls and multiplied by
-#' the `OFFICIAL_TOTAL_CATCH` to get an estimate of the amount of bycatch that
-#' should be subtracted from the total weight to get just the weight of the
-#' species of interest.Sma
+#' Monthly fleet-specific bycatch rates are estimated from the sampled hauls and
+#' multiplied by the `OFFICIAL_TOTAL_CATCH` to get an estimate of the amount of
+#' bycatch that should be subtracted from `OFFICIAL_TOTAL_CATCH` to get just the
+#' weight of Pacific Hake.
 #'
 #' @details # Definitions
-#' \enumerate{
-#'   \item @template official_total_catch
-#'   \item @template extrapolated_weight
-#' }
+#' 1. `OFFICIAL_TOTAL_CATCH` is measured in metric tons (mt) and includes both
+#'    retained and discarded species. Thus, this measurement sums the targeted
+#'    species, prohibited species, and non-allocated species.
+#' 1. `EXTRAPOLATED_WEIGHT` is measured in kilograms (kg) and includes just the
+#'    weight of the relevant `SPECIES` included in that row of data, e.g., if
+#'    `SPECIES == 206`, then `EXTRAPOLATED_WEIGHT` is the kg of Pacific Hake in
+#'    that haul.
 #'
 #' @details # Assumptions
-#' \enumerate{
-#'   \item sampled hauls have an entry in the `SPECIES` column,
-#'   i.e., hake are denoted with 206
-#'   \item an unsampled haul is represented by one unique record
-#' }
+#' * sampled hauls have an entry in the `SPECIES` column, i.e., hake are
+#'   denoted with 206
+#' * an unsampled haul is represented by one unique record because there no
+#'   additional lines of catch for the bycatch species given it was not sampled
 #'
-#' @param ncatch An R object with catch information extracted from the
-#'   NORPAC database. The default is to read the `.Rdat` file
-#'   from the disk using [get_local()]. Else, users can just pass the R object
-#'   itself, which would typically be `hakedata[["ncatch"]]`.
+#' @param ncatch A data frame with catch information extracted from the NORPAC
+#'   database. The default is to read the `.Rdat` file from the disk using
+#'   [get_local()]. Else, users can just pass the R object itself, which would
+#'   typically be `hakedata[["ncatch"]]`.
 #' @param nyears The number of years for plotting.
-#' @template species
 #'
 #' @import ggplot2 grDevices
 #' @export
@@ -73,12 +74,11 @@
 #'
 process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
                                  nyears = 5,
-                                 species = 206,
                                  savedir = hakedata_wd()) {
   # Setup the environment
+  species <- 206
   args <- list(
-    width = 6.5, height = 4.5,
-    pointsize = 10, units = "in", res = 600
+    width = 6.5, height = 4.5, pointsize = 10, units = "in", res = 600
   )
   oldop <- options()$warn
   options(warn = -1)
@@ -91,12 +91,13 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
   )
   data("quotas")
 
-  outncatch <- ncatch %>%
+  ncatch_formatted <- ncatch %>%
     dplyr::mutate(
       Date = f_date(RETRIEVAL_DATE, format = "%Y-%m-%d"),
       month = f_date(RETRIEVAL_DATE, format = "%m"),
       Month = f_date(RETRIEVAL_DATE, format = "%b", factor = TRUE),
       year = f_date(RETRIEVAL_DATE, "%Y"),
+      # Create catch rate in mt/hr
       crate = EXTRAPOLATED_WEIGHT / 1000 / HRS,
       FISHING_DEPTH_M = FISHING_DEPTH_FATHOMS * fathom_to_meter,
       BOTTOM_DEPTH_M = BOTTOM_DEPTH_FATHOMS * fathom_to_meter,
@@ -106,8 +107,10 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
       # Unsampled hauls will have a SPECIES == NA and EXTRAPOLATED_WEIGHT == NA
       SPECIES = ifelse(sampled == 0, species, SPECIES),
       OFFICIAL_TOTAL_CATCHkg = OFFICIAL_TOTAL_CATCH * 1000,
+      # ByCatch (kg)
       ByCatch = OFFICIAL_TOTAL_CATCHkg - EXTRAPOLATED_WEIGHT
-    ) %>%
+    )
+  outncatch <- ncatch_formatted %>%
     dplyr::group_by(year, month, SPECIES == species, VESSEL_TYPE) %>%
     dplyr::mutate(
       bycatchrate = sum(ifelse(sampled == 1, ByCatch, 0), na.rm = TRUE) /
@@ -232,12 +235,22 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
   )
   gg <- mapply(plot_boxplot,
     data = list(
-      dplyr::filter(hcatch, year %in% keeptheseyears & ngroups > 2) %>% data.frame(),
-      dplyr::filter(hcatch, year %in% keeptheseyears & ngroups > 2) %>% data.frame()
+      dplyr::filter(hcatch, year %in% keeptheseyears & ngroups > 2) %>%
+        data.frame(),
+      dplyr::filter(hcatch, year %in% keeptheseyears & ngroups > 2) %>%
+        data.frame()
     ),
     file = list(
-      file.path(dirname(savedir), "doc", "main-figures", "fishCatchRatesUS.png"),
-      file.path(savedir, "Figures", "fishCatchRatesUSnolog.png")
+      file.path(
+        dirname(savedir),
+        "doc",
+        "main-figures",
+        "fishCatchRatesUS.png"
+      ),
+      file.path(savedir,
+        "Figures",
+        "fishCatchRatesUSnolog.png"
+      )
     ),
     yscale = list(
       "log10",
@@ -248,7 +261,8 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
       "U.S. at-sea unstandardized yearly catch-rates"
     ),
     MoreArgs = list(
-      xvar = c("Month"), showmedian = TRUE,
+      xvar = c("Month"),
+      showmedian = TRUE,
       incolor = "year",
       yvar = "crate",
       ylab = ylabelexpression,
@@ -289,7 +303,11 @@ process_catch_pacfin <- function(pcatch = get_local(file = "pacfin_catch.Rdat"),
   # database  1986 3431.9436
   # assesment 1986 3465.00
   pcatch.yr.per <- stats::aggregate(list("catch" = pcatch$MT),
-    list("sector" = pcatch$sector, "month" = pcatch$month, "year" = pcatch$year),
+    list(
+      "sector" = pcatch$sector,
+      "month" = pcatch$month,
+      "year" = pcatch$year
+    ),
     FUN = sum
   )
   pcatch.yr.per <- pcatch.yr.per[order(pcatch.yr.per$sector), ]
