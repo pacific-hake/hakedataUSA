@@ -2,4 +2,4 @@ password.txt
 ^README\.Rmd$
 ^\.github$
 ^\.history$
-^\pdf$
+pdf$
