@@ -16,7 +16,7 @@ You can install the development version of {hakedataUSA} from
 
 ``` r
 # install.packages("pak")
-pak::pak("pacific-hake/hakedataUSA")
+pak::pkg_install("pacific-hake/hakedataUSA")
 # or if getwd() is a clone of this repository
 # pak::local_install()
 library(hakedataUSA)
