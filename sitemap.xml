@@ -22,13 +22,16 @@
     <loc>/reference/commit_catch.html</loc>
   </url>
   <url>
+    <loc>/reference/f_date.html</loc>
+  </url>
+  <url>
+    <loc>/reference/f_vessel_type.html</loc>
+  </url>
+  <url>
     <loc>/reference/format_big_number.html</loc>
   </url>
   <url>
     <loc>/reference/get_confidential.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_date.html</loc>
   </url>
   <url>
     <loc>/reference/get_local.html</loc>
@@ -92,9 +95,6 @@
   </url>
   <url>
     <loc>/reference/process_database.html</loc>
-  </url>
-  <url>
-    <loc>/reference/process_vessel_type.html</loc>
   </url>
   <url>
     <loc>/reference/process_weight_at_age.html</loc>
