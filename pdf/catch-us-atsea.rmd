@@ -1,0 +1,176 @@
+---
+title: "Summary of bycatch in U.S. At-Sea sector"
+author: "Kelli F. Johnson"
+date: "`r Sys.Date()`"
+output:
+  bookdown::pdf_document2
+---
+
+**Please do NOT share this document** given that information summarized in
+at least one of the included figures shows summary statistics for groups
+containing less than three vessels.
+
+Data from NORPAC is used to calculate monthly, fishery-specific bycatch rates
+for each year (Figure \@ref(fig:catch-rates)). These are used to extrapolate
+the amount of bycatch there might have been in unsampled tows of Pacific Hake.
+The hypothesized amount of bycatch is then subtracted from the total weight of
+the unsampled tow to generate a total weight of Pacific Hake.
+
+```{r set-up, eval = TRUE, echo = FALSE, error = FALSE, warning = FALSE, message = FALSE}
+library(dplyr)
+library(devtools)
+load_all()
+options(scipen = 999)
+knitr::opts_chunk$set(
+  echo = FALSE, results = "hide", cache = TRUE,
+  message = FALSE, error = FALSE, warning = FALSE
+)
+load("../hake-assessment/data/extractedData/norpac_catch.Rdat")
+species <- 206
+current_year <- as.numeric(format(Sys.Date(), "%Y")) - 1
+
+ncatch_formatted <- ncatch %>%
+  dplyr::mutate(
+    Date = f_date(RETRIEVAL_DATE, format = "%Y-%m-%d"),
+    month = f_date(RETRIEVAL_DATE, format = "%m"),
+    Month = f_date(RETRIEVAL_DATE, format = "%b", factor = TRUE),
+    year = f_date(RETRIEVAL_DATE, "%Y"),
+    # Create catch rate in mt/hr
+    crate = EXTRAPOLATED_WEIGHT / 1000 / HRS,
+    FISHING_DEPTH_M = FISHING_DEPTH_FATHOMS * fathom_to_meter,
+    BOTTOM_DEPTH_M = BOTTOM_DEPTH_FATHOMS * fathom_to_meter,
+    vesseltype = f_vessel_type(VESSEL_TYPE),
+    Sector = "DomesticAtSea",
+    sampled = ifelse(is.na(HAUL_SAMPLED_BY) | HAUL_SAMPLED_BY == 0, 0, 1),
+    # Unsampled hauls will have a SPECIES == NA and EXTRAPOLATED_WEIGHT == NA
+    SPECIES = ifelse(sampled == 0, species, SPECIES),
+    OFFICIAL_TOTAL_CATCHkg = OFFICIAL_TOTAL_CATCH * 1000,
+    # ByCatch (kg)
+    ByCatch = OFFICIAL_TOTAL_CATCHkg - EXTRAPOLATED_WEIGHT
+  )
+
+entries_dont_match <- ncatch_formatted %>%
+  dplyr::group_by(VESSEL, Date, HAUL, year, month, vesseltype) %>%
+  dplyr::summarize(
+    sum = sum(EXTRAPOLATED_WEIGHT),
+    total = unique(OFFICIAL_TOTAL_CATCH) * 1000,
+    diff = total - sum
+  ) %>%
+  dplyr::filter(abs(diff) > 0.1)
+
+catch_rates <- ncatch_formatted %>%
+  dplyr::filter(
+    SPECIES == species,
+    sampled == 1
+  ) %>%
+  dplyr::group_by(vesseltype, VESSEL, HAUL, HAUL_DATE, CRUISE, PERMIT) %>%
+  dplyr::mutate(
+    bycatch_kg = OFFICIAL_TOTAL_CATCH * 1000 - EXTRAPOLATED_WEIGHT
+  ) %>%
+  dplyr::group_by(year, month, vesseltype) %>%
+  dplyr::summarize(
+    bycatch_kg = sum(bycatch_kg),
+    OFFICIAL_TOTAL_CATCHkg = sum(OFFICIAL_TOTAL_CATCH) * 1000,
+    bycatchrate = bycatch_kg / OFFICIAL_TOTAL_CATCHkg
+  ) %>%
+  dplyr::full_join(
+    ncatch_formatted %>%
+      dplyr::filter(sampled == 0, OFFICIAL_TOTAL_CATCH > 0) %>%
+      dplyr::group_by(year, month, vesseltype) %>%
+      dplyr::summarize(
+        n = n(),
+        unsampled_mt = sum(OFFICIAL_TOTAL_CATCH)
+      ),
+    by = c("year", "month", "vesseltype")
+  )
+
+ncatch_bycatch <- dplyr::full_join(
+  ncatch_formatted %>%
+    dplyr::filter(SPECIES == species, sampled == 1) %>%
+    dplyr::group_by(year, month, vesseltype) %>%
+    dplyr::summarize(
+      catch_sampled = sum(EXTRAPOLATED_WEIGHT, na.rm = TRUE),
+      catch_bycatch = sum(OFFICIAL_TOTAL_CATCH * 1000 - EXTRAPOLATED_WEIGHT, na.rm = TRUE)
+    ),
+  ncatch_formatted %>%
+    dplyr::group_by(year, month, vesseltype) %>%
+    dplyr::filter(SPECIES != species, sampled == 1) %>%
+    dplyr::summarize(
+      catch_bycatch_other = sum(EXTRAPOLATED_WEIGHT)
+    ),
+  by = c("year", "month", "vesseltype")
+) %>%
+  dplyr::mutate(
+    bycatchrate = catch_bycatch / catch_sampled,
+    test = catch_bycatch - catch_bycatch_other,
+    sampled = 0
+  )
+test <- dplyr::left_join(
+  ncatch_formatted,
+  ncatch_bycatch,
+  by = c("year", "month", "vesseltype", "sampled")
+)
+```
+
+In `r current_year`, the total landings (mt) brought on board and **NOT**
+sampled was estimated to sum to
+`r dplyr::filter(catch_rates, year == current_year, vesseltype == "CP") %>% dplyr::pull(unsampled_mt) %>% sum(na.rm = TRUE)` and
+`r dplyr::filter(catch_rates, year == current_year, vesseltype == "MS") %>% dplyr::pull(unsampled_mt) %>% sum(na.rm = TRUE)` (mt)
+for Catcher-Processors and Motherships, respectively. The total landings of
+Pacific Hake in the Catcher-Processor fleet for `r current_year` was estimated
+to be 126,247.03 (mt). The total landings of Pacific Hake in the Mothership
+fleet for `r current_year` was estimated to be 59,152.31 (mt). Which, makes for
+`r round(126427.03/126287*100, 2)` and `r round(59152.31/89144*100, 2)`
+percent attainment, respectively. These estimates are known to be different
+than the information provided in the [Commercial At-Sea Pacific Whiting Fishery
+and Shoreside Targeted Whiting Fishery Summary
+](https://reports.psmfc.org/pacfin/f?p=501:202::INITIAL:YES:::).
+Approximately, 126,246.74 and 59,157.13 (mt) were landed in by Catcher-
+Processors and Motherships, respectively.
+
+I found that the estimates of bycatch rates changed depending on how landing of
+non-target species is calculated. That is, adding `EXTRAPOLATED_WEIGHT` of
+non-target species is not the same as subtracting `EXTRAPOLATED_WEIGHT` of
+Pacific Hake from the `OFFICIAL_TOTAL_CATCH` after accounting for differences
+in units. There are many records where these two numbers do not add up after
+accounting for what I consider to be rounding errors, i.e., differences of
+less than 0.1. Beyond not knowing exactly how to calculate the total amount
+of bycatch in sampled tows, there will always be differences between
+numbers reported in PacFIN and those reported in the stock assessment
+because the JTC is using monthly-specific bycatch rates for each vessel type
+instead of bycatch rates from like tows that are calculated in season.
+
+The goal is to best estimate the amount of Pacific Hake that was removed
+from U.S. waters and I am uncertain which method accomplishes that. Though
+it is clear that that amount of bycatch differs by fishery, month, and
+year (Figures \@ref(fig:catch-rates) and \@ref(fig:total-bycatch)).
+
+```{r catch-rates, fig.cap = "\\label{fig:catch-rates}Bycatch (kg) / total catch (kg) by month (x axis), year (panel), and fishery (color). Size of the points indicates the amount of unsampled landings (mt)."}
+ggplot2::ggplot(
+    data = catch_rates %>% dplyr::filter(vesseltype != 3),
+    ggplot2::aes(x = month, y = bycatchrate, group = vesseltype, colour = vesseltype)
+) +
+  ggplot2::geom_point(alpha = .5, ggplot2::aes(size = unsampled_mt)) +
+  ggplot2::geom_line() +
+  ggplot2::facet_wrap("year", scales = "fixed") +
+  ggplot2::theme_bw() +
+  ggplot2::ylab("bycatch (kg) / total catch (kg)")
+```
+
+```{r total-bycatch, fig.cap = "\\label{fig:total-bycatch}Weight (kg) of bycatch by year (x axis), month (color), and vessel type (panel) in the at-sea fishery."}
+ncatch_formatted %>%
+  dplyr::filter(SPECIES != species, VESSEL_TYPE != 3, !is.na(EXTRAPOLATED_WEIGHT)) %>%
+  dplyr::group_by(year, Month = factor(month), vesseltype) %>%
+  dplyr::summarize(EXTRAPOLATED_WEIGHT = sum(EXTRAPOLATED_WEIGHT)) %>%
+  ggplot2::ggplot(ggplot2::aes(
+    x = year,
+    y = EXTRAPOLATED_WEIGHT,
+    colour = Month,
+    group = Month
+  )) +
+  ggplot2::geom_line() +
+  ggplot2::geom_point() +
+  ggplot2::facet_grid(. ~ vesseltype, scales = "fixed") +
+  ggplot2::ylab("Extrapolated weight (kg) of sampled bycatch") +
+  ggplot2::theme_bw()
+```
