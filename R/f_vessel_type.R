@@ -1,4 +1,3 @@
-
 #' Format `VESSEL_TYPE` as a character
 #'
 #' `VESSEL_TYPE` in the NORPAC data base are integers and this function

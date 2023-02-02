@@ -1,4 +1,3 @@
-
 update_ss3_weight_at_age <- function(dir) {
   load(fs::path(hakedata_wd(), "LengthWeightAge", "LWAdata.Rdata"))
   filenameforss <- file.path(
