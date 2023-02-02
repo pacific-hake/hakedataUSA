@@ -401,7 +401,6 @@ make_wtatage_plots <- function(plots = 1:6, data, counts, lengths = NULL,
       yrvec = (year - ncol(len.mat) + 1):year
     )
     dev.off()
-
   }
 }
 

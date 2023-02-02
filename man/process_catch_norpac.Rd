@@ -2,31 +2,21 @@
 % Please edit documentation in R/process_catch-.R
 \name{process_catch_norpac}
 \alias{process_catch_norpac}
-\title{Workup NORPAC Catches}
+\title{Process NORPAC catches}
 \usage{
 process_catch_norpac(
   ncatch = get_local(file = "norpac_catch.Rdat"),
   nyears = 5,
-  species = 206,
   savedir = hakedata_wd()
 )
 }
 \arguments{
-\item{ncatch}{An R object with catch information extracted from the
-NORPAC database. The default is to read the \code{.Rdat} file
-from the disk using \code{\link[=get_local]{get_local()}}. Else, users can just pass the R object
-itself, which would typically be \code{hakedata[["ncatch"]]}.}
+\item{ncatch}{A data frame with catch information extracted from the NORPAC
+database. The default is to read the \code{.Rdat} file from the disk using
+\code{\link[=get_local]{get_local()}}. Else, users can just pass the R object itself, which would
+typically be \code{hakedata[["ncatch"]]}.}
 
 \item{nyears}{The number of years for plotting.}
-
-\item{species}{An integer specifying the species for given data base.
-For NORPAC data, this will be three digits and
-is associated with the species name in
-\code{NORPAC.DOMESTIC_SPECIES}, using the column \code{SPECIES_NO}. Note that this
-value is often called the \code{OBS} species code in observer landings from the
-Alaska Fisheries Science Center and is not the \code{AKR} species code.
-For example, \code{206} is Pacific Hake and is the default.
-For PacFIN data, this will be the entry in \code{SPID}.}
 }
 \value{
 Figures and csv files are saved to the disk regarding
@@ -40,7 +30,7 @@ In the \code{Figures} directory, the following png files are saved:
 \item fishBottomDepthByVesselUS.png
 \item fishCatchRatesUSByYear.png
 \item fishDepthByYearUS.png
-\item fishCatchRatesUS.png
+\item ../doc/main-figures/fishCatchRatesUS.png
 \item fishCatchRatesUSnolog.png
 }
 
@@ -51,8 +41,8 @@ In the \code{Catches} directory, the following csv files are saved:
 }
 }
 \description{
-Summarize and plot NORPAC catches for the at-sea hake fishery.
-Fleet types are assigned to create summaries by fleet and year.
+Summarize and plot NORPAC catches for the at-sea hake fishery. Fleet types
+are assigned to create summaries by fleet and year.
 }
 \section{Tribal catches}{
 The column \code{CDQ_CODE} contains strings starting with an upper-case followed
@@ -60,17 +50,16 @@ by and the last two digits of the the CDQ code of the vessel. The code was
 created in 1995 and is used to track tribal catches in the hake fishery. The
 following codes exist:
 \itemize{
-\item C51 -- Aleutian Pribolof Island Community Development Association
+\item C51 -- Aleutian Pribilof Island Community Development Association
 \item C52 -- Bristol Bay Economic Development Corporation
-\item C53 -- Central Bering Sea Fishermens Association
+\item C53 -- Central Bering Sea Fishermen's Association
 \item C54 -- Coastal Villages Fishing Cooperative
 \item C55 -- Norton Sound Economic Development Corporation
 \item C56 -- Yukon Delta Fisheries Development Association
-\item R10 -- Research Permit - AFSC Catch Estimation
+\item R10 -- Research Permit - Alaska Fisheries Science Center Catch Estimation
 \item M01 -- Makah Tribe Whiting Association
 \item R11 -- Research Permit - WA Sea Grant bird/longline interaction
 \item R12 -- Research Permit - WA Sea Grant bird/longline interaction
-Tribal catches are denoted with an "M" for Makah.
 }
 }
 
@@ -80,24 +69,30 @@ including bycatch weight. For sampled hauls, \code{EXTRAPOLATED_WEIGHT} is the
 weight of the catch only. For unsampled hauls that have no knowledge of the
 amount of bycatch included in the haul, \code{OFFICIAL_TOTAL_CATCH} must be used
 along with a estimated bycatch rate to calculate \code{EXTRAPOLATED_WEIGHT}.
-Monthly bycatch rates are estimated from the sampled hauls and multiplied by
-the \code{OFFICIAL_TOTAL_CATCH} to get an estimate of the amount of bycatch that
-should be subtracted from the total weight to get just the weight of the
-species of interest.Sma
+Monthly fleet-specific bycatch rates are estimated from the sampled hauls and
+multiplied by the \code{OFFICIAL_TOTAL_CATCH} to get an estimate of the amount of
+bycatch that should be subtracted from \code{OFFICIAL_TOTAL_CATCH} to get just the
+weight of Pacific Hake.
 }
 
 \section{Definitions}{
 \enumerate{
-\item @template official_total_catch
-\item @template extrapolated_weight
+\item \code{OFFICIAL_TOTAL_CATCH} is measured in metric tons (mt) and includes both
+retained and discarded species. Thus, this measurement sums the targeted
+species, prohibited species, and non-allocated species.
+\item \code{EXTRAPOLATED_WEIGHT} is measured in kilograms (kg) and includes just the
+weight of the relevant \code{SPECIES} included in that row of data, e.g., if
+\code{SPECIES == 206}, then \code{EXTRAPOLATED_WEIGHT} is the kg of Pacific Hake in
+that haul.
 }
 }
 
 \section{Assumptions}{
-\enumerate{
-\item sampled hauls have an entry in the \code{SPECIES} column,
-i.e., hake are denoted with 206
-\item an unsampled haul is represented by one unique record
+\itemize{
+\item sampled hauls have an entry in the \code{SPECIES} column, i.e., hake are
+denoted with 206
+\item an unsampled haul is represented by one unique record because there no
+additional lines of catch for the bycatch species given it was not sampled
 }
 }
 

@@ -1,4 +1,3 @@
-
 #' Run tests for historical weight-at-age data
 #'
 #' @param data A data frame of weight-at-age data.

@@ -1,4 +1,3 @@
-
 #' Update the catches in a Stock Synthesis file
 #'
 #' @inheritParams commit_catch

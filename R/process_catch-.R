@@ -247,7 +247,8 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
         "main-figures",
         "fishCatchRatesUS.png"
       ),
-      file.path(savedir,
+      file.path(
+        savedir,
         "Figures",
         "fishCatchRatesUSnolog.png"
       )
