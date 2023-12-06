@@ -436,7 +436,9 @@ write_wtatage_file <- function(file = paste0("wtatage_", format(Sys.time(), "%Y"
   options(width = 5000, max.print = 9999999)
 
   # Remove the file if it exists because you do not want to append it
-  file.remove(file)
+  if (fs::file_exists(file)) {
+    fs::file_delete(file)
+  }
   zz <- file(file, open = "at")
   on.exit(close(zz), add = TRUE)
   sink(zz)
