@@ -4,30 +4,51 @@
 # hakedataUSA
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 The goal of {hakedataUSA} is to provide code to extract and workup the
 U.S. data for the assessment of Pacific Hake.
 
-## Installation
-
-You can install the development version of {hakedataUSA} from
-[GitHub](https://github.com/) with:
-
-``` r
-# install.packages("pak")
-pak::pkg_install("pacific-hake/hakedataUSA")
-# or if getwd() is a clone of this repository
-# pak::local_install()
-library(hakedataUSA)
-```
-
 ## Instructions
 
-``` r
-# Customize the next two lines
-local.model <- fs::path("2023", "test")
+1.  First, you must update `data-raw/quotas.csv` to include the
+    sector-specific quotas. These values are used when processing the
+    data, mainly for the creation of figures. Then, from within R,
+    source `data-raw/quotas.R` and the internal data object will be
+    updated and ready for use. Commit both `data-raw/quotas.csv` and
+    `data-quotas.rda` to the repository and push.
 
+2.  Next, load the package. This can be accomplished through GitHub
+    (first chunk) or using a local clone (second chunk).
+    
+    ``` r
+    chooseCRANmirror(ind = 1)
+    # install.packages("pak")
+    pak::pak("pacific-hake/hakedataUSA")
+    library(hakedataUSA)
+    ```
+    
+    ``` r
+    chooseCRANmirror(ind = 1)
+    stopifnot(basename(getwd()) == "hakedataUSA")
+    devtools::load_all()
+    ```
+
+3.  The path to where all of the raw output will be saved is stored in
+    an internal function, i.e., `hakedata_wd()`. Try it out, see if it
+    works for you. If it does not work, then you will need to alter the
+    function, which is stored in `R/hakedata-R`. The function should
+    result in a path ending with `data-tables` inside of your cloned
+    version of
+    [pacific-hake/hake-assessment](www.github.com/pacific-hake/hake-assessment).
+
+4.  The remainder of the code will pull from the data bases and set up
+    the input files.
+
+<!-- end list -->
+
+``` r
 pull_database()
 process_database()
 
@@ -37,12 +58,8 @@ write_bridging(
 )
 ```
 
-``` r
-rmarkdown::render("inst/extdata/beamer/hake_jtc_data_us.Rmd")
-```
-
 ## Issues
 
 Please contact <kelli.johnson@noaa.gov> if there are issues with the
-code. Note that the databases will only be accessible to members of the
-U.S. JTC.
+code. Note that the databases will only be accessible to U.S. members of
+the JTC.
