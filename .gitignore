@@ -7,3 +7,4 @@ inst/extdata/beamer/*.tex
 inst/extdata/beamer/*.utf8*
 inst/extdata/beamer/*.xmpi
 .history*
+README.html
