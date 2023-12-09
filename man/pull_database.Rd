@@ -70,7 +70,7 @@ Other, additional, databases may be added in the future through the
 and leads to many files being saved to your computer.
 Originally, files were \strong{NOT} overwritten. In 2022, Kelli F. Johnson
 changed the code to not save previous downloads to
-save on disk space, reduce the storing of redunant information, and
+save on disk space, reduce the storing of redundant information, and
 simplify the code base that needed maintenance.
 \itemize{
 \item Find the folder where the data should be saved with \code{\link[=hakedata_wd]{hakedata_wd()}}.

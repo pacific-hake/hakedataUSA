@@ -21,23 +21,15 @@ typically be \code{hakedata[["ncatch"]]}.}
 \value{
 Figures and csv files are saved to the disk regarding
 catch rates and depth (fishing and bottom depths).
-In the \code{Figures} directory, the following png files are saved:
-\itemize{
-\item fishDepthsUS.png
-\item fishDepthsUSallyears.png
-\item fish_FISHING_DEPTH_FATHOMS_US.png
-\item fish_BOTTOM_DEPTH_FATHOMS_US.png
-\item fishBottomDepthByVesselUS.png
-\item fishCatchRatesUSByYear.png
-\item fishDepthByYearUS.png
-\item ../doc/main-figures/fishCatchRatesUS.png
-\item fishCatchRatesUSnolog.png
-}
 
 In the \code{Catches} directory, the following csv files are saved:
 \itemize{
 \item depth-us-atsea-bottom.csv
 \item depth-us-atsea-fishing.csv
+\item us-cp-catch-by-month.csv
+\item us-ms-catch-by-month.csv
+\item us-cp-catch-rate-by-month.csv
+\item us-ms-catch-rate-by-month.csv
 }
 }
 \description{
@@ -73,6 +65,31 @@ Monthly fleet-specific bycatch rates are estimated from the sampled hauls and
 multiplied by the \code{OFFICIAL_TOTAL_CATCH} to get an estimate of the amount of
 bycatch that should be subtracted from \code{OFFICIAL_TOTAL_CATCH} to get just the
 weight of Pacific Hake.
+The raw column names are as follows \code{colnames(ncatch)}:
+\itemize{
+\item "HAULJOIN"
+\item "CRUISE"
+\item "PERMIT"
+\item "VESSEL"
+\item "VESSEL_TYPE"
+\item "HAUL_DATE"
+\item "HAUL"
+\item "DEPLOYMENT_DATE"
+\item "RETRIEVAL_DATE"
+\item "HRS"
+\item "CDQ_CODE"
+\item "OFFICIAL_TOTAL_CATCH"
+\item "HAUL_SAMPLED_BY"
+\item "LATDD_START"
+\item "LONDD_START"
+\item "LATDD_END"
+\item "LONDD_END"
+\item "FISHING_DEPTH_FATHOMS"
+\item "BOTTOM_DEPTH_FATHOMS"
+\item "CATCHER_BOAT_ADFG"
+\item "SPECIES"
+\item "EXTRAPOLATED_WEIGHT"
+}
 }
 
 \section{Definitions}{

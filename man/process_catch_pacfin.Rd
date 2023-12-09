@@ -26,12 +26,8 @@ which returns a path specific to the personal preferences of JTC members.}
 \value{
 The following files are saved to the disk:
 \itemize{
-\item PacFIN_Fleet.csv
-\item PacFIN_Sector.cs
-\item USshoreCatchByPeriodComp_ft.csv
 \item us-shore-catch-by-month.csv
 \item us-research-catch-by-month.csv
-\item us-shore-startdate-by-dahl.csv
 \item us-ti-catch-by-month.csv
 }
 }

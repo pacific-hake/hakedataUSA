@@ -120,7 +120,7 @@ for Catcher-Processors and Motherships, respectively. The total landings of
 Pacific Hake in the Catcher-Processor fleet for `r current_year` was estimated
 to be 126,247.03 (mt). The total landings of Pacific Hake in the Mothership
 fleet for `r current_year` was estimated to be 59,152.31 (mt). Which, makes for
-`r round(126427.03/126287*100, 2)` and `r round(59152.31/89144*100, 2)`
+`r round(126247.03/126287*100, 2)` and `r round(59152.31/89144*100, 2)`
 percent attainment, respectively. These estimates are known to be different
 than the information provided in the [Commercial At-Sea Pacific Whiting Fishery
 and Shoreside Targeted Whiting Fishery Summary

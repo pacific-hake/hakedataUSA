@@ -67,23 +67,21 @@ pull_surveyrawproportion <- function(year, dir) {
       path = "\\\\nwcfile\\fram\\Survey.Acoustics\\2003 Hake Sum WER\\00_Catch export & misc files to be placed_from xHD"
     )
   }
-  if (length(cnfilename) == 0) {
-    cnfilename <- usfilename
-  }
   usdata <- readxl::read_excel(
     path = usfilename,
     col_type = "text"
   ) %>%
     dplyr::select(dplyr::contains("age", ignore.case = TRUE)) %>%
     dplyr::rename_with(tolower)
-  cndata <- readxl::read_excel(
-    path = cnfilename,
-    col_type = "text"
-  ) %>%
-    dplyr::select(dplyr::contains("age", ignore.case = TRUE)) %>%
-    dplyr::rename_with(tolower)
-  if (year %in% c(2005, 2007)) {
+  if (length(cnfilename) == 0 | year %in% c(2005, 2007)) {
     cndata <- usdata[0, ]
+  } else {
+    cndata <- readxl::read_excel(
+      path = cnfilename,
+      col_type = "text"
+    ) %>%
+      dplyr::select(dplyr::contains("age", ignore.case = TRUE)) %>%
+      dplyr::rename_with(tolower)
   }
   col <- grep("age$", colnames(usdata), ignore.case = TRUE, value = TRUE)
   dplyr::full_join(usdata, cndata, by = col) %>%

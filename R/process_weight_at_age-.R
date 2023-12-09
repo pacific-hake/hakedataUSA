@@ -5,91 +5,127 @@
 #' @export
 #' @author Ian G. Taylor
 #'
-process_weight_at_age_US <- function(savedir = hakedata_wd()) {
-  # TODO: move these files to somewhere that is version controlled
-  # acdir <- file.path(savedir, "AcousticSurvey", "BioData", "csvFiles")
+process_weight_at_age_survey <- function(savedir = hakedata_wd()) {
+  year <- hakedata_year()
+  server_path <- "//nwcfile/fram/Survey.Acoustics/Survey Time Series Analysis/Historical Summary (for Kriging)/Biological"
 
-  # Determine if a survey occurred
-  survey_year <- utils::read.csv(fs::path(savedir, "survey-history.csv")) %>%
-    dplyr::pull(year) %>%
-    max() - hakedata_year() == 0
-  if (hakedata_year() %% 2 == 1 && survey_year) {
-    warning("process_weight_at_age_US thinks it is a non-survey year!")
-  }
-  if (survey_year) {
-    stop("acdir is not version controlled and needs to be dealt with")
-    Ac_survYear <- TRUE
-    # Shimada
-    datUS <- readxl::read_excel(
-      path = dir(
-        acdir,
-        pattern = glue::glue("{year}.+specimen_{{0,1}}[AGES]{{0,4}}\\."),
-        full.names = TRUE
-      )
-    ) %>%
+  # Find survey files and read in data
+  # Custom function only needed inside this function for survey data
+  read_mutate_join <- function(x, y) {
+    if (!grepl("xlsx", x)) {
+        x_data <- suppressWarnings(readxl::read_xls(x))
+        y_data <- suppressWarnings(readxl::read_xls(y))
+    } else {
+      x_data <- suppressWarnings(readxl::read_excel(x))
+      y_data <- suppressWarnings(readxl::read_excel(y))
+    }
+
+    xx <- x_data |>
+      dplyr::rename_with(tolower) |>
       dplyr::mutate(
         Sex2 = dplyr::case_when(
           sex == 1 ~ "M",
           sex == 2 ~ "F",
           sex == 3 ~ "U"
         )
-      ) %>%
-      dplyr::left_join(
-        readxl::read_excel(
-          path = dir(
-            acdir,
-            pattern = glue::glue("{year}.+haul\\."),
-            full.names = TRUE
-          )
-        ) %>% dplyr::select(haul, hb_date_time),
-        by = "haul"
-      ) %>%
-      dplyr::transmute(
-        Source = "Acoustic U.S.",
-        Weight_kg = weight,
-        Sex = Sex2,
-        Age_yrs = age,
-        Length_cm = length,
-        Month = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%m")),
-        Year = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%Y"))
       )
-    datCAN <- readxl::read_excel(
-      path = dir(
-        acdir,
-        pattern = glue::glue("{year}.+_specimen_CAN[_AGES]{{0,5}}\\."),
-        full.names = TRUE
-      )
-    ) %>%
-      dplyr::mutate(
-        Sex2 = dplyr::case_when(
-          sex == 1 ~ "M",
-          sex == 2 ~ "F",
-          sex == 3 ~ "U"
+    yy <- y_data |>
+      dplyr::rename_with(tolower) |>
+      dplyr::filter(!is.na(haul_weight)) |>
+      dplyr::select(haul, hb_date_time)
+    # Fix some bad dates in 2011 Canada data
+    if (any(grepl("4077[58\\.[768]", yy[["hb_date_time"]]))) {
+      yy <- dplyr::mutate(
+        yy,
+        hb_date_time = dplyr::case_when(
+          grepl("4077[58]\\.[768]", hb_date_time) ~ "8/20/2011 11:00:00 PM",
+          TRUE ~ hb_date_time
         )
-      ) %>%
-      dplyr::left_join(
-        readxl::read_excel(
-          path = dir(
-            acdir,
-            pattern = glue::glue("{year}.+biodata_haul_CAN\\."),
-            full.names = TRUE
-          )
-        ) %>% dplyr::select(haul, eq_date_time),
-        by = "haul"
-      ) %>%
-      dplyr::transmute(
-        Source = "Acoustic U.S.",
-        Weight_kg = weight,
-        Sex = Sex2,
-        Age_yrs = age,
-        Length_cm = length,
-        Month = as.numeric(format(as.Date(eq_date_time, f = "%m/%d/%Y"), "%m")),
-        Year = as.numeric(format(as.Date(eq_date_time, f = "%m/%d/%Y"), "%Y"))
       )
-    dat <- rbind(datUS, datCAN) %>%
-      dplyr::filter(!is.na(Age_yrs) & !is.na(Weight_kg))
+    }
+    together <- dplyr::left_join(
+      xx,
+      yy,
+      by = "haul"
+    ) |>
+    dplyr::transmute(
+      Source = dplyr::case_when(
+        basename(dirname(x)) == "US" ~ "U.S. Acoustic",
+        basename(dirname(x)) == "CAN" ~ "Canada Acoustic",
+        TRUE ~ "Unknown Acoustic"
+      ),
+      Weight_kg = weight,
+      Sex = Sex2,
+      Age_yrs = age,
+      Length_cm = length,
+      Month = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%m")),
+      Year = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%Y"))
+    ) |>
+    dplyr::mutate(
+      Year = ifelse(Year < 2000, Year + 2000, Year)
+    ) |>
+    dplyr::filter(!is.na(Age_yrs)) |>
+    dplyr::filter(!is.na(Weight_kg))
+    stopifnot(!any(is.na(together[["Year"]])))
+    return(together)
   }
+  main_tibble <- fs::dir_ls(
+    path = server_path,
+    type = "dir",
+    recurse = TRUE,
+    regexp = "US$|CAN$"
+  ) |>
+    tibble::as_tibble() |>
+    # Filter for data newer than 2008 just like all the other data sources
+    # and file structure/names is even more difficult to rectify for older
+    # data on the Acoustic server
+    dplyr::filter(
+      grepl(
+        "/20[12][0-9]/[CANUS]{2,3}|/2009/[CANUS]{2,3}",
+        value
+      )
+    ) |> 
+    dplyr::mutate(
+      bio_file = purrr::map_chr(
+        value,
+        .f = \(x) fs::dir_ls(x, regexp = "biodata_specimen.+x")[1]
+      ),
+      haul_file = purrr::map_chr(
+        value,
+        .f = \(x) fs::dir_ls(x, regexp = "[hH]aul")[1]
+      ),
+      data = purrr::map2(bio_file, haul_file, read_mutate_join)
+    ) |>
+    dplyr::pull(data) |>
+    dplyr::bind_rows()
 
+  # Save the data after combining with old data
+  file_path <- fs::path(savedir, "survey-weight-at-age.csv")
+  old_data <- utils::read.csv(file_path) |>
+    dplyr::filter(Year < 2008) |>
+    dplyr::mutate(
+      Source = dplyr::case_when(
+        Source == "US_acoustic" ~ "U.S. Acoustic",
+        Source == "CAN_acoustic" ~ "Canada Acoustic",
+        TRUE ~ Source
+      )
+    )
+  final_data <- dplyr::bind_rows(
+    old_data,
+    main_tibble
+  ) |>
+    dplyr::arrange(Source, Year, Month) |>
+    as.data.frame()
+
+  utils::write.csv(
+    x = final_data,
+    file = file_path,
+    quote = FALSE,
+    row.names = FALSE
+  )
+}
+
+process_weight_at_age_us <- function(savedir = hakedata_wd()) {
   base::load(file.path(savedir, "extractedData", "atsea.ages.Rdat"))
   base::load(file.path(savedir, "extractedData", "page.Rdat"))
   tmp <- dplyr::bind_rows(
@@ -123,13 +159,18 @@ process_weight_at_age_US <- function(savedir = hakedata_wd()) {
       !is.na(Age_yrs),
       !is.na(Weight_kg)
     )
-  fishery <- read.csv(
-    file = fs::path(savedir, "LengthWeightAge", "us-weight.csv")
+  final_data <- utils::read.csv(
+    file = fs::path(savedir, "us-weight-at-age.csv")
   ) %>%
     dplyr::filter(Year < 2008) %>%
-    dplyr::bind_rows(tmp)
-
-  stopifnot(NROW(dplyr::filter(tmp, Weight_kg > 10)) == 0)
+    dplyr::bind_rows(tmp) |>
+    dplyr::arrange(Source, Year, Month)
+  write.csv(
+    x = final_data |> as.data.frame(),
+    file = fs::path(savedir, "us-weight-at-age.csv"),
+    quote = FALSE,
+    row.names = FALSE
+  )
 }
 
 #' Create weight-at-age files for hake assessment
@@ -169,7 +210,7 @@ process_weight_at_age_US <- function(savedir = hakedata_wd()) {
 #' @author Ian G. Taylor
 #' @return todo: document return
 #'
-process_weight_at_age <- function(dir = fs::path(hakedata_wd(), "LengthWeightAge"),
+process_weight_at_age <- function(dir = hakedata_wd(),
                                   maxage = 15,
                                   yrs = 2008:hakedata_year(),
                                   navgyears = 5,
@@ -177,13 +218,14 @@ process_weight_at_age <- function(dir = fs::path(hakedata_wd(), "LengthWeightAge
                                   maturity = maturity_at_age) {
   fs::dir_create(path = file.path(dir, "plots"))
 
-  # LengthWeightAge_data.rds provided by CG on 2021-01-09 in google drive #703
+  # length-weight-age_data.rds provided by CG on 2021-01-09 in google drive #703
   # filtered by area rather than month and provided as rds rather than csv to
   # save on size, contains all US samples in LWAdata_1975to2007.csv, so
   # eliminated that file.
-  files_weights <- c(
-    fs::path(ext = "csv", dir, c("survey-weight", "us-weight")),
-    fs::path(dirname(dir), "can-weight-at-age.csv")
+  files_weights <- fs::path(
+      ext = "csv",
+      dir,
+      c("survey-weight-at-age", "us-weight-at-age", "can-weight-at-age")
   )
   dat <- purrr::map_dfr(
     files_weights,

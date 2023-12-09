@@ -9,7 +9,7 @@ process_age_sea(
   ncatch = get_local(file = "norpac_catch.Rdat"),
   years = 2008:hakedata_year(),
   ages = 1:15,
-  files = fs::path(hakedata_wd(), paste0("us-", c("cp", "ms"), "-age-data.csv")),
+  files = fs::path(hakedata_wd(), paste0("us-", c("cp", "ms"), "-age-proportions.csv")),
   write = TRUE
 )
 }

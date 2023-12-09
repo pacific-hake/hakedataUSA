@@ -17,7 +17,7 @@ plot_raw_age <- function(atsea.ages = get_local("atsea.ages.Rdat"),
                          xlim_weight = c(0, 3),
                          xlim_length = c(0, 70)) {
   gg <- ggplot(
-    atsea.ages[atsea.ages$YEAR %in% years, ],
+    dplyr::filter(atsea.ages, YEAR %in% years),
     aes(group = factor(.data[["YEAR"]]), na.rm = TRUE)
   ) +
     ylab("At-Sea") +

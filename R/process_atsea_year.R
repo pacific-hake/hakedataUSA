@@ -78,17 +78,11 @@ process_atsea_year <- function(dat,
   dat <- dat %>%
     dplyr::group_by(AGE, Year, Month) %>%
     dplyr::mutate(
-      dplyr::across(
-        .cols = WEIGHT,
-        .fns = ~ tidyr::replace_na(., mean(., na.rm = TRUE)),
-      )
+      WEIGHT = tidyr::replace_na(WEIGHT, mean(WEIGHT, na.rm = TRUE)),
     ) %>%
     dplyr::group_by(AGE, Year) %>%
     dplyr::mutate(
-      dplyr::across(
-        .cols = WEIGHT,
-        .fns = ~ tidyr::replace_na(., mean(., na.rm = TRUE)),
-      )
+      WEIGHT = tidyr::replace_na(WEIGHT, mean(WEIGHT, na.rm = TRUE))
     ) %>%
     dplyr::ungroup()
 
@@ -128,8 +122,8 @@ process_atsea_year <- function(dat,
       dplyr::mutate(id = paste(CRUISE, PERMIT, HAUL_OFFLOAD)) %>%
       dplyr::group_by(Year) %>%
       dplyr::summarise(
-        `n.fish` = n(),
-        `n.hauls` = length(unique(id))
+        `num_fish` = dplyr::n(),
+        `num_samples` = length(unique(id))
       ) %>%
       dplyr::ungroup(),
     dat %>%

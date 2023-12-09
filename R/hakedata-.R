@@ -25,12 +25,15 @@ hakedata_wd <- function() {
   if (Sys.info()["sysname"] == "Windows") {
     wd <- switch(user,
       "Kelli.Johnson" = {
-        fs::path("c:", "github", "pacific-hake", "hake-assessment", "data")
+        fs::path(
+          "d:", "github", "pacific-hake",
+          "hake-assessment", "data-tables"
+        )
       },
       "Aaron.Berger" = {
         fs::path(
           "C:", "Users", "Aaron.Berger", "Documents",
-          "GitHub", "hake-assessment", "data"
+          "GitHub", "hake-assessment", "data-tables"
         )
       },
       getwd()

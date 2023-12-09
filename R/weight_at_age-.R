@@ -49,7 +49,8 @@ weight_at_age_wide <- function(dat,
     "CAN_domestic",
     "CAN_polish",
     "Acoustic U.S.", "US_acoustic",
-    "Acoustic Canada", "CAN_acoustic"
+    "Acoustic Canada", "CAN_acoustic",
+    "U.S. Acoustic", "Canada Acoustic"
   )
 
   dat_filtered <- dat %>%
@@ -651,6 +652,8 @@ weight_at_age_read <- function(file) {
         Source == "Poland_acoustic" ~ "Acoustic Poland",
         Source == "Acoustic U.S." ~ "US_acoustic",
         Source == "Acoustic Canada" ~ "CAN_acoustic",
+        Source == "U.S. Acoustic" ~ "US_acoustic",
+        Source == "Canada Acoustic" ~ "CAN_acoustic",
         Source == "ATSEA" ~ "US_atsea",
         TRUE ~ Source
       )

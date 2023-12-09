@@ -23,7 +23,11 @@ process_age_sea <- function(atsea.ages = get_local(file = "atsea.ages.Rdat"),
                             ages = 1:15,
                             files = fs::path(
                               hakedata_wd(),
-                              paste0("us-", c("cp", "ms"), "-age-data.csv")
+                              paste0(
+                                "us-",
+                                c("cp", "ms"),
+                                "-age-proportions.csv"
+                              )
                             ),
                             write = TRUE) {
   daterange <- atsea.ages %>%
@@ -40,8 +44,48 @@ process_age_sea <- function(atsea.ages = get_local(file = "atsea.ages.Rdat"),
     )
   }
 
+  # Output raw ages
+  raw_ages <- dplyr::filter(
+    atsea.ages,
+    YEAR %in% years,
+    !is.na(AGE)
+  ) |>
+    dplyr::left_join(
+      y = ncatch |>
+        dplyr::filter(SPECIES == 206) |>
+        dplyr::select(HAULJOIN, HAUL, vesseltype),
+      by = c(HAUL_JOIN = "HAULJOIN", HAUL_OFFLOAD = "HAUL")
+    ) |>
+    dplyr::mutate(
+      AGE = ifelse(AGE > 15, 15, AGE)
+    ) |>
+    dplyr::rename(year = YEAR) |>
+    dplyr::group_by(year, AGE, vesseltype) |>
+    dplyr::count() |>
+    tidyr::pivot_wider(
+      names_from = AGE,
+      values_from = n
+    ) |>
+    dplyr::mutate(dplyr::across(
+      dplyr::everything(),
+      .fns = \(x) tidyr::replace_na(x, 0)
+    ))|>
+    tidyr::nest(gg = -"vesseltype") |>
+    dplyr::mutate(
+      lower_name = tolower(vesseltype),
+      name = fs::path(
+        dirname(files)[1],
+        glue::glue("us-{lower_name}-age-raw.csv")
+      ),
+      purrr::walk2(
+        .x = gg,
+        .y = name,
+        .f = \(x, y) utils::write.csv(x, y, row.names = FALSE, quote = FALSE)
+      )
+    )
+
   processed <- purrr::map(
-    .x = ifelse(test = grepl("ms", file_out), yes = 2, no = 1),
+    .x = ifelse(test = grepl("ms", files), yes = 2, no = 1),
     .f = ~ process_atsea_year(
       dat = atsea.ages,
       ncatch = ncatch %>% dplyr::filter(SPECIES == 206),
@@ -53,16 +97,20 @@ process_age_sea <- function(atsea.ages = get_local(file = "atsea.ages.Rdat"),
       tidyr::pivot_wider(
         id_cols = year,
         names_from = AGE,
-        names_prefix = "a",
         values_from = comp,
         unused_fn = max
       ) %>%
-      dplyr::relocate(`n.fish`, `n.hauls`, .after = year)
+      dplyr::relocate(`num_fish`, `num_samples`, .after = year)
   )
   purrr::walk2(
     .x = processed,
     .y = files,
-    .f = ~ utils::write.table(x = .x, file = .y, sep = ",", row.names = FALSE)
+    .f = ~ utils::write.csv(
+      x = .x,
+      file = .y,
+      quote = FALSE,
+      row.names = FALSE
+    )
   )
   return(processed)
 }
@@ -91,6 +139,27 @@ process_age_shore <- function(page = get_local("page.Rdat"),
     states = c("CA", "OR", "WA", "PW")
   )
 
+  raw_ages <- page.worked |>
+    dplyr::group_by(SAMPLE_YEAR, AGE) |>
+    dplyr::mutate(
+      AGE = ifelse(AGE > 15, 15, AGE)
+    ) |>
+    dplyr::count() |>
+    tidyr::pivot_wider(
+      names_from = AGE,
+      values_from = n
+    ) |>
+    dplyr::rename(year = SAMPLE_YEAR) |>
+    dplyr::mutate(dplyr::across(
+      dplyr::everything(),
+      .fns = \(x) tidyr::replace_na(x, 0)
+    ))|>
+    utils::write.csv(
+      file = fs::path(hakedata_wd(), "us-sb-age-raw.csv"),
+      row.names = FALSE,
+      quote = FALSE
+    )
+
   nFishbygear <- table(dat$SAMPLE_YEAR, dat$gear)
   nSamp <- apply(
     table(dat$SAMPLE_YEAR, dat$SAMPLE_NO),
@@ -117,32 +186,36 @@ process_age_shore <- function(page = get_local("page.Rdat"),
   tmp <- LFs$all$PW
   afs <- matrix(NA,
     ncol = length(ages) + 3, nrow = length(tmp),
-    dimnames = list(NULL, c("year", "n.fish", "n.trips", paste0("a", ages)))
+    dimnames = list(NULL, c("year", "num_fish", "num_samples", paste0(ages)))
   )
   for (i in 1:length(tmp)) {
     tmp2 <- tmp[[i]]
     afs[i, "year"] <- tmp2$year[1]
-    afs[i, paste0("a", min(ages))] <- sum(tmp2[tmp2$age <= min(ages), "lf"])
-    afs[i, paste0("a", max(ages))] <- sum(tmp2[tmp2$age >= max(ages), "lf"])
+    afs[i, paste0(min(ages))] <- sum(tmp2[tmp2$age <= min(ages), "lf"])
+    afs[i, paste0(max(ages))] <- sum(tmp2[tmp2$age >= max(ages), "lf"])
     for (j in (min(ages) + 1):(max(ages) - 1)) {
       if (sum(tmp2$age == j)) {
-        afs[i, paste0("a", j)] <- tmp2[tmp2$age == j, "lf"]
+        afs[i, paste0(j)] <- tmp2[tmp2$age == j, "lf"]
       } else {
-        afs[i, paste0("a", j)] <- 0
+        afs[i, paste0(j)] <- 0
       }
     }
   }
+  while (length(dev.list()) > 0) {
+    dev.off()
+  }
 
-  afs[, "n.trips"] <- nSamp[as.character(afs[, "year"])]
-  afs[, "n.fish"] <- nFish[as.character(afs[, "year"])]
+  afs[, "num_samples"] <- nSamp[as.character(afs[, "year"])]
+  afs[, "num_fish"] <- nFish[as.character(afs[, "year"])]
   # Deal with not wanting scientific notation in output
   oldoptions <- options()
   options(scipen = 999)
   on.exit(options(sciepen = oldoptions[["scipen"]]), add = TRUE)
   utils::write.csv(
     afs,
-    file = fs::path(hakedata_wd(), "us-shore-age-data.csv"),
-    row.names = FALSE
+    file = fs::path(hakedata_wd(), "us-sb-age-proportions.csv"),
+    row.names = FALSE,
+    quote = FALSE
   )
 
   return(afs)

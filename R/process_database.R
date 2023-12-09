@@ -13,6 +13,7 @@ process_database <- function() {
   plot_raw_age()
 
   # Weight at age
-  process_weight_at_age_US()
+  process_weight_at_age_survey()
+  process_weight_at_age_us()
   withforecast <- process_weight_at_age()
 }

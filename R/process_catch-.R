@@ -29,6 +29,29 @@
 #' multiplied by the `OFFICIAL_TOTAL_CATCH` to get an estimate of the amount of
 #' bycatch that should be subtracted from `OFFICIAL_TOTAL_CATCH` to get just the
 #' weight of Pacific Hake.
+#' The raw column names are as follows `colnames(ncatch)`:
+#' * "HAULJOIN"
+#' * "CRUISE"
+#' * "PERMIT"
+#' * "VESSEL"
+#' * "VESSEL_TYPE"
+#' * "HAUL_DATE"
+#' * "HAUL"
+#' * "DEPLOYMENT_DATE"
+#' * "RETRIEVAL_DATE"
+#' * "HRS"
+#' * "CDQ_CODE"
+#' * "OFFICIAL_TOTAL_CATCH"
+#' * "HAUL_SAMPLED_BY"
+#' * "LATDD_START"
+#' * "LONDD_START"
+#' * "LATDD_END"
+#' * "LONDD_END"
+#' * "FISHING_DEPTH_FATHOMS"
+#' * "BOTTOM_DEPTH_FATHOMS"
+#' * "CATCHER_BOAT_ADFG"
+#' * "SPECIES"
+#' * "EXTRAPOLATED_WEIGHT"
 #'
 #' @details # Definitions
 #' 1. `OFFICIAL_TOTAL_CATCH` is measured in metric tons (mt) and includes both
@@ -57,20 +80,14 @@
 #'
 #' @return Figures and csv files are saved to the disk regarding
 #' catch rates and depth (fishing and bottom depths).
-#' In the `Figures` directory, the following png files are saved:
-#'   * fishDepthsUS.png
-#'   * fishDepthsUSallyears.png
-#'   * fish_FISHING_DEPTH_FATHOMS_US.png
-#'   * fish_BOTTOM_DEPTH_FATHOMS_US.png
-#'   * fishBottomDepthByVesselUS.png
-#'   * fishCatchRatesUSByYear.png
-#'   * fishDepthByYearUS.png
-#'   * ../doc/main-figures/fishCatchRatesUS.png
-#'   * fishCatchRatesUSnolog.png
 #'
 #' In the `Catches` directory, the following csv files are saved:
 #'   * depth-us-atsea-bottom.csv
 #'   * depth-us-atsea-fishing.csv
+#'   * us-cp-catch-by-month.csv
+#'   * us-ms-catch-by-month.csv
+#'   * us-cp-catch-rate-by-month.csv
+#'   * us-ms-catch-rate-by-month.csv
 #'
 process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
                                  nyears = 5,
@@ -89,9 +106,8 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
     path = fs::path(savedir, "Figures"),
     recurse = TRUE
   )
-  data("quotas")
 
-  ncatch_formatted <- ncatch %>%
+  outncatch <- ncatch %>%
     dplyr::mutate(
       Date = f_date(RETRIEVAL_DATE, format = "%Y-%m-%d"),
       month = f_date(RETRIEVAL_DATE, format = "%m"),
@@ -109,8 +125,7 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
       OFFICIAL_TOTAL_CATCHkg = OFFICIAL_TOTAL_CATCH * 1000,
       # ByCatch (kg)
       ByCatch = OFFICIAL_TOTAL_CATCHkg - EXTRAPOLATED_WEIGHT
-    )
-  outncatch <- ncatch_formatted %>%
+    ) %>%
     dplyr::group_by(year, month, SPECIES == species, VESSEL_TYPE) %>%
     dplyr::mutate(
       bycatchrate = sum(ifelse(sampled == 1, ByCatch, 0), na.rm = TRUE) /
@@ -139,26 +154,12 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
     dplyr::ungroup()
 
   cp <- catchout[catchout$vesseltype == "CP", -(1:2)]
-  plot_catchvmonthbyyear(
-    data = cp,
-    Yrs = as.character((max(cp$year) - nyears + 1):max(cp$year)),
-    title = "U.S. CP Catches",
-    quotas = quotas[1, -1],
-    file = file.path(savedir, "Figures", "CpCatchMonthYear.png")
-  )
   utils::write.table(cp %>% dplyr::arrange(year, month),
     file = fs::path(savedir, "us-cp-catch-by-month.csv"),
     sep = ",", row.names = FALSE, quote = FALSE
   )
-  ms <- catchout[catchout$vesseltype == "MS", -(1:2)]
-  plot_catchvmonthbyyear(
-    data = ms,
-    file = file.path(savedir, "Figures", "MsCatchMonthYear.png"),
-    Yrs = as.character((max(ms$year) - nyears + 1):max(ms$year)),
-    title = "U.S. MS Catches",
-    quotas = quotas[2, -1]
-  )
 
+  ms <- catchout[catchout$vesseltype == "MS", -(1:2)]
   utils::write.table(
     ms %>% dplyr::arrange(year, month),
     file = fs::path(savedir, "us-ms-catch-by-month.csv"),
@@ -174,47 +175,38 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
   keeptheseyears <- utils::tail(1:max(hcatch$year, na.rm = TRUE), nyears)
 
   #### Figures: depths
-  hcatch <- get_confidential(hcatch, yvar = "vcolumn", xvar = c("year"))
+  hcatch <- get_confidential(
+    hcatch,
+    yvar = "vcolumn",
+    xvar = c("year")
+  )
   stopifnot(
-    "Yearly summaries are not confidential" =
+    "Year summaries are not confidential" =
       all(
         stats::aggregate(ngroups ~ year, data = hcatch, unique)[, "ngroups"] > 2
       )
   )
-  gg <- plot_boxplot(
-    data = stats::reshape(
-      data = dplyr::filter(
-        hcatch,
-        year %in% keeptheseyears & ngroups > 2
-      ) %>%
-        data.frame(),
-      direction = "long",
-      varying = c("FISHING_DEPTH_FATHOMS", "BOTTOM_DEPTH_FATHOMS"),
-      v.names = "fathoms", timevar = "type",
-      times = c("(a) Fishing depth", "(b) Bottom depth")
-    ),
-    xvar = c("year", "type"), showmedian = TRUE,
-    yvar = "fathoms", ylab = "Depth (fathoms)", mlab = "",
-    incolor = "year", scales = "free",
-    file = file.path(savedir, "Figures", "fishDepthsUS.png"),
-    width = args[["width"]], height = args[["height"]],
-    units = args[["units"]], dpi = args[["res"]]
-  )
-
-  cols <- c(
-    "year",
-    grep(value = TRUE, "lower|median|upper", colnames(gg[["data"]]))
-  )
   utils::write.csv(
-    x = gg[["data"]][grepl("Bottom", gg[["data"]][, "type"]), cols],
+    x = get_depth_by_year(
+      hcatch,
+      type = "bottom",
+      yrs = keeptheseyears,
+      min_depth_cutoff = 0
+    ),
     file = file.path(savedir, "depth-us-atsea-bottom.csv"),
     row.names = FALSE
   )
   utils::write.csv(
-    x = gg[["data"]][grepl("Fishing", gg[["data"]][, "type"]), cols],
+    x = get_depth_by_year(
+      hcatch,
+      type = "gear",
+      yrs = keeptheseyears,
+      min_depth_cutoff = 0
+    ),
     file = file.path(savedir, "depth-us-atsea-fishing.csv"),
     row.names = FALSE
   )
+
   hcatch[, "months"] <- droplevels(factor(hcatch$month,
     levels = 1:12,
     labels = rep(paste(seq(1, 11, by = 2), seq(2, 12, by = 2), sep = "-"),
@@ -222,59 +214,32 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
     )
   ))
 
-  #### Figure: catch rate
-  hcatch <- get_confidential(
-    hcatch,
+  # catch rate
+  data_rate <- get_confidential(
+    hcatch |>
+      dplyr::filter(vesseltype %in% c("CP", "MS")),
     yvar = "vcolumn",
-    xvar = c("year", "month")
-  )
-  ylabelexpression <- expression(
-    Unstandardized ~ catch ~ rates ~ (mt ~ "*" ~ hr^{
-      -1
-    })
-  )
-  gg <- mapply(plot_boxplot,
-    data = list(
-      dplyr::filter(hcatch, year %in% keeptheseyears & ngroups > 2) %>%
-        data.frame(),
-      dplyr::filter(hcatch, year %in% keeptheseyears & ngroups > 2) %>%
-        data.frame()
-    ),
-    file = list(
-      file.path(
-        dirname(savedir),
-        "doc",
-        "main-figures",
-        "fishCatchRatesUS.png"
-      ),
-      file.path(
+    xvar = c("year", "month", "vesseltype")
+  ) |>
+    dplyr::filter(ngroups > 2) |>
+    tidyr::nest(gg = -"vesseltype") |>
+    mutate_at(
+      "gg",
+      purrr::map,
+      function(x) get_rate_by_month(x)
+    ) |>
+    dplyr::mutate(
+      lower_name = tolower(vesseltype),
+      name = fs::path(
         savedir,
-        "Figures",
-        "fishCatchRatesUSnolog.png"
+        glue::glue("us-{lower_name}-catch-rate-by-month.csv")
+      ),
+      purrr::walk2(
+        .x = gg,
+        .y = name,
+        .f = \(x, y) utils::write.csv(x = x, file = y, row.names = FALSE)
       )
-    ),
-    yscale = list(
-      "log10",
-      "identity"
-    ),
-    mlab = list(
-      "U.S. at-sea unstandardized yearly catch-rates",
-      "U.S. at-sea unstandardized yearly catch-rates"
-    ),
-    MoreArgs = list(
-      xvar = c("Month"),
-      showmedian = TRUE,
-      incolor = "year",
-      yvar = "crate",
-      ylab = ylabelexpression,
-      legend.position = c(0.5, 0.95),
-      legend.direction = "horizontal",
-      width = args[["width"]],
-      height = args[["height"]],
-      units = args[["units"]],
-      dpi = args[["res"]]
     )
-  )
   return(outncatch)
 }
 
@@ -285,57 +250,39 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
 #' @template savedir
 #'
 #' @return The following files are saved to the disk:
-#' * PacFIN_Fleet.csv
-#' * PacFIN_Sector.cs
-#' * USshoreCatchByPeriodComp_ft.csv
 #' * us-shore-catch-by-month.csv
 #' * us-research-catch-by-month.csv
-#' * us-shore-startdate-by-dahl.csv
 #' * us-ti-catch-by-month.csv
 #'
 process_catch_pacfin <- function(pcatch = get_local(file = "pacfin_catch.Rdat"),
                                  nyears = 5,
                                  savedir = hakedata_wd()) {
-  # File management
-  data("quotas")
 
   # FLEET XXX is in the hake assessment as shore-based catches,
   # although 1986 differs from data used
   # database  1986 3431.9436
   # assesment 1986 3465.00
-  pcatch.yr.per <- stats::aggregate(list("catch" = pcatch$MT),
-    list(
-      "sector" = pcatch$sector,
-      "month" = pcatch$month,
-      "year" = pcatch$year
-    ),
-    FUN = sum
-  )
-  pcatch.yr.per <- pcatch.yr.per[order(pcatch.yr.per$sector), ]
-  pcatch.yr.per$catch <- round(pcatch.yr.per$catch, 5)
-  plot_catchvmonthbyyear(
-    data = pcatch.yr.per %>%
-      dplyr::filter(sector == "USshore") %>%
-      dplyr::select(-sector),
-    Yrs = as.character(
-      (max(pcatch.yr.per$year) - nyears + 1):max(pcatch.yr.per$year)
-    ),
-    quotas = quotas[3, ],
-    title = "U.S. Shoreside Catches",
-    file = file.path(savedir, "Figures", "shoresideCatchMonthYear.png")
-  )
+  pcatch_by_month_year <- dplyr::group_by(
+    pcatch,
+    sector, month, year
+  ) |>
+    dplyr::summarise(catch = sum(MT, na.rm = TRUE)) |>
+    dplyr::arrange(sector, year, month) |>
+    dplyr::ungroup()
 
-  utils::write.table(pcatch.yr.per[pcatch.yr.per$sector == "USshore", -1],
+  utils::write.table(
+    x = pcatch_by_month_year |>
+      dplyr::filter(sector == "USshore") |>
+      dplyr::select(-sector) |>
+      dplyr::mutate(catch = round(catch, 5)),
     file = file.path(savedir, "us-shore-catch-by-month.csv"),
     sep = ",", quote = FALSE, row.names = FALSE
   )
-  research <- pcatch[pcatch$sector == "USresearch", ]
-  research <- stats::aggregate(list("catch" = research$MT),
-    list("month" = research$month, "year" = research$year),
-    FUN = sum
-  )
-  research$catch <- sprintf("%.9f", research$catch)
-  utils::write.table(research,
+  utils::write.table(
+    x = pcatch_by_month_year |>
+      dplyr::filter(sector == "USresearch") |>
+      dplyr::select(-sector) |>
+      dplyr::mutate(catch = sprintf("%.9f", catch)),
     file = file.path(savedir, "us-research-catch-by-month.csv"),
     sep = ",", quote = FALSE, row.names = FALSE
   )
@@ -345,7 +292,7 @@ process_catch_pacfin <- function(pcatch = get_local(file = "pacfin_catch.Rdat"),
     x = pcatch %>%
       dplyr::filter(FLEET == "TI") %>%
       dplyr::group_by(month, year) %>%
-      dplyr::summarize(catch = sum(MT)) %>%
+      dplyr::summarize(catch = round(sum(MT, na.rm = TRUE), 5)) %>%
       dplyr::arrange(year, month) %>%
       dplyr::ungroup(),
     file = file.path(savedir, "us-ti-catch-by-month.csv"),

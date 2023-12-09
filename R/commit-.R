@@ -33,8 +33,11 @@ commit_catch <- function(dir_data = hakedata_wd(),
   file_cp <- fs::path(dir_data, "us-cp-catch-by-month.csv")
   file_ms <- fs::path(dir_data, "us-ms-catch-by-month.csv")
   file_ti <- fs::path(dir_data, "us-ti-catch-by-month.csv")
-  file_can <- fs::dir_ls(dir_data, regexp = "can.*catch-by-month.csv") %>%
-    `names<-`(gsub(".*can-([a-z]{2})-.*", "\\1", .))
+  file_can <- fs::dir_ls(
+    gsub("-tables", "", dir_data),
+    regexp = "can.*catch_by_month_df.rda"
+  ) %>%
+    `names<-`(gsub(".*can_([a-z]{2})_.*", "\\1", .))
 
   # Read in and prepare data sets
   sh <- dplyr::full_join(
@@ -60,10 +63,14 @@ commit_catch <- function(dir_data = hakedata_wd(),
   ti <- utils::read.csv(file_ti) %>%
     dplyr::group_by(year) %>%
     dplyr::summarize(catch = sum(catch))
-  can <- purrr::map_dfr(
+  temp.env <- new.env()
+  can_names <- purrr::map(
     file_can,
-    read.csv,
-    check.names = FALSE,
+    .f = \(x) load(x, envir = temp.env)
+  )
+  can <- purrr::map_dfr(
+    can_names,
+    .f = \(x) get(x, envir = temp.env),
     .id = "sector"
   ) %>%
     dplyr::mutate(sector = dplyr::case_when(
@@ -84,43 +91,47 @@ commit_catch <- function(dir_data = hakedata_wd(),
     dplyr::rename(year = Year)
   inc <- list(sh, cp, ms, can) %>%
     purrr::reduce(dplyr::full_join, by = "year") %>%
+    dplyr::rename(
+      Year = year,
+      `U.S. Mothership` = atSea_US_MS,
+      `U.S. Catcher-processor` = atSea_US_CP,
+      `U.S. Shore-based` = US_shore,
+      `U.S. Research` = USresearch,
+      `Canada Shoreside` = CAN_Shoreside,
+      `Canada Freezer-trawler` = CAN_FreezeTrawl
+    ) %>%
     coalesce_join(
-      utils::read.csv(file_lan),
+      utils::read.csv(file_lan, check.names = FALSE),
       .,
-      c(Year = "year")
+      by = "Year"
     ) %>%
     # dplyr::mutate(dplyr::across(.fns = tidyr::replace_na, replace = 0)) %>%
     dplyr::mutate(
-      Ustotal = rowSums(
-        dplyr::across(dplyr::matches("^US_|_US|USre")),
-        na.rm = TRUE
-      ),
-      CANtotal = rowSums(
-        dplyr::across(dplyr::matches("^CAN_[FJS]")),
-        na.rm = TRUE
-      ),
-      TOTAL = rowSums(
-        dplyr::across(dplyr::matches("[a-z]{2,3}total")),
-        na.rm = TRUE
-      )
-    ) %>%
-    dplyr::mutate(
-      dplyr::across(dplyr::starts_with("TAC"), as.character),
-      dplyr::across(dplyr::starts_with("TAC"), ~ tidyr::replace_na(., "")),
-      dplyr::across(dplyr::matches("^US|^CAN"), ~ tidyr::replace_na(., 0))
+      dplyr::across(dplyr::matches("TAC"), as.character),
+      dplyr::across(dplyr::matches("TAC"), ~ tidyr::replace_na(., "")),
+      dplyr::across(dplyr::matches("[FJMCSR][oaer]"), ~ tidyr::replace_na(., 0))
     )
 
-  tar <- utils::read.csv(file_tar, check.names = FALSE) %>%
-    dplyr::select(-TAC) %>%
+  check_year <- utils::read.csv(file_tar, check.names = FALSE)
+  tar <- utils::read.csv(file_tar, check.names = FALSE) |>
+    dplyr::select(!dplyr::matches("^TAC$|Total TAC")) |>
     dplyr::right_join(
       inc %>%
-        dplyr::filter(Year >= min(tar[, "Year"])) %>%
-        dplyr::select(Year, TOTAL, TAC),
+        dplyr::filter(Year >= min(check_year[, "Year"])) %>%
+        dplyr::mutate(
+          TOTAL = rowSums(
+            dplyr::across(
+              .cols = c(-Year, -`U.S. TAC`, -`Canada TAC`, -`Total TAC`)
+            ),
+            na.rm = TRUE
+          )
+        ) |>
+        dplyr::select(Year, TOTAL, `Total TAC`),
       by = "Year"
-    ) %>%
+    ) |>
     dplyr::mutate(`Realized catch` = sprintf("%.0f", TOTAL)) %>%
     dplyr::select(-TOTAL) %>%
-    dplyr::relocate(`Realized catch`, TAC, .after = Year) %>%
+    dplyr::relocate(`Realized catch`, `Total TAC`, .after = Year) %>%
     dplyr::mutate_all(as.character) %>%
     dplyr::mutate_all(~ tidyr::replace_na(., ""))
 
