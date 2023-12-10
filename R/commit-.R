@@ -78,17 +78,12 @@ commit_catch <- function(dir_data = hakedata_wd(),
       sector == "ft" ~ "CAN_FreezeTrawl",
       sector == "jv" ~ "CAN_JV"
     )) %>%
-    tidyr::pivot_longer(
-      cols = !sector:Year,
-      names_to = "month"
-    ) %>%
-    dplyr::group_by(Year, sector) %>%
-    dplyr::summarize(catch = sum(value)) %>%
+    dplyr::group_by(year, sector) %>%
+    dplyr::summarize(catch = sum(catch)) %>%
     tidyr::pivot_wider(names_from = sector, values_from = catch) %>%
     dplyr::mutate(
       dplyr::across(dplyr::starts_with("CAN"), tidyr::replace_na, 0)
-    ) %>%
-    dplyr::rename(year = Year)
+    )
   inc <- list(sh, cp, ms, can) %>%
     purrr::reduce(dplyr::full_join, by = "year") %>%
     dplyr::rename(
