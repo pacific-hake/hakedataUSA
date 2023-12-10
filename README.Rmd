@@ -32,15 +32,15 @@ for the assessment of Pacific Hake.
 1. Next, load the package. This can be accomplished through GitHub (first
    chunk) or using a local clone (second chunk).
    ```{r installation-github}
-   chooseCRANmirror(ind = 1)
-   # install.packages("pak")
-   pak::pak("pacific-hake/hakedataUSA")
-   library(hakedataUSA)
+chooseCRANmirror(ind = 1)
+# install.packages("pak")
+pak::pak("pacific-hake/hakedataUSA")
+library(hakedataUSA)
    ```
    ```{r installation-local}
-   chooseCRANmirror(ind = 1)
-   stopifnot(basename(getwd()) == "hakedataUSA")
-   devtools::load_all()
+chooseCRANmirror(ind = 1)
+stopifnot(basename(getwd()) == "hakedataUSA")
+devtools::load_all()
    ```
 1. The path to where all of the raw output will be saved is stored in an 
    internal function, i.e., `hakedata_wd()`. Try it out, see if it works for 

@@ -257,7 +257,6 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
 process_catch_pacfin <- function(pcatch = get_local(file = "pacfin_catch.Rdat"),
                                  nyears = 5,
                                  savedir = hakedata_wd()) {
-
   # FLEET XXX is in the hake assessment as shore-based catches,
   # although 1986 differs from data used
   # database  1986 3431.9436

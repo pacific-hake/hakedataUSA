@@ -69,7 +69,7 @@ process_age_sea <- function(atsea.ages = get_local(file = "atsea.ages.Rdat"),
     dplyr::mutate(dplyr::across(
       dplyr::everything(),
       .fns = \(x) tidyr::replace_na(x, 0)
-    ))|>
+    )) |>
     tidyr::nest(gg = -"vesseltype") |>
     dplyr::mutate(
       lower_name = tolower(vesseltype),
@@ -153,7 +153,7 @@ process_age_shore <- function(page = get_local("page.Rdat"),
     dplyr::mutate(dplyr::across(
       dplyr::everything(),
       .fns = \(x) tidyr::replace_na(x, 0)
-    ))|>
+    )) |>
     utils::write.csv(
       file = fs::path(hakedata_wd(), "us-sb-age-raw.csv"),
       row.names = FALSE,

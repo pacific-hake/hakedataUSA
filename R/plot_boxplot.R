@@ -39,7 +39,7 @@ get_depth_by_year <- function(d,
       median = 4,
       upperhinge = 5, upper95 = 6
     )
-  if(!is.null(yrs)){
+  if (!is.null(yrs)) {
     dpth <- dpth %>%
       dplyr::filter(year %in% yrs)
   }
@@ -62,7 +62,7 @@ get_rate_by_month <- function(d,
       median = 5,
       upperhinge = 6, upper95 = 7
     )
-  if(!is.null(yrs)){
+  if (!is.null(yrs)) {
     dpth <- dpth %>%
       dplyr::filter(year %in% yrs)
   }
