@@ -3,7 +3,6 @@
 export("%>%")
 export(calc_calendar_date)
 export(coalesce_join)
-export(commit_catch)
 export(format_big_number)
 export(get_depth_by_year)
 export(get_local)

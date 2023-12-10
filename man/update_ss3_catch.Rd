@@ -7,9 +7,7 @@
 update_ss3_catch(dir_data, file_ss3)
 }
 \arguments{
-\item{dir_data}{A directory that houses the \code{.csv} data files for the stock
-assessment. These are typically found within the \code{data} directory of the
-hake-assessment repository.}
+\item{dir_data}{A path to where the input files are saved.}
 
 \item{file_ss3}{A file path to the Stock Synthesis data file that you want to
 integrate catches into.}

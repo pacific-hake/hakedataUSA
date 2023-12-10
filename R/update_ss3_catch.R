@@ -1,6 +1,6 @@
 #' Update the catches in a Stock Synthesis file
 #'
-#' @inheritParams commit_catch
+#' @param dir_data A path to where the input files are saved.
 #' @param file_ss3 A file path to the Stock Synthesis data file that you want to
 #'   integrate catches into.
 #' @author Kelli F. Johnson
