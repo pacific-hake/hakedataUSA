@@ -71,18 +71,15 @@ typically be <code>hakedata[["ncatch"]]</code>.</p></dd>
     
 
 <p>Figures and csv files are saved to the disk regarding
-catch rates and depth (fishing and bottom depths).
-In the <code>Figures</code> directory, the following png files are saved:</p><ul><li><p>fishDepthsUS.png</p></li>
-<li><p>fishDepthsUSallyears.png</p></li>
-<li><p>fish_FISHING_DEPTH_FATHOMS_US.png</p></li>
-<li><p>fish_BOTTOM_DEPTH_FATHOMS_US.png</p></li>
-<li><p>fishBottomDepthByVesselUS.png</p></li>
-<li><p>fishCatchRatesUSByYear.png</p></li>
-<li><p>fishDepthByYearUS.png</p></li>
-<li><p>../doc/main-figures/fishCatchRatesUS.png</p></li>
-<li><p>fishCatchRatesUSnolog.png</p></li>
-</ul><p>In the <code>Catches</code> directory, the following csv files are saved:</p><ul><li><p>depth-us-atsea-bottom.csv</p></li>
+catch rates and depth (fishing and bottom depths).</p>
+
+
+<p>In the <code>Catches</code> directory, the following csv files are saved:</p><ul><li><p>depth-us-atsea-bottom.csv</p></li>
 <li><p>depth-us-atsea-fishing.csv</p></li>
+<li><p>us-cp-catch-by-month.csv</p></li>
+<li><p>us-ms-catch-by-month.csv</p></li>
+<li><p>us-cp-catch-rate-by-month.csv</p></li>
+<li><p>us-ms-catch-rate-by-month.csv</p></li>
 </ul></div>
     <div id="tribal-catches">
     <h2>Tribal catches</h2>
@@ -110,8 +107,30 @@ along with a estimated bycatch rate to calculate <code>EXTRAPOLATED_WEIGHT</code
 Monthly fleet-specific bycatch rates are estimated from the sampled hauls and
 multiplied by the <code>OFFICIAL_TOTAL_CATCH</code> to get an estimate of the amount of
 bycatch that should be subtracted from <code>OFFICIAL_TOTAL_CATCH</code> to get just the
-weight of Pacific Hake.</p>
-    </div>
+weight of Pacific Hake.
+The raw column names are as follows <code>colnames(ncatch)</code>:</p><ul><li><p>"HAULJOIN"</p></li>
+<li><p>"CRUISE"</p></li>
+<li><p>"PERMIT"</p></li>
+<li><p>"VESSEL"</p></li>
+<li><p>"VESSEL_TYPE"</p></li>
+<li><p>"HAUL_DATE"</p></li>
+<li><p>"HAUL"</p></li>
+<li><p>"DEPLOYMENT_DATE"</p></li>
+<li><p>"RETRIEVAL_DATE"</p></li>
+<li><p>"HRS"</p></li>
+<li><p>"CDQ_CODE"</p></li>
+<li><p>"OFFICIAL_TOTAL_CATCH"</p></li>
+<li><p>"HAUL_SAMPLED_BY"</p></li>
+<li><p>"LATDD_START"</p></li>
+<li><p>"LONDD_START"</p></li>
+<li><p>"LATDD_END"</p></li>
+<li><p>"LONDD_END"</p></li>
+<li><p>"FISHING_DEPTH_FATHOMS"</p></li>
+<li><p>"BOTTOM_DEPTH_FATHOMS"</p></li>
+<li><p>"CATCHER_BOAT_ADFG"</p></li>
+<li><p>"SPECIES"</p></li>
+<li><p>"EXTRAPOLATED_WEIGHT"</p></li>
+</ul></div>
     <div id="definitions">
     <h2>Definitions</h2>
     

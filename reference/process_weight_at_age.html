@@ -47,7 +47,7 @@ Updated csv or rds files must exist prior to running.</p>
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">process_weight_at_age</span><span class="op">(</span></span>
-<span>  dir <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="fu"><a href="hakedata_wd.html">hakedata_wd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"LengthWeightAge"</span><span class="op">)</span>,</span>
+<span>  dir <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path.html" class="external-link">path</a></span><span class="op">(</span><span class="fu"><a href="hakedata_wd.html">hakedata_wd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"length-weight-age"</span><span class="op">)</span>,</span>
 <span>  maxage <span class="op">=</span> <span class="fl">15</span>,</span>
 <span>  yrs <span class="op">=</span> <span class="fl">2008</span><span class="op">:</span><span class="fu"><a href="hakedata_year.html">hakedata_year</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  navgyears <span class="op">=</span> <span class="fl">5</span>,</span>
@@ -75,7 +75,7 @@ the data for a few ages.</p></dd>
 <dt>yrs</dt>
 <dd><p>A vector of years to search for recent data. Typically,
 the vector starts with 2008 and ends with the most recent year
-of data. This will allow files created from <code><a href="process_weight_at_age_US.html">process_weight_at_age_US()</a></code> to
+of data. This will allow files created from <code>process_weight_at_age_US()</code> to
 be included in the analysis, i.e., recent US data. Typically, you
 should not have to change this value from the default entry.</p></dd>
 

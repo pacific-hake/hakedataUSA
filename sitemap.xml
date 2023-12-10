@@ -19,9 +19,6 @@
     <loc>/reference/coalesce_join.html</loc>
   </url>
   <url>
-    <loc>/reference/commit_catch.html</loc>
-  </url>
-  <url>
     <loc>/reference/f_date.html</loc>
   </url>
   <url>
@@ -32,6 +29,9 @@
   </url>
   <url>
     <loc>/reference/get_confidential.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_depth_by_year.html</loc>
   </url>
   <url>
     <loc>/reference/get_local.html</loc>
@@ -49,9 +49,6 @@
     <loc>/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/lines.bymonth.html</loc>
-  </url>
-  <url>
     <loc>/reference/load_age_fishery.html</loc>
   </url>
   <url>
@@ -62,12 +59,6 @@
   </url>
   <url>
     <loc>/reference/pipe.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plot_boxplot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plot_catchvmonthbyyear.html</loc>
   </url>
   <url>
     <loc>/reference/plot_colour.html</loc>
@@ -100,7 +91,7 @@
     <loc>/reference/process_weight_at_age.html</loc>
   </url>
   <url>
-    <loc>/reference/process_weight_at_age_US.html</loc>
+    <loc>/reference/process_weight_at_age_survey.html</loc>
   </url>
   <url>
     <loc>/reference/pull_database.html</loc>
