@@ -13,8 +13,8 @@ process_weight_at_age_survey <- function(savedir = hakedata_wd()) {
   # Custom function only needed inside this function for survey data
   read_mutate_join <- function(x, y) {
     if (!grepl("xlsx", x)) {
-        x_data <- suppressWarnings(readxl::read_xls(x))
-        y_data <- suppressWarnings(readxl::read_xls(y))
+      x_data <- suppressWarnings(readxl::read_xls(x))
+      y_data <- suppressWarnings(readxl::read_xls(y))
     } else {
       x_data <- suppressWarnings(readxl::read_excel(x))
       y_data <- suppressWarnings(readxl::read_excel(y))
@@ -48,24 +48,24 @@ process_weight_at_age_survey <- function(savedir = hakedata_wd()) {
       yy,
       by = "haul"
     ) |>
-    dplyr::transmute(
-      Source = dplyr::case_when(
-        basename(dirname(x)) == "US" ~ "U.S. Acoustic",
-        basename(dirname(x)) == "CAN" ~ "Canada Acoustic",
-        TRUE ~ "Unknown Acoustic"
-      ),
-      Weight_kg = weight,
-      Sex = Sex2,
-      Age_yrs = age,
-      Length_cm = length,
-      Month = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%m")),
-      Year = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%Y"))
-    ) |>
-    dplyr::mutate(
-      Year = ifelse(Year < 2000, Year + 2000, Year)
-    ) |>
-    dplyr::filter(!is.na(Age_yrs)) |>
-    dplyr::filter(!is.na(Weight_kg))
+      dplyr::transmute(
+        Source = dplyr::case_when(
+          basename(dirname(x)) == "US" ~ "U.S. Acoustic",
+          basename(dirname(x)) == "CAN" ~ "Canada Acoustic",
+          TRUE ~ "Unknown Acoustic"
+        ),
+        Weight_kg = weight,
+        Sex = Sex2,
+        Age_yrs = age,
+        Length_cm = length,
+        Month = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%m")),
+        Year = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%Y"))
+      ) |>
+      dplyr::mutate(
+        Year = ifelse(Year < 2000, Year + 2000, Year)
+      ) |>
+      dplyr::filter(!is.na(Age_yrs)) |>
+      dplyr::filter(!is.na(Weight_kg))
     stopifnot(!any(is.na(together[["Year"]])))
     return(together)
   }
@@ -84,7 +84,7 @@ process_weight_at_age_survey <- function(savedir = hakedata_wd()) {
         "/20[12][0-9]/[CANUS]{2,3}|/2009/[CANUS]{2,3}",
         value
       )
-    ) |> 
+    ) |>
     dplyr::mutate(
       bio_file = purrr::map_chr(
         value,
@@ -223,9 +223,9 @@ process_weight_at_age <- function(dir = hakedata_wd(),
   # save on size, contains all US samples in LWAdata_1975to2007.csv, so
   # eliminated that file.
   files_weights <- fs::path(
-      ext = "csv",
-      dir,
-      c("survey-weight-at-age", "us-weight-at-age", "can-weight-at-age")
+    ext = "csv",
+    dir,
+    c("survey-weight-at-age", "us-weight-at-age", "can-weight-at-age")
   )
   dat <- purrr::map_dfr(
     files_weights,

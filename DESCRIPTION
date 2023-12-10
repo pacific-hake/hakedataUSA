@@ -2,52 +2,45 @@ Package: hakedataUSA
 Title: Extract USA Data for Pacific Hake
 Version: 2022.0.1
 Authors@R: c(
-    person(given = c("Kelli", "F."),
-           family = "Johnson",
-           role = c("aut", "cre"),
-           email = "kelli.johnson@noaa.gov",
+    person(c("Kelli", "F."), "Johnson", , "kelli.johnson@noaa.gov", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-5149-451X")),
-    person(given = c("Aaron", "M."),
-           family = "Berger",
-           role = "aut"),
-    person(given = c("Ian", "G."),
-           family = "Taylor",
-           role = "ctb"),
-    person(given = c("Alan", "C."),
-           family = "Hicks",
-           role = "ctb"),
-    person(given = c("Andi"),
-           family = "Stephens",
-           role = "ctb"))
-Description: Extract data from the two data warehouses, i.e., North Pacific Database (NORPAC) and Pacific Fisheries Information Network (PacFIN), used to store data for the Pacific Fisheries Management Council (PFMC).
+    person(c("Aaron", "M."), "Berger", role = "aut"),
+    person(c("Ian", "G."), "Taylor", role = "ctb"),
+    person(c("Alan", "C."), "Hicks", role = "ctb"),
+    person("Andi", "Stephens", role = "ctb")
+  )
+Description: Extract data from the two data warehouses, i.e., North
+    Pacific Database (NORPAC) and Pacific Fisheries Information Network
+    (PacFIN), used to store data for the Pacific Fisheries Management
+    Council (PFMC).
 License: What license it uses
-Encoding: UTF-8
-LazyData: true
-Suggests:
-    knitr,
-    rmarkdown,
-    RODBC,
-    testthat
+Depends: 
+    R (>= 2.10)
 Imports:
-    magrittr,
     dplyr,
     fs,
     ggplot2,
     glue,
     graphics,
     grDevices,
+    magrittr,
     mapdata,
     maps,
     plyr,
-    RColorBrewer,
     r4ss,
+    RColorBrewer,
     readxl,
     stats,
     tidyr,
     tools
+Suggests:
+    knitr,
+    rmarkdown,
+    RODBC,
+    testthat
 Remotes:
-  github::r4ss/r4ss
-RoxygenNote: 7.2.3
+    github::r4ss/r4ss
+Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
-Depends: 
-    R (>= 2.10)
+RoxygenNote: 7.2.3
