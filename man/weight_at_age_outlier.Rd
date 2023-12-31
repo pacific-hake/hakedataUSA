@@ -38,11 +38,9 @@ These protocols started in 2011.
 }
 \seealso{
 Other weight-at-age: 
-\code{\link{test_weight_at_age}()},
 \code{\link{weight_at_age_read}()}
 
 Other weight-at-age: 
-\code{\link{test_weight_at_age}()},
 \code{\link{weight_at_age_read}()}
 }
 \author{

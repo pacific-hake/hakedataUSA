@@ -33,7 +33,6 @@ in 2022 as a csv file.
 }
 \seealso{
 Other weight-at-age: 
-\code{\link{test_weight_at_age}()},
 \code{\link{weight_at_age_outlier}()}
 }
 \author{

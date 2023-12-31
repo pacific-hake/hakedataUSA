@@ -2,7 +2,7 @@
 % Please edit documentation in R/process_weight_at_age-.R
 \name{process_weight_at_age_survey}
 \alias{process_weight_at_age_survey}
-\title{Collate some of the age-weight data}
+\title{Get the weight-at-age data from the NWFSC server}
 \usage{
 process_weight_at_age_survey(savedir = hakedata_wd())
 }
@@ -10,14 +10,8 @@ process_weight_at_age_survey(savedir = hakedata_wd())
 \item{savedir}{A string specifying the path of interest.}
 }
 \description{
-Collate some of the age-weight data
-}
-\details{
-Todo: Suppress the warning messages.
-Get Alicia to put the information into the database and pull directly
-from the database.
-Get gps coordinates for the hauls.
+Get the weight-at-age data from the NWFSC server
 }
 \author{
-Ian G. Taylor
+Kelli F. Johnson
 }

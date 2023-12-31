@@ -1,90 +1,31 @@
-#' Collate some of the age-weight data
+#' Get the weight-at-age data from the NWFSC server
 #'
 #' @param savedir A string specifying the path of interest.
 #'
 #' @export
-#' @author Ian G. Taylor
+#' @author Kelli F. Johnson
 #'
 process_weight_at_age_survey <- function(savedir = hakedata_wd()) {
   year <- hakedata_year()
-  server_path <- "//nwcfile/fram/Survey.Acoustics/Survey Time Series Analysis/Historical Summary (for Kriging)/Biological"
+  # NWFSC Acoustic Survey path to biological data since 1995
+  server_path <- fs::path(
+    "//nwcfile", "fram", "Survey.Acoustics", "Survey Time Series Analysis",
+    "Historical Summary (for Kriging)", "Biological"
+  )
 
-  # Find survey files and read in data
-  # Custom function only needed inside this function for survey data
-  read_mutate_join <- function(x, y) {
-    if (!grepl("xlsx", x)) {
-      x_data <- suppressWarnings(readxl::read_xls(x))
-      y_data <- suppressWarnings(readxl::read_xls(y))
-    } else {
-      x_data <- suppressWarnings(readxl::read_excel(x))
-      y_data <- suppressWarnings(readxl::read_excel(y))
-    }
-
-    xx <- x_data |>
-      dplyr::rename_with(tolower) |>
-      dplyr::mutate(
-        Sex2 = dplyr::case_when(
-          sex == 1 ~ "M",
-          sex == 2 ~ "F",
-          sex == 3 ~ "U"
-        )
-      )
-    yy <- y_data |>
-      dplyr::rename_with(tolower) |>
-      dplyr::filter(!is.na(haul_weight)) |>
-      dplyr::select(haul, hb_date_time)
-    # Fix some bad dates in 2011 Canada data
-    if (any(grepl("4077[58\\.[768]", yy[["hb_date_time"]]))) {
-      yy <- dplyr::mutate(
-        yy,
-        hb_date_time = dplyr::case_when(
-          grepl("4077[58]\\.[768]", hb_date_time) ~ "8/20/2011 11:00:00 PM",
-          TRUE ~ hb_date_time
-        )
-      )
-    }
-    together <- dplyr::left_join(
-      xx,
-      yy,
-      by = "haul"
-    ) |>
-      dplyr::transmute(
-        Source = dplyr::case_when(
-          basename(dirname(x)) == "US" ~ "U.S. Acoustic",
-          basename(dirname(x)) == "CAN" ~ "Canada Acoustic",
-          TRUE ~ "Unknown Acoustic"
-        ),
-        Weight_kg = weight,
-        Sex = Sex2,
-        Age_yrs = age,
-        Length_cm = length,
-        Month = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%m")),
-        Year = as.numeric(format(as.Date(hb_date_time, f = "%m/%d/%Y"), "%Y"))
-      ) |>
-      dplyr::mutate(
-        Year = ifelse(Year < 2000, Year + 2000, Year)
-      ) |>
-      dplyr::filter(!is.na(Age_yrs)) |>
-      dplyr::filter(!is.na(Weight_kg))
-    stopifnot(!any(is.na(together[["Year"]])))
-    return(together)
-  }
+  # Search for the annual directories, then search for biological_specimen and
+  # the haul files. Merge the two files together then row bind all of the years.
   main_tibble <- fs::dir_ls(
     path = server_path,
     type = "dir",
     recurse = TRUE,
-    regexp = "US$|CAN$"
+    regexp = paste0(
+      .Platform[["file.sep"]], "[0-9]{4}",
+      .Platform[["file.sep"]], c("US$", "CAN$"),
+      collapse = "|"
+    )
   ) |>
     tibble::as_tibble() |>
-    # Filter for data newer than 2008 just like all the other data sources
-    # and file structure/names is even more difficult to rectify for older
-    # data on the Acoustic server
-    dplyr::filter(
-      grepl(
-        "/20[12][0-9]/[CANUS]{2,3}|/2009/[CANUS]{2,3}",
-        value
-      )
-    ) |>
     dplyr::mutate(
       bio_file = purrr::map_chr(
         value,
@@ -92,9 +33,9 @@ process_weight_at_age_survey <- function(savedir = hakedata_wd()) {
       ),
       haul_file = purrr::map_chr(
         value,
-        .f = \(x) fs::dir_ls(x, regexp = "[hH]aul")[1]
+        .f = \(x) fs::dir_ls(x, regexp = "[hH][aA][uU][lL][_CANand]{0,7}\\.")[1]
       ),
-      data = purrr::map2(bio_file, haul_file, read_mutate_join)
+      data = purrr::map2(bio_file, haul_file, .f = read_weight_at_age_nwfsc)
     ) |>
     dplyr::pull(data) |>
     dplyr::bind_rows()
@@ -102,7 +43,7 @@ process_weight_at_age_survey <- function(savedir = hakedata_wd()) {
   # Save the data after combining with old data
   file_path <- fs::path(savedir, "survey-weight-at-age.csv")
   old_data <- utils::read.csv(file_path) |>
-    dplyr::filter(Year < 2008) |>
+    dplyr::filter(Year < 1993) |>
     dplyr::mutate(
       Source = dplyr::case_when(
         Source == "US_acoustic" ~ "U.S. Acoustic",
@@ -123,6 +64,7 @@ process_weight_at_age_survey <- function(savedir = hakedata_wd()) {
     quote = FALSE,
     row.names = FALSE
   )
+  return(invisible(final_data))
 }
 
 process_weight_at_age_us <- function(savedir = hakedata_wd()) {
@@ -231,7 +173,6 @@ process_weight_at_age <- function(dir = hakedata_wd(),
     .f = weight_at_age_read
   ) %>%
     weight_at_age_outlier(filter = FALSE, drop = FALSE)
-  test_weight_at_age(dat)
 
   late <- (max(yrs) - navgyears + 1):(max(yrs))
 
