@@ -12,6 +12,12 @@ process_weight_at_age_survey(savedir = hakedata_wd())
 \description{
 Collate some of the age-weight data
 }
+\details{
+Todo: Suppress the warning messages.
+Get Alicia to put the information into the database and pull directly
+from the database.
+Get gps coordinates for the hauls.
+}
 \author{
 Ian G. Taylor
 }
