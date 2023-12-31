@@ -233,7 +233,7 @@ process_weight_at_age <- function(dir = hakedata_wd(),
   )
   utils::write.csv(
     setNames(counts_All_wMean, gsub("#", "", colnames(counts_All_wMean))),
-    file.path(dirname(normalizePath(dir)), "wtatage_all_samplesize.csv"),
+    file.path(normalizePath(dir), "wtatage-all-samplesize.csv"),
     row.names = FALSE
   )
   # new method does only linear interpolation within each age (only works with all data)
