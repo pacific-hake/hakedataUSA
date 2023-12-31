@@ -205,8 +205,8 @@ process_weight_at_age_us <- function(savedir = hakedata_wd()) {
 #'   number of ages in the data. The default is to use the maturity ogive stored
 #'   in the package.
 #'
-#' @import ggplot2 utils
-#' @rawNamespace import(r4ss, except = c(profile))
+#' @import ggplot2 r4ss utils
+#' @export
 #' @author Ian G. Taylor
 #' @return todo: document return
 #'
