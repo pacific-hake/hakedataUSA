@@ -4,7 +4,6 @@
 # hakedataUSA
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 The goal of {hakedataUSA} is to provide code to extract and workup the
@@ -21,14 +20,14 @@ U.S. data for the assessment of Pacific Hake.
 
 2.  Next, load the package. This can be accomplished through GitHub
     (first chunk) or using a local clone (second chunk).
-    
+
     ``` r
     chooseCRANmirror(ind = 1)
     # install.packages("pak")
     pak::pak("pacific-hake/hakedataUSA")
     library(hakedataUSA)
     ```
-    
+
     ``` r
     chooseCRANmirror(ind = 1)
     stopifnot(basename(getwd()) == "hakedataUSA")
@@ -45,8 +44,6 @@ U.S. data for the assessment of Pacific Hake.
 
 4.  The remainder of the code will pull from the data bases and set up
     the input files.
-
-<!-- end list -->
 
 ``` r
 pull_database()
