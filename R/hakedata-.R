@@ -40,6 +40,12 @@ hakedata_wd <- function() {
           "GitHub", "hake-assessment", terminal_directory
         )
       },
+      "Chantel.Wetzel" = {
+        fs::path(
+          "C:", "Users", "Chantel.Wetzel", "Documents",
+          "github", "hake-assessment", terminal_directory
+        )
+      },
       {
         cli::cli_bullets(c(
           "x" = "Username not found",
