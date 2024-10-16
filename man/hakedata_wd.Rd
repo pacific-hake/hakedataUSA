@@ -7,19 +7,18 @@
 hakedata_wd()
 }
 \value{
-A string specifying the full file path for the
-\code{hake-assessment/data} directory. The default is your current working
-directory.
+A string specifying the full file path for the \code{hake-assessment/data}
+directory. The default is your current working directory.
 }
 \description{
-Find the directory called \code{hake-assessment/data}, which should be a clone of
-\url{www.github.com/pacific-hake/hake-assessment}. The location of the
-directory is found based on a set of rules for a given system and user name
-of the computer you are on. This \code{data} directory stores non-confidential
-data used in the assessment of Pacific Hake and is integral in building the
-bridging files to go from one year of data to the next. If the combination
-of known system and user names are not found then it will default to using
-your current working directory.
+Find the directory called \code{hake-assessment/data-tables}, which should be a
+result of cloning \url{www.github.com/pacific-hake/hake-assessment}. The
+location of the directory is found based on a set of rules for a given system
+and user name of the computer you are on. This \code{data} directory stores
+non-confidential data used in the assessment of Pacific Hake and is integral
+in building the bridging files to go from one year of data to the next. If
+the combination of known system and user names are not found then it will
+default to using your current working directory.
 }
 \examples{
 hakedata_wd()

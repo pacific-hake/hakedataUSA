@@ -1,17 +1,17 @@
 #' Find the working directory for `hake-assessment`
 #'
-#' Find the directory called `hake-assessment/data`, which should be a clone of
-#' \url{www.github.com/pacific-hake/hake-assessment}. The location of the
-#' directory is found based on a set of rules for a given system and user name
-#' of the computer you are on. This `data` directory stores non-confidential
-#' data used in the assessment of Pacific Hake and is integral in building the
-#' bridging files to go from one year of data to the next. If the combination
-#' of known system and user names are not found then it will default to using
-#' your current working directory.
+#' Find the directory called `hake-assessment/data-tables`, which should be a
+#' result of cloning \url{www.github.com/pacific-hake/hake-assessment}. The
+#' location of the directory is found based on a set of rules for a given system
+#' and user name of the computer you are on. This `data` directory stores
+#' non-confidential data used in the assessment of Pacific Hake and is integral
+#' in building the bridging files to go from one year of data to the next. If
+#' the combination of known system and user names are not found then it will
+#' default to using your current working directory.
 #'
-#' @return A string specifying the full file path for the
-#' `hake-assessment/data` directory. The default is your current working
-#' directory.
+#' @return
+#' A string specifying the full file path for the `hake-assessment/data`
+#' directory. The default is your current working directory.
 #' @export
 #' @author Kelli F. Johnson
 #' @examples
@@ -19,24 +19,33 @@
 #'
 hakedata_wd <- function() {
   user <- Sys.info()["user"]
+  terminal_directory <- "data-tables"
   if (Sys.info()["sysname"] == "Linux") {
-    wd <- fs::path("/home", user, "github", "pacific-hake", "hake-assessment", "data")
+    wd <- fs::path(
+      "/home", user,
+      "github", "pacific-hake", "hake-assessment", terminal_directory)
   }
   if (Sys.info()["sysname"] == "Windows") {
     wd <- switch(user,
       "Kelli.Johnson" = {
         fs::path(
           "d:", "github", "pacific-hake",
-          "hake-assessment", "data-tables"
+          "hake-assessment", terminal_directory
         )
       },
       "Aaron.Berger" = {
         fs::path(
           "C:", "Users", "Aaron.Berger", "Documents",
-          "GitHub", "hake-assessment", "data-tables"
+          "GitHub", "hake-assessment", terminal_directory
         )
       },
-      getwd()
+      {
+        cli::cli_bullets(c(
+          "x" = "Username not found",
+          "i" = "Setting the directory to {getwd()}"
+        ))
+        getwd()
+      }
     )
   }
   stopifnot(fs::dir_exists(wd))
@@ -52,8 +61,11 @@ hakedata_wd <- function() {
 #' most recent data in the current year as the last year of data included
 #' in the extraction.
 #' @author Kelli F. Johnson
-#' @return The last year of data you want as an integer.
+#' @return
+#' The last year of data you want as an integer.
 #' @export
+#' @examples
+#' hakedata_year()
 #'
 hakedata_year <- function() {
   as.numeric(format(Sys.Date(), "%Y")) -
@@ -116,6 +128,9 @@ hakedata_sql_password <- function(database = c("NORPAC", "PacFIN"), file) {
     },
     "Ian.Taylor" = {
       c("NORPAC" = "TAYLORI", "PacFIN" = "itaylor")[database]
+    },
+    "Chantel.Wetzel" = {
+      c("NORPAC" = "WETZELC", "PacFIN" = "cwetzel")[database]
     }
   )
   stopifnot(!is.null(name))

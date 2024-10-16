@@ -17,6 +17,7 @@ License: What license it uses
 Depends: 
     R (>= 2.10)
 Imports:
+    cli,
     dplyr,
     fs,
     ggplot2,
