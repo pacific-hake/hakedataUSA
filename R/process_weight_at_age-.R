@@ -128,16 +128,14 @@ process_weight_at_age_us <- function(savedir = hakedata_wd()) {
 #' This will correspond to the maximum age group in the data, not in the
 #' model because SS can model many ages when there is only information in
 #' the data for a few ages.
-#' @param yrs A vector of years to search for recent data. Typically,
-#' the vector starts with 2008 and ends with the most recent year
-#' of data. This will allow files created from `process_weight_at_age_US()` to
-#' be included in the analysis, i.e., recent US data. Typically, you
-#' should not have to change this value from the default entry.
-#' @param navgyears The number of early and late years to average since
-#' 1975 and \code{max(yrs)} for the early and late analysis asked for
-#' by the Scientific Review Group in 2017. The argument can be a single
-#' value or a vector of two values, where in the latter case the second
-#' value will be used for the most recent time period.
+#' @param max_year A four-digit integer specifying the maximum year of data
+#'   that you want to include in the weight-at-age data. The default is the
+#'   last year of data found using [hakedata_year()].
+#' @param navgyears The number of early and late years to average since 1975 and
+#'   `max_year` for the early and late analysis asked for by the Scientific
+#'   Review Group in 2017. The argument can be a single value or a vector of two
+#'   values, where in the latter case the second value will be used for the most
+#'   recent time period.
 #' @param nforecast The number of years to forecast into the future.
 #' Typically, this is three for the hake assessment and will lead to
 #' this many rows of mean weight-at-age data being copied to the data frame
@@ -153,10 +151,11 @@ process_weight_at_age_us <- function(savedir = hakedata_wd()) {
 #'
 process_weight_at_age <- function(dir = hakedata_wd(),
                                   maxage = 15,
-                                  yrs = 2008:hakedata_year(),
+                                  max_year = hakedata_year(),
                                   navgyears = 5,
                                   nforecast = 4,
-                                  maturity = maturity_at_age) {
+                                  maturity = maturity_at_age,
+                                  output_wtatage_file_name = "wtatage.ss") {
   fs::dir_create(path = file.path(dir, "plots"))
 
   # length-weight-age_data.rds provided by CG on 2021-01-09 in google drive #703
@@ -171,13 +170,21 @@ process_weight_at_age <- function(dir = hakedata_wd(),
   dat <- purrr::map_dfr(
     files_weights,
     .f = weight_at_age_read
-  ) %>%
-    weight_at_age_outlier(filter = FALSE, drop = FALSE)
-
-  late <- (max(yrs) - navgyears + 1):(max(yrs))
+  ) |>
+    # Fix the four--five weight units from PacFIN that are wrong
+    # TODO: remove this mutate when the data is fixed.
+    dplyr::mutate(
+      Weight_kg = ifelse(
+        (Source == "US_shore" & Weight_kg < 0.09 & Age_yrs > 4),
+        Weight_kg * 10,
+        Weight_kg
+      )
+    ) |>
+    weight_at_age_outlier(filter = FALSE, drop = FALSE) |>
+    dplyr::filter(!outlier, Year <= max_year)
 
   gg <- plot_weight_at_age(
-    data = dplyr::filter(dat, Age_yrs <= 10, outlier == FALSE),
+    data = dplyr::filter(dat, Age_yrs <= 10),
     maxage = maxage
   )
   ggplot2::ggsave(
@@ -186,7 +193,7 @@ process_weight_at_age <- function(dir = hakedata_wd(),
     filename = file.path(dir, "plots", "meanweightatage_source.png")
   )
   gg <- plot_weight_at_age(
-    data = dplyr::filter(dat, Age_yrs <= maxage, outlier == FALSE),
+    data = dplyr::filter(dat, Age_yrs <= maxage),
     maxage = maxage
   ) +
     ggplot2::facet_grid(cat ~ .)
@@ -197,7 +204,6 @@ process_weight_at_age <- function(dir = hakedata_wd(),
 
   #### making input files for SS with the holes still present
   # NULL months keeps the Poland data
-  dat <- dplyr::filter(dat, !outlier)
   wtage_All <- weight_at_age_wide(dat)
   wtage_All_wMean <- dplyr::bind_rows(
     weight_at_age_wide(dat %>% dplyr::mutate(Year = -1940)),
@@ -243,7 +249,7 @@ process_weight_at_age <- function(dir = hakedata_wd(),
   wtageInterp2_All <- fill_wtage_matrix(wtageInterp1_All)
   wtageInterp2_All$Note <- fill_wtage_matrix(wtage_All)$Note
 
-  # write output combining all fleets closer to format used by SS
+  # write output combining all fleets closer to format used by SS3
   wtage_All_wMean$Note <- c(paste("# Mean from ", min(dat$Year), "-", max(dat$Year), sep = ""), wtageInterp2_All$Note)
   wtageInterp2_All <- rbind(wtage_All_wMean[1, ], wtageInterp2_All)
 
@@ -254,7 +260,7 @@ process_weight_at_age <- function(dir = hakedata_wd(),
     counts = counts_All_wMean,
     lengths = lenage_All_wMean,
     dir = file.path(dir, "plots"),
-    year = max(yrs),
+    year = max_year,
     maxage = maxage
   )
 
@@ -273,7 +279,7 @@ process_weight_at_age <- function(dir = hakedata_wd(),
   withforecast <- dplyr::bind_rows(
     wtage_extended,
     wtage_extended %>%
-      dplyr::filter(`#Yr` %in% late) %>%
+      dplyr::filter(`#Yr` %in% (max_year - navgyears + 1):(max_year)) %>%
       dplyr::mutate(
         dplyr::across(.cols = dplyr::starts_with("a"), mean),
         `#Yr` = max(`#Yr`) + 1:NROW(.)
@@ -283,7 +289,7 @@ process_weight_at_age <- function(dir = hakedata_wd(),
       )
   )
   write_wtatage_file(
-    file = fs::path(dirname(dir), "wtatage.ss"),
+    file = fs::path(dirname(dir), output_wtatage_file_name),
     data = withforecast,
     maturity = maturity
   )
@@ -292,5 +298,5 @@ process_weight_at_age <- function(dir = hakedata_wd(),
     file = fs::path(dir, "LWAdata.Rdata")
   )
 
-  return(withforecast)
+  return(invisible(withforecast))
 }

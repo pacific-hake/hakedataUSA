@@ -5,7 +5,7 @@
 \title{Print summaries and figures for catches from PacFIN}
 \usage{
 process_catch_pacfin(
-  pcatch = get_local(file = "pacfin_catch.Rdat"),
+  pcatch = get_local(file = "pcatch.Rdat"),
   nyears = 5,
   savedir = hakedata_wd()
 )
@@ -19,9 +19,7 @@ Otherwise, the R object is typically stored in the \code{hakedata} environment.}
 where the most recent year will be sequenced back in time \code{nyears}.
 The default is typically five years.}
 
-\item{savedir}{A full path to a directory where you want files saved.
-The default is to save them in a folder found using \code{\link[=hakedata_wd]{hakedata_wd()}},
-which returns a path specific to the personal preferences of JTC members.}
+\item{savedir}{A string specifying the path of interest.}
 }
 \value{
 The following files are saved to the disk:

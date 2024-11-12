@@ -89,7 +89,7 @@
 #'   * us-cp-catch-rate-by-month.csv
 #'   * us-ms-catch-rate-by-month.csv
 #'
-process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
+process_catch_norpac <- function(ncatch = get_local(file = "ncatch.Rdat"),
                                  nyears = 5,
                                  savedir = hakedata_wd()) {
   # Setup the environment
@@ -247,14 +247,14 @@ process_catch_norpac <- function(ncatch = get_local(file = "norpac_catch.Rdat"),
 #'
 #' @template pcatch
 #' @template nyears
-#' @template savedir
+#' @inheritParams process_weight_at_age_survey
 #'
 #' @return The following files are saved to the disk:
 #' * us-shore-catch-by-month.csv
 #' * us-research-catch-by-month.csv
 #' * us-ti-catch-by-month.csv
 #'
-process_catch_pacfin <- function(pcatch = get_local(file = "pacfin_catch.Rdat"),
+process_catch_pacfin <- function(pcatch = get_local(file = "pcatch.Rdat"),
                                  nyears = 5,
                                  savedir = hakedata_wd()) {
   # FLEET XXX is in the hake assessment as shore-based catches,

@@ -1,9 +1,7 @@
-
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # hakedataUSA
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 The goal of {hakedataUSA} is to provide code to extract and workup the
@@ -20,43 +18,48 @@ U.S. data for the assessment of Pacific Hake.
 
 2.  Next, load the package. This can be accomplished through GitHub
     (first chunk) or using a local clone (second chunk).
-
+    
     ``` r
     chooseCRANmirror(ind = 1)
     # install.packages("pak")
     pak::pak("pacific-hake/hakedataUSA")
     library(hakedataUSA)
     ```
-
+    
     ``` r
     chooseCRANmirror(ind = 1)
     stopifnot(basename(getwd()) == "hakedataUSA")
     devtools::load_all()
     ```
 
-3.  The path to where all of the raw output will be saved is stored in
-    an internal function, i.e., `hakedata_wd()`. Try it out, see if it
+3.  The path to where the raw output will be saved is stored in an
+    internal function, i.e., `hakedata_wd()`. Try it out, see if it
     works for you. If it does not work, then you will need to alter the
     function, which is stored in `R/hakedata-R`. The function should
     result in a path ending with `data-tables` inside of your cloned
     version of
     [pacific-hake/hake-assessment](www.github.com/pacific-hake/hake-assessment).
 
-4.  The remainder of the code will pull from the data bases and set up
-    the input files.
+4.  Check that the correct year will be pulled for the data of interest
+    by running `hakedata_year()`. This will be the last year of data.
 
-``` r
-pull_database()
-process_database()
+5.  To pull the data for the U.S.A., run the following code:
+    
+    ``` r
+    pull_US_data()
+    ```
 
-write_bridging(
-  dir_input = fs::path(dirname(hakedata_wd()), "models", "2022.01.10_base"),
-  dir_output = fs::path(dirname(hakedata_wd()), "models", "2023", "01-version", "02-bridging-models")
-)
-```
+6.  To process the recently pulled data run the following code:
+    
+    ``` r
+    process_database()
+    
+    write_bridging(
+      dir_input = fs::path(dirname(hakedata_wd()), "models", "2022.01.10_base"),
+      dir_output = fs::path(dirname(hakedata_wd()), "models", "2023", "01-version", "02-bridging-models")
+    )
+    ```
 
-## Issues
-
-Please contact <kelli.johnson@noaa.gov> if there are issues with the
-code. Note that the databases will only be accessible to U.S. members of
-the JTC.
+7.  This process must be augmented if it is a survey year to get the
+    survey data from the server and process it accordingly. More
+    information on that process is to come later.

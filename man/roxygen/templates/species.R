@@ -5,4 +5,3 @@
 #' value is often called the `OBS` species code in observer landings from the
 #' Alaska Fisheries Science Center and is not the `AKR` species code.
 #' For example, `206` is Pacific Hake and is the default.
-#' For PacFIN data, this will be the entry in `SPID`.

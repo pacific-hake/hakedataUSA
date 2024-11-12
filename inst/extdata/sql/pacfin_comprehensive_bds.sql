@@ -1,5 +1,4 @@
 select
-   PACFIN_SPECIES_CODE spid,
    sample_year,
    sample_month,
    sample_agency,
@@ -14,7 +13,6 @@ select
    AGENCY_GEAR_CODE gear,
    PACFIN_GEAR_CODE grid,
    data_type,
-   PACFIN_CONDITION_CODE cond,
    FISH_LENGTH,
    FISH_LENGTH_UNITS,
    FISH_MATURITY_CODE maturity,
@@ -27,7 +25,6 @@ select
    NUMBER_OF_FEMALES females_num,
    WEIGHT_OF_LANDING_LBS total_wgt,
    EXPANDED_SAMPLE_WEIGHT exp_wt,
-   AGE_METHOD_CODE age_method,
    FINAL_FISH_AGE_IN_YEARS AGE,
    OBSERVED_FREQUENCY FREQ
 FROM pacfin_marts.COMPREHENSIVE_BDS_COMM

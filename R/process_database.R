@@ -15,5 +15,9 @@ process_database <- function() {
   # Weight at age
   process_weight_at_age_survey()
   process_weight_at_age_us()
+  old <- process_weight_at_age(
+    max_year = hakedata_year() - 1,
+    output_wtatage_file_name = "wtatage_fix.ss"
+  )
   withforecast <- process_weight_at_age()
 }

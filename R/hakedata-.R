@@ -56,6 +56,7 @@ hakedata_wd <- function() {
     )
   }
   stopifnot(fs::dir_exists(wd))
+  stopifnot(basename(wd) == "data-tables")
   return(wd)
 }
 
@@ -87,43 +88,32 @@ hakedata_year <- function() {
 #' and stored or entered passwords for accessing databases that store
 #' confidential information about landings of Pacific Hake.
 #'
-#' @param database A vector of character values specifying which databases you
-#'   want login information for.
-#' @param file A file path specifying where to find the passwords.
-#'   The path can be full or relative to your current working directory.
-#'   If a path is provided, the file that it leads to
-#'   must be for a text file with one password per line for each database
-#'   in the `database` argument and in that order.
-#'   The default for `database` means that the file would have two lines,
-#'   where the first line is the NORPAC password and
-#'   the second line is the PacFIN password.
-#'   These passwords should not be surrounded with quotes.
-#'   If a file name is not provided, which is the default behaviour, then
-#'   the user will be prompted for their passwords. This also happens if
-#'   the file cannot be found given the path provided.
+#' @inheritParams pull_US_data
 #'
-#' @return A list with two entries, `usernames` and `passwords`.
-#' Each element will have the same number of entries as the
-#' input argument `database` and be named using the elements of `database`.
-#' The list is invisibly returned to ensure that the passwords are not printed
-#' to the screen. Thus, the function call should be assigned to an object.
+#' @return
+#' A list with two entries, `usernames` and `passwords`. Each entry contain a
+#' named vector with one element for each element in the input argument
+#' `database`. The list is invisibly returned to ensure that the passwords are
+#' not printed to the screen. Thus, the function call should be assigned to an
+#' object.
 #' @export
 #' @author Kelli F. Johnson
 #' @examples
 #' \dontrun{
 #' # Prompted for passwords for each database
 #' test <- hakedata_sql_password()
-#' # Prompted for passwords for each database because file is not found
-#' test <- hakedata_sql_password(file = "doesnotwork.txt")
+#' # Prompted for passwords for each database because password_file is not found
+#' test <- hakedata_sql_password(password_file = "doesnotwork.txt")
 #' # On Kelli Johnson's machine, the following will work
-#' test <- hakedata_sql_password(file = "password.txt")
+#' test <- hakedata_sql_password(password_file = "password.txt")
 #' # Doesn't work because entry for database is not in the list
 #' # of allowed databases, i.e., the default for `database`.
 #' test <- hakedata_sql_password(database = "onedatabase")
 #' # Only look for one password
 #' test <- hakedata_sql_password(database = "NORPAC")
 #' }
-hakedata_sql_password <- function(database = c("NORPAC", "PacFIN"), file) {
+hakedata_sql_password <- function(password_file,
+                                  database = c("NORPAC", "PacFIN")) {
   user <- Sys.info()["user"]
   database <- match.arg(database, several.ok = TRUE)
   name <- switch(user,
@@ -141,14 +131,13 @@ hakedata_sql_password <- function(database = c("NORPAC", "PacFIN"), file) {
     }
   )
   stopifnot(!is.null(name))
+  stopifnot(all(names(name) %in% database))
 
-  if (missing(file)) {
-    file <- NULL
-  } else {
-    if (!file.exists(file)) file <- NULL
+  if (missing(password_file) || !file.exists(password_file)) {
+    password_file <- NULL
   }
 
-  if (is.null(file)) {
+  if (is.null(password_file)) {
     passwords <- rep(NA, length(database))
     for (ii in seq_along(database)) {
       passwords[ii] <- readline(
@@ -160,7 +149,8 @@ hakedata_sql_password <- function(database = c("NORPAC", "PacFIN"), file) {
       )
     }
   } else {
-    passwords <- readLines(file, warn = FALSE)
+    passwords <- readLines(password_file, warn = FALSE)
+    stopifnot(length(database) == length(passwords))
   }
 
   names(passwords) <- database

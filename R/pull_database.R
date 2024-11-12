@@ -58,7 +58,7 @@
 #'   If this argument is `NULL`, users will be prompted
 #'   for their passwords.
 #'   Passwords are needed because the databases store confidential data.
-#' @template savedir
+#' @inheritParams process_weight_at_age_survey
 #'
 #' @seealso
 #' * [hakedata_year()]

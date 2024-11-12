@@ -42,9 +42,7 @@ If this argument is \code{NULL}, users will be prompted
 for their passwords.
 Passwords are needed because the databases store confidential data.}
 
-\item{savedir}{A full path to a directory where you want files saved.
-The default is to save them in a folder found using \code{\link[=hakedata_wd]{hakedata_wd()}},
-which returns a path specific to the personal preferences of JTC members.}
+\item{savedir}{A string specifying the path of interest.}
 }
 \value{
 An environment or \code{list} with several objects pulled from the

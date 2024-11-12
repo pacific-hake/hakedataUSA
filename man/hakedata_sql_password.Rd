@@ -4,31 +4,31 @@
 \alias{hakedata_sql_password}
 \title{Find username and passwords for databases}
 \usage{
-hakedata_sql_password(database = c("NORPAC", "PacFIN"), file)
+hakedata_sql_password(password_file, database = c("NORPAC", "PacFIN"))
 }
 \arguments{
-\item{database}{A vector of character values specifying which databases you
-want login information for.}
+\item{password_file}{A file path specifying where to find the passwords. The
+path can be full or relative to your current working directory. If a path
+is provided, the file must be a text file with one password per line for
+each database in the \code{database} argument and in that order. The default for
+\code{database} means that the file has two lines, where the first line is the
+NORPAC password and the second line is the PacFIN password. These passwords
+should not be surrounded with quotes. If a file name is not provided, which
+is the default behavior, then the user will be prompted for their
+passwords. This also happens if the file cannot be found given the path
+provided. These passwords are needed because the databases store
+confidential information.}
 
-\item{file}{A file path specifying where to find the passwords.
-The path can be full or relative to your current working directory.
-If a path is provided, the file that it leads to
-must be for a text file with one password per line for each database
-in the \code{database} argument and in that order.
-The default for \code{database} means that the file would have two lines,
-where the first line is the NORPAC password and
-the second line is the PacFIN password.
-These passwords should not be surrounded with quotes.
-If a file name is not provided, which is the default behaviour, then
-the user will be prompted for their passwords. This also happens if
-the file cannot be found given the path provided.}
+\item{database}{A vector of character strings indicating which databases you
+want to pull information from. Options include \code{c("NORPAC", "PacFIN")}, one
+or both (the default) can be specified. Note that case matters here.}
 }
 \value{
-A list with two entries, \code{usernames} and \code{passwords}.
-Each element will have the same number of entries as the
-input argument \code{database} and be named using the elements of \code{database}.
-The list is invisibly returned to ensure that the passwords are not printed
-to the screen. Thus, the function call should be assigned to an object.
+A list with two entries, \code{usernames} and \code{passwords}. Each entry contain a
+named vector with one element for each element in the input argument
+\code{database}. The list is invisibly returned to ensure that the passwords are
+not printed to the screen. Thus, the function call should be assigned to an
+object.
 }
 \description{
 Find the username and passwords specific given the username of the computer
@@ -39,10 +39,10 @@ confidential information about landings of Pacific Hake.
 \dontrun{
 # Prompted for passwords for each database
 test <- hakedata_sql_password()
-# Prompted for passwords for each database because file is not found
-test <- hakedata_sql_password(file = "doesnotwork.txt")
+# Prompted for passwords for each database because password_file is not found
+test <- hakedata_sql_password(password_file = "doesnotwork.txt")
 # On Kelli Johnson's machine, the following will work
-test <- hakedata_sql_password(file = "password.txt")
+test <- hakedata_sql_password(password_file = "password.txt")
 # Doesn't work because entry for database is not in the list
 # of allowed databases, i.e., the default for `database`.
 test <- hakedata_sql_password(database = "onedatabase")

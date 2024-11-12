@@ -7,10 +7,11 @@
 process_weight_at_age(
   dir = hakedata_wd(),
   maxage = 15,
-  yrs = 2008:hakedata_year(),
+  max_year = hakedata_year(),
   navgyears = 5,
   nforecast = 4,
-  maturity = maturity_at_age
+  maturity = maturity_at_age,
+  output_wtatage_file_name = "wtatage.ss"
 )
 }
 \arguments{
@@ -24,17 +25,15 @@ This will correspond to the maximum age group in the data, not in the
 model because SS can model many ages when there is only information in
 the data for a few ages.}
 
-\item{yrs}{A vector of years to search for recent data. Typically,
-the vector starts with 2008 and ends with the most recent year
-of data. This will allow files created from \code{process_weight_at_age_US()} to
-be included in the analysis, i.e., recent US data. Typically, you
-should not have to change this value from the default entry.}
+\item{max_year}{A four-digit integer specifying the maximum year of data
+that you want to include in the weight-at-age data. The default is the
+last year of data found using \code{\link[=hakedata_year]{hakedata_year()}}.}
 
-\item{navgyears}{The number of early and late years to average since
-1975 and \code{max(yrs)} for the early and late analysis asked for
-by the Scientific Review Group in 2017. The argument can be a single
-value or a vector of two values, where in the latter case the second
-value will be used for the most recent time period.}
+\item{navgyears}{The number of early and late years to average since 1975 and
+\code{max_year} for the early and late analysis asked for by the Scientific
+Review Group in 2017. The argument can be a single value or a vector of two
+values, where in the latter case the second value will be used for the most
+recent time period.}
 
 \item{nforecast}{The number of years to forecast into the future.
 Typically, this is three for the hake assessment and will lead to

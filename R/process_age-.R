@@ -18,7 +18,7 @@
 #' @author Kelli F. Johnson
 #'
 process_age_sea <- function(atsea.ages = get_local(file = "atsea.ages.Rdat"),
-                            ncatch = get_local(file = "norpac_catch.Rdat"),
+                            ncatch = get_local(file = "ncatch.Rdat"),
                             years = 2008:hakedata_year(),
                             ages = 1:15,
                             files = fs::path(

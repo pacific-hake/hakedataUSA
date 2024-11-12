@@ -2,10 +2,7 @@ REM Get pacfin catch from PACFIN_MARTS.COMPREHENSIVE_FT table, which includes re
 SELECT   cft.PACFIN_YEAR YEAR,
          cft.FLEET_CODE FLEET,
          cft.PACFIN_GEAR_CODE GRID,
-         cft.LANDING_DATE TDATE,
-         cft.PACFIN_PORT_CODE PCID,
-         cft.DEALER_NUM PROC,
-         cft.DAHL_GROUNDFISH_CODE DAHL_SECTOR,
+         cft.LANDING_DATE,
          SUM(landed_weight_lbs) AS LBS,
          SUM(landed_weight_mtons) as MT,
          SUM(round_weight_mtons) as rMT

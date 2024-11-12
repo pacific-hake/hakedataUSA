@@ -5,7 +5,7 @@
 \title{Process NORPAC catches}
 \usage{
 process_catch_norpac(
-  ncatch = get_local(file = "norpac_catch.Rdat"),
+  ncatch = get_local(file = "ncatch.Rdat"),
   nyears = 5,
   savedir = hakedata_wd()
 )
