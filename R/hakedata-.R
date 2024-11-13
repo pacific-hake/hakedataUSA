@@ -43,7 +43,7 @@ hakedata_wd <- function() {
       "Chantel.Wetzel" = {
         fs::path(
           "C:", "Users", "Chantel.Wetzel", "Documents",
-          "github", "hake-assessment", terminal_directory
+          "github", "pacific-hake", "hake-assessment", terminal_directory
         )
       },
       {
