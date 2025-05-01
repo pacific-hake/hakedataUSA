@@ -1,8 +1,0 @@
-on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-name: call-update-docs
-jobs:
-  call-workflow:
-    uses: nmfs-fish-tools/ghactions4r/.github/workflows/doc-and-style-r.yml@main
